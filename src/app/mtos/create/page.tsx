@@ -9,7 +9,6 @@ export default function CreateMtoPage() {
   const [loading, setLoading] = useState(false);
   const [mtoType, setMtoType] = useState('REGULAR');
   const [category, setCategory] = useState('RING');
-  const [metalType, setMetalType] = useState('GOLD');
   const [isStudded, setIsStudded] = useState('true');
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -105,11 +104,7 @@ export default function CreateMtoPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Metal Preference</label>
-              <select name="metalType" value={metalType} onChange={(e) => setMetalType(e.target.value)}>
-                <option value="GOLD">Gold</option>
-                <option value="PLATINUM">Platinum</option>
-              </select>
+              <input type="hidden" name="metalType" value="GOLD" />
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Studded?</label>
@@ -125,8 +120,6 @@ export default function CreateMtoPage() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            {metalType === 'GOLD' && (
-              <>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Karatage</label>
                   <select name="goldKaratage">
@@ -145,8 +138,6 @@ export default function CreateMtoPage() {
                     <option value="Rose Gold">Rose Gold</option>
                   </select>
                 </div>
-              </>
-            )}
             {isStudded === 'true' && (
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Diamond Caratage</label>
