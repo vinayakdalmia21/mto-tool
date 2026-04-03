@@ -1,0 +1,37 @@
+"use server";
+
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export async function getDashboardStats() {
+  const activeMtos = await prisma.mtoQuery.count({
+    where: {
+      status: {
+        notIn: ['DROPPED', 'COMPLETED']
+      }
+    }
+  });
+
+  const pendingEstimates = await prisma.mtoQuery.count({
+    where: {
+      status: {
+        in: ['OPEN', 'NEGOTIATION']
+      }
+    }
+  });
+
+  const aggregatePayments = await prisma.payment.aggregate({
+    _sum: {
+      amount: true
+    }
+  });
+
+  const totalRevenue = aggregatePayments._sum.amount || 0;
+
+  return {
+    activeMtos,
+    pendingEstimates,
+    totalRevenue
+  };
+}
