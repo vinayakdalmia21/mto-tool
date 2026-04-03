@@ -35,6 +35,7 @@ model MtoQuery {
   diamondCaratage String?  // Optional caratage
   weightRange     String
   goldKaratage    String?  // Optional 9K, 14K, 18K etc
+  metalColor      String?  // Yellow Gold, White Gold, Rose Gold
   notes           String?
   status          String   // OPEN, ESTIMATING, AWAITING_RESPONSE, NEGOTIATION, ACCEPTED, DROPPED
   referenceImages String?  // JSON string

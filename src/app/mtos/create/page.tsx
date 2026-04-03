@@ -117,18 +117,28 @@ export default function CreateMtoPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             {metalType === 'GOLD' && (
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Karatage</label>
-                <select name="goldKaratage">
-                  <option value="18K">18K (Default)</option>
-                  <option value="9K">9K</option>
-                  <option value="14K">14K</option>
-                  <option value="22K">22K</option>
-                  <option value="24K">24K</option>
-                </select>
-              </div>
+              <>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Karatage</label>
+                  <select name="goldKaratage">
+                    <option value="18K">18K (Default)</option>
+                    <option value="9K">9K</option>
+                    <option value="14K">14K</option>
+                    <option value="22K">22K</option>
+                    <option value="24K">24K</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Metal Color *</label>
+                  <select name="metalColor" required>
+                    <option value="Yellow Gold">Yellow Gold</option>
+                    <option value="White Gold">White Gold</option>
+                    <option value="Rose Gold">Rose Gold</option>
+                  </select>
+                </div>
+              </>
             )}
             {isStudded === 'true' && (
               <div>

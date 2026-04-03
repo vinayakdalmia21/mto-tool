@@ -49,6 +49,7 @@ export async function createMtoQuery(formData: FormData) {
   }
 
   const goldKaratage = formData.get('goldKaratage') as string;
+  const metalColor = formData.get('metalColor') as string;
   const diamondCaratage = formData.get('diamondCaratage') as string;
 
   // 3. Create MTO
@@ -65,6 +66,7 @@ export async function createMtoQuery(formData: FormData) {
       diamondCaratage: diamondCaratage || null,
       weightRange,
       goldKaratage: goldKaratage || null,
+      metalColor: metalColor || null,
       notes,
       referenceImages: base64Image,
       status: 'OPEN'
