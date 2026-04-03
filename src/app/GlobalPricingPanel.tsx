@@ -12,8 +12,12 @@ export default function GlobalPricingPanel({ initialPricing }: { initialPricing:
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
 
-  // Hide entirely if NOT manager
-  if (role !== 'MANAGER') return null;
+  // Hide entirely if NOT manager or operations
+  if (role !== 'MANAGER' && role !== 'OPERATIONS') return (
+    <div style={{ padding: '2rem', textAlign: 'center' }}>
+      You do not have permission to view global pricing defaults.
+    </div>
+  );
 
   async function handleLiveFetch() {
     setFetching(true);
