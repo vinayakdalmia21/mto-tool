@@ -29,7 +29,19 @@ export default function CreateMtoPage() {
       <div className="glass-panel" style={{ padding: '2rem' }}>
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Staff Member *</label>
+              <select name="staffName" required>
+                <option value="">Select Staff...</option>
+                <option value="Vishaka (STAFF)">Vishaka (STAFF)</option>
+                <option value="Intakhab (STAFF)">Intakhab (STAFF)</option>
+                <option value="Ankesh (STAFF)">Ankesh (STAFF)</option>
+                <option value="Roshan (STAFF)">Roshan (STAFF)</option>
+                <option value="Sri (STAFF)">Sri (STAFF)</option>
+                <option value="Karthik (STAFF)">Karthik (STAFF)</option>
+              </select>
+            </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Customer Name *</label>
               <input name="customerName" required placeholder="e.g. Priya Sharma" />

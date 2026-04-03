@@ -16,11 +16,17 @@ export async function createMtoQuery(formData: FormData) {
   const weightRange = formData.get('weightRange') as string;
   const notes = formData.get('notes') as string;
 
-  // 1. Ensure staff user exists (mocking for simplicity)
-  let staff = await prisma.user.findFirst({ where: { role: 'SALES' } });
+  const staffName = formData.get('staffName') as string;
+
+  // 1. Ensure staff user exists (mocking creation if missing)
+  let staff = await prisma.user.findFirst({ where: { name: staffName } });
   if (!staff) {
     staff = await prisma.user.create({
-      data: { name: 'Sarah (Sales)', role: 'SALES', email: 'sarah@veda.com' }
+      data: { 
+        name: staffName || 'Unknown Staff', 
+        role: 'SALES', 
+        email: `${(staffName || 'unknown').split(' ')[0].toLowerCase()}@veda.com` 
+      }
     });
   }
 
