@@ -22,6 +22,10 @@ export async function getMtoQueryDetails(mtoId: string) {
     where: { id: mtoId },
     include: {
       customer: true,
+      vendorEstimations: {
+        where: { isAccepted: true },
+        orderBy: { createdAt: 'desc' }
+      },
       estimations: {
         orderBy: { version: 'desc' }
       }

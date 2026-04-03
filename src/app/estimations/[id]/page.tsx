@@ -1,4 +1,5 @@
 import { getMtoQueryDetails } from '../../actions/estimation';
+import { getGlobalPricing } from '../../actions/pricing';
 import EstimationForm from './EstimationForm';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -6,10 +7,15 @@ import { notFound } from 'next/navigation';
 export default async function EstimationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const mto = await getMtoQueryDetails(id);
+  const pricing = await getGlobalPricing();
 
   if (!mto) {
     notFound();
   }
+
+  const acceptedVendorEst = mto.vendorEstimations && mto.vendorEstimations.length > 0 
+    ? mto.vendorEstimations[0] 
+    : null;
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -42,6 +48,34 @@ export default async function EstimationDetailPage({ params }: { params: Promise
             </div>
           </div>
 
+          {/* VENDOR ESTIMATE INJECTION */}
+          {acceptedVendorEst && (
+             <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid var(--info)' }}>
+               <h3 style={{ marginBottom: '1rem', color: 'var(--info)' }}>Operations Vendor Limits</h3>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                   <span style={{ color: 'var(--text-muted)' }}>Vendor:</span>
+                   <span>{acceptedVendorEst.vendorName}</span>
+                 </div>
+                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                   <span style={{ color: 'var(--text-muted)' }}>Locked Gold:</span>
+                   <span style={{ fontWeight: 600 }}>{acceptedVendorEst.goldWeight}</span>
+                 </div>
+                 {acceptedVendorEst.diamondWeight && (
+                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ color: 'var(--text-muted)' }}>Locked Diamond:</span>
+                     <span style={{ fontWeight: 600 }}>{acceptedVendorEst.diamondWeight}</span>
+                   </div>
+                 )}
+                 {acceptedVendorEst.remarks && (
+                   <div style={{ marginTop: '0.5rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                     "{acceptedVendorEst.remarks}"
+                   </div>
+                 )}
+               </div>
+             </div>
+          )}
+
           {/* PREVIOUS VERSIONS */}
           {mto.estimations.length > 0 && (
             <div className="glass-panel" style={{ padding: '1.5rem' }}>
@@ -66,7 +100,12 @@ export default async function EstimationDetailPage({ params }: { params: Promise
         {/* ESTIMATION CALCULATOR */}
         <div className="glass-panel" style={{ padding: '2rem' }}>
            <h2 style={{ marginBottom: '1.5rem' }}>Provide New Estimate (Live Calculator)</h2>
-           <EstimationForm mtoId={mto.id} isStudded={mto.isStudded} />
+           <EstimationForm 
+             mtoId={mto.id} 
+             mto={mto}
+             vendorLimit={acceptedVendorEst}
+             globalPricing={pricing}
+           />
         </div>
 
       </div>

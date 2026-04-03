@@ -141,6 +141,17 @@ model QcRecord {
   createdAt       DateTime      @default(now())
 }
 
+model GlobalPricing {
+  id          Int      @id @default(1)
+  rate9k      Float    @default(0)
+  rate14k     Float    @default(0)
+  rate18k     Float    @default(0)
+  rate22k     Float    @default(0)
+  rate24k     Float    @default(0)
+  diamondRate Float    @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
 model Invoice {
   id            Int      @id @default(autoincrement())
   mtoOrderId    Int      @unique

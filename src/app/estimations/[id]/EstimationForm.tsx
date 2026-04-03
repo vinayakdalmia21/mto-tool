@@ -4,17 +4,47 @@ import { useState, useMemo } from 'react';
 import { saveEstimation } from '../../actions/estimation';
 import { useRouter } from 'next/navigation';
 
-export default function EstimationForm({ mtoId, isStudded }: { mtoId: string, isStudded: boolean }) {
+export default function EstimationForm({ 
+  mtoId, 
+  mto, 
+  vendorLimit, 
+  globalPricing 
+}: { 
+  mtoId: string, 
+  mto: any,
+  vendorLimit: any,
+  globalPricing: any 
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   
-  const [goldWeight, setGoldWeight] = useState('10');
-  const [goldRate, setGoldRate] = useState('6500'); // per gram
-  const [wastage, setWastage] = useState('12'); // %
-  const [makingCharges, setMakingCharges] = useState('800'); // flat or per gram? Let's say flat logic for demo, or per gram as user specifies. We will just use it as Flat Addition for simplicity, or actually per gram. Let's do per gram.
+  // Dynamic Pricing Extraction
+  const karr = mto.goldKaratage || '18K';
+  const pricingMap: Record<string, number> = {
+    '9K': globalPricing.rate9k,
+    '14K': globalPricing.rate14k,
+    '18K': globalPricing.rate18k,
+    '22K': globalPricing.rate22k,
+    '24K': globalPricing.rate24k,
+  };
+  const baseGoldRate = pricingMap[karr] || globalPricing.rate18k || 0;
   
-  const [diamondWeight, setDiamondWeight] = useState('0');
-  const [diamondRate, setDiamondRate] = useState('50000'); // per carat
+  // Extract number strings from vendor limits gracefully
+  const extractNum = (str: string | null | undefined) => {
+    if (!str) return '';
+    const match = str.match(/\d+(?:\.\d+)?/);
+    return match ? match[0] : '';
+  };
+
+  const isStudded = mto.isStudded;
+
+  const [goldWeight, setGoldWeight] = useState(extractNum(vendorLimit?.goldWeight) || '10');
+  const [goldRate, setGoldRate] = useState(baseGoldRate.toString()); // per gram dynamically configured
+  const [wastage, setWastage] = useState('12'); // %
+  const [makingCharges, setMakingCharges] = useState('800'); // flat per gram
+  
+  const [diamondWeight, setDiamondWeight] = useState(extractNum(vendorLimit?.diamondWeight) || '0');
+  const [diamondRate, setDiamondRate] = useState((globalPricing.diamondRate || 0).toString()); // per carat
   
   // Calculations
   const calculatedGoldValue = useMemo(() => {
