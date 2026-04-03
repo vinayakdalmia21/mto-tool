@@ -97,7 +97,7 @@ export default function CreateMtoPage() {
               </div>
             )}
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Reference Image / Sketch (Optional)</label>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Reference Image / Sketch</label>
               <input type="file" name="referenceImage" accept="image/*" />
             </div>
           </div>
@@ -136,11 +136,11 @@ export default function CreateMtoPage() {
             )}
             <div>
               <input type="hidden" name="metalType" value="GOLD" />
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Size (Optional)</label>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Size</label>
               <input name="size" placeholder="e.g. Ring Size 12" />
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Gold Weight (Optional)</label>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Gold Weight</label>
               <input name="goldWeight" placeholder="e.g. ~12.5g" />
             </div>
           </div>
