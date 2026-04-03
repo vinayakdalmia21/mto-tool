@@ -12,9 +12,7 @@ export async function getPendingVendorQueries() {
     where: {
       status: 'OPEN',
       vendorEstimations: {
-        none: {
-          isAccepted: true
-        }
+        none: {}
       }
     },
     include: {

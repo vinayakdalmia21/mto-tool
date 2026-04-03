@@ -26,6 +26,9 @@ export default async function MtoDetailsPage({ params }: { params: Promise<{ id:
           <span className={`badge ${mto.status === 'ACCEPTED' ? 'badge-success' : 'badge-primary'}`} style={{ border: '1px solid currentColor' }}>
             {mto.status}
           </span>
+          <Link href={`/mtos/${mto.id}/edit`} className="btn" style={{ padding: '0.2rem 0.6rem', fontSize: '0.8rem', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-main)' }}>
+            Edit
+          </Link>
         </div>
       </header>
 

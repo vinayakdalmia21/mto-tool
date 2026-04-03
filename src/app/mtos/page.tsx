@@ -71,10 +71,13 @@ export default async function MtosPage() {
                 <td style={{ padding: '0.75rem' }}>{mto.goldWeight || mto.weightRange || '-'}</td>
                 <td style={{ padding: '0.75rem' }}>{mto.diamondCaratage ? `${mto.diamondCaratage} Ct` : '-'}</td>
                 <td style={{ padding: '0.75rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{mto.notes || '-'}</td>
-                <td style={{ padding: '0.75rem' }}>
-                   <Link href={`/mtos/${mto.id}`} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>
-                     View →
-                   </Link>
+                <td style={{ padding: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                  <Link href={`/mtos/${mto.id}`} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', background: 'var(--surface-light)', border: '1px solid var(--surface-border)' }}>
+                    View
+                  </Link>
+                  <Link href={`/mtos/${mto.id}/edit`} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-main)' }}>
+                    Edit
+                  </Link>
                 </td>
               </tr>
             ))}

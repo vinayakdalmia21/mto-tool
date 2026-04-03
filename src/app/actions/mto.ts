@@ -93,3 +93,65 @@ export async function getMtos() {
     orderBy: { createdAt: 'desc' }
   });
 }
+
+export async function updateMtoQuery(id: string, formData: FormData) {
+  const customerName = formData.get('customerName') as string;
+  const phoneNumber = formData.get('phoneNumber') as string;
+  const leadType = formData.get('leadType') as string;
+  const mtoType = formData.get('mtoType') as string;
+  let category = formData.get('category') as string;
+  if (category === 'OTHER') {
+    category = formData.get('otherCategory') as string || 'OTHER';
+  }
+  const metalType = formData.get('metalType') as string;
+  const isStudded = formData.get('isStudded') === 'true';
+  const notes = formData.get('notes') as string;
+
+  // Assume customer/staff don't change or if they do we update just the customer details
+  // For safety, let's just update the customer's name on their profile
+  await prisma.customer.update({
+    where: { phone: phoneNumber },
+    data: { name: customerName }
+  }).catch(() => null);
+
+  const rawImage = formData.get('referenceImage');
+  let base64Image: string | undefined = undefined;
+  if (rawImage instanceof File && rawImage.size > 0) {
+    const arrayBuffer = await rawImage.arrayBuffer();
+    const base64Str = Buffer.from(arrayBuffer).toString('base64');
+    base64Image = `data:${rawImage.type};base64,${base64Str}`;
+  }
+
+  const goldKaratage = formData.get('goldKaratage') as string;
+  const metalColor = formData.get('metalColor') as string;
+  const diamondCaratage = formData.get('diamondCaratage') as string;
+  const goldWeight = formData.get('goldWeight') as string;
+  const size = formData.get('size') as string;
+
+  const dataToUpdate: any = {
+    leadType,
+    mtoType,
+    category,
+    metalType,
+    isStudded,
+    diamondCaratage: diamondCaratage || null,
+    goldKaratage: goldKaratage || null,
+    goldWeight: goldWeight || null,
+    metalColor: metalColor || null,
+    size: size || null,
+    notes
+  };
+
+  if (base64Image) {
+    dataToUpdate.referenceImages = base64Image;
+  }
+
+  await prisma.mtoQuery.update({
+    where: { id },
+    data: dataToUpdate
+  });
+
+  revalidatePath('/mtos');
+  revalidatePath(`/mtos/${id}`);
+  return { success: true };
+}
