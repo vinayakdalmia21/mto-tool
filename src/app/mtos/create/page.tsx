@@ -81,6 +81,19 @@ export default function CreateMtoPage() {
             </div>
           </div>
 
+          <div style={{ display: 'grid', gridTemplateColumns: mtoType === 'REGULAR' ? '1fr 1fr' : '1fr', gap: '1rem' }}>
+            {mtoType === 'REGULAR' && (
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Catalogue SKU *</label>
+                <input name="catalogueSku" required placeholder="e.g. RING-1024" />
+              </div>
+            )}
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Reference Image / Sketch (Optional)</label>
+              <input type="file" name="referenceImage" accept="image/*" />
+            </div>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Metal Preference</label>
