@@ -87,7 +87,8 @@ export async function createMtoQuery(formData: FormData) {
 export async function getMtos() {
   return await prisma.mtoQuery.findMany({
     include: {
-      customer: true
+      customer: true,
+      staff: true
     },
     orderBy: { createdAt: 'desc' }
   });
