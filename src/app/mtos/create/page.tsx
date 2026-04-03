@@ -8,6 +8,7 @@ export default function CreateMtoPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [mtoType, setMtoType] = useState('REGULAR');
+  const [category, setCategory] = useState('RING');
   const [metalType, setMetalType] = useState('GOLD');
   const [isStudded, setIsStudded] = useState('true');
 
@@ -73,7 +74,7 @@ export default function CreateMtoPage() {
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Category</label>
-              <select name="category">
+              <select name="category" value={category} onChange={(e) => setCategory(e.target.value)}>
                 <option value="RING">Ring</option>
                 <option value="BRACELET">Bracelet</option>
                 <option value="NECKLACE">Necklace</option>
@@ -81,6 +82,12 @@ export default function CreateMtoPage() {
                 <option value="OTHER">Other</option>
               </select>
             </div>
+            {category === 'OTHER' && (
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Specify Category *</label>
+                <input name="otherCategory" required placeholder="e.g. Cufflinks" />
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: mtoType === 'REGULAR' ? '1fr 1fr' : '1fr', gap: '1rem' }}>

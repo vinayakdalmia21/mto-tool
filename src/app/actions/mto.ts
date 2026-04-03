@@ -10,7 +10,10 @@ export async function createMtoQuery(formData: FormData) {
   const phoneNumber = formData.get('phoneNumber') as string;
   const leadType = formData.get('leadType') as string;
   const mtoType = formData.get('mtoType') as string;
-  const category = formData.get('category') as string;
+  let category = formData.get('category') as string;
+  if (category === 'OTHER') {
+    category = formData.get('otherCategory') as string || 'OTHER';
+  }
   const metalType = formData.get('metalType') as string;
   const isStudded = formData.get('isStudded') === 'true';
   const weightRange = formData.get('weightRange') as string;
