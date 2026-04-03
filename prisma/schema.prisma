@@ -36,6 +36,7 @@ model MtoQuery {
   notes           String?
   status          String   // OPEN, ESTIMATING, AWAITING_RESPONSE, NEGOTIATION, ACCEPTED, DROPPED
   referenceImages String?  // JSON string
+  catalogueSku    String?  // Optional SKU for regular MTOs
   
   customer        Customer @relation(fields: [customerId], references: [id])
   staff           User     @relation(fields: [staffId], references: [id])

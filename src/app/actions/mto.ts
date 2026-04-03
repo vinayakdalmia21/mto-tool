@@ -38,6 +38,16 @@ export async function createMtoQuery(formData: FormData) {
     });
   }
 
+  const catalogueSku = formData.get('catalogueSku') as string;
+  const rawImage = formData.get('referenceImage');
+  
+  let base64Image: string | null = null;
+  if (rawImage instanceof File && rawImage.size > 0) {
+    const arrayBuffer = await rawImage.arrayBuffer();
+    const base64Str = Buffer.from(arrayBuffer).toString('base64');
+    base64Image = `data:${rawImage.type};base64,${base64Str}`;
+  }
+
   // 3. Create MTO
   const mto = await prisma.mtoQuery.create({
     data: {
@@ -45,11 +55,13 @@ export async function createMtoQuery(formData: FormData) {
       staffId: staff.id,
       leadType,
       mtoType,
+      catalogueSku: catalogueSku || null,
       category,
       metalType,
       isStudded,
       weightRange,
       notes,
+      referenceImages: base64Image,
       status: 'OPEN'
     }
   });

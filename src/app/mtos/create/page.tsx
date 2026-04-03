@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 export default function CreateMtoPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [mtoType, setMtoType] = useState('REGULAR');
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -63,7 +64,7 @@ export default function CreateMtoPage() {
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>MTO Type</label>
-              <select name="mtoType">
+              <select name="mtoType" value={mtoType} onChange={(e) => setMtoType(e.target.value)}>
                 <option value="REGULAR">Regular (Catalogue)</option>
                 <option value="CUSTOM">Fully Custom Design</option>
               </select>
@@ -92,8 +93,8 @@ export default function CreateMtoPage() {
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Studded?</label>
               <select name="isStudded">
-                <option value="true">Yes (Diamonds/Polki)</option>
-                <option value="false">Plain</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
               </select>
             </div>
             <div>
