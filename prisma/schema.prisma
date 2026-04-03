@@ -47,12 +47,27 @@ model MtoQuery {
   customer Customer @relation(fields: [customerId], references: [id])
   staff    User     @relation(fields: [staffId], references: [id])
 
-  estimations Estimation[]
-  pricing     PromisedPricing?
-  order       MtoOrder?
-  payment     Payment[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  vendorEstimations VendorEstimation[]
+  estimations       Estimation[]
+  pricing           PromisedPricing?
+  order             MtoOrder?
+  payment           Payment[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model VendorEstimation {
+  id            Int      @id @default(autoincrement())
+  mtoQueryId    String
+  vendorName    String
+  goldWeight    String?
+  diamondWeight String?
+  remarks       String?
+  images        String?
+  isAccepted    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  mtoQuery MtoQuery @relation(fields: [mtoQueryId], references: [id])
 }
 
 model Estimation {

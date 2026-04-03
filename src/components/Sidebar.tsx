@@ -30,6 +30,7 @@ export default function Sidebar() {
     { label: 'Dashboard', icon: <LayoutDashboard size={20} />, href: '/', roles: ['SALES', 'MANAGER', 'OPERATIONS', 'FINANCE'] },
     { label: 'CRM & MTOs', icon: <Briefcase size={20} />, href: '/mtos', roles: ['SALES', 'MANAGER'] },
     { label: 'Estimations', icon: <Calculator size={20} />, href: '/estimations', roles: ['SALES', 'MANAGER'] },
+    { label: 'Vendor Estimates', icon: <Calculator size={20} />, href: '/vendor-estimations', roles: ['OPERATIONS', 'MANAGER'] },
     { label: 'Purchase Orders', icon: <Building2 size={20} />, href: '/orders', roles: ['OPERATIONS', 'MANAGER'] },
     { label: 'Production & QC', icon: <ClipboardCheck size={20} />, href: '/qc', roles: ['OPERATIONS', 'MANAGER'] },
     { label: 'Invoices & Billing', icon: <FileText size={20} />, href: '/billing', roles: ['FINANCE', 'MANAGER'] },
