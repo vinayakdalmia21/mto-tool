@@ -1,0 +1,134 @@
+.sidebar {
+  width: 260px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  border-radius: 0;
+  border-right: 1px solid var(--surface-border);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  z-index: 50;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.brandIcon {
+  color: var(--primary);
+}
+
+.brandName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: linear-gradient(90deg, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.roleSelector {
+  margin-bottom: 2rem;
+  padding: 0 0.5rem;
+}
+
+.roleSelector label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.select {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.navItem:hover {
+  background: var(--surface-hover);
+  color: var(--text-main);
+  transform: translateX(4px);
+}
+
+.navItem.active {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--primary);
+  border-left: 3px solid var(--primary);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--surface-border);
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--info));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: white;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.userRole {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

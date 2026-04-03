@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  name  String
+  role  String  // SALES, MANAGER, OPERATIONS, FINANCE
+  email String  @unique
+  phone String?
+  mtos  MtoQuery[]
+}
+
+model Customer {
+  id    Int     @id @default(autoincrement())
+  name  String
+  phone String  @unique
+  mtos  MtoQuery[]
+}
+
+model MtoQuery {
+  id              String   @id @default(cuid())
+  customerId      Int
+  staffId         Int
+  leadType        String   // HIGH, MEDIUM, LOW
+  mtoType         String   // REGULAR, CUSTOM
+  category        String   // RING, BRACELET, EARRINGS, etc.
+  metalType       String   // GOLD, SILVER
+  isStudded       Boolean
+  weightRange     String
+  notes           String?
+  status          String   // OPEN, ESTIMATING, AWAITING_RESPONSE, NEGOTIATION, ACCEPTED, DROPPED
+  referenceImages String?  // JSON string
+  
+  customer        Customer @relation(fields: [customerId], references: [id])
+  staff           User     @relation(fields: [staffId], references: [id])
+
+  estimations     Estimation[]
+  pricing         PromisedPricing?
+  order           MtoOrder?
+  payment         Payment[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Estimation {
+  id              Int      @id @default(autoincrement())
+  mtoQueryId      String
+  version         Int
+  goldWeight      String   
+  goldRate        Float
+  diamondWeight   Float?
+  diamondRate     Float?
+  makingCharges   Float   // Using Float to support decimals if needed
+  wastage         Float
+  otherStones     Float?
+  finalEstimatedPrice Float
+  notes           String?
+  mtoQuery        MtoQuery @relation(fields: [mtoQueryId], references: [id])
+
+  createdAt       DateTime @default(now())
+}
+
+model PromisedPricing {
+  id              Int      @id @default(autoincrement())
+  mtoQueryId      String   @unique
+  goldWeight      String
+  makingCharges   Float
+  wastage         Float
+  stoneDetails    String
+  finalPrice      Float
+  lockedAt        DateTime @default(now())
+  mtoQuery        MtoQuery @relation(fields: [mtoQueryId], references: [id])
+}
+
+model Payment {
+  id              Int      @id @default(autoincrement())
+  mtoQueryId      String
+  amount          Float
+  status          String   // PENDING, PAID
+  createdAt       DateTime @default(now())
+  mtoQuery        MtoQuery @relation(fields: [mtoQueryId], references: [id])
+}
+
+model MtoOrder {
+  id              Int      @id @default(autoincrement())
+  mtoQueryId      String   @unique
+  posRefId        String?
+  mtoQuery        MtoQuery @relation(fields: [mtoQueryId], references: [id])
+  purchaseOrder   PurchaseOrder?
+  invoice         Invoice?
+  createdAt       DateTime @default(now())
+}
+
+model PurchaseOrder {
+  id              Int      @id @default(autoincrement())
+  mtoOrderId      Int      @unique
+  vendorName      String
+  lockedGoldPrice Float
+  deliveryTimeline String
+  status          String   // RAISED, IN_PRODUCTION, DISPATCHED
+  mtoOrder        MtoOrder @relation(fields: [mtoOrderId], references: [id])
+  qcRecord        QcRecord?
+  createdAt       DateTime @default(now())
+}
+
+model QcRecord {
+  id              Int      @id @default(autoincrement())
+  purchaseOrderId Int      @unique
+  status          String   // PASS, REJECT
+  iterations      Int      @default(0)
+  notes           String?
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  createdAt       DateTime @default(now())
+}
+
+model Invoice {
+  id              Int      @id @default(autoincrement())
+  mtoOrderId      Int      @unique
+  totalAmount     Float
+  paidAmount      Float
+  balanceAmount   Float
+  status          String   // COMPLETED
+  mtoOrder        MtoOrder @relation(fields: [mtoOrderId], references: [id])
+  createdAt       DateTime @default(now())
+}
