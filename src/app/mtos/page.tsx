@@ -22,23 +22,23 @@ export default async function MtosPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--surface-border)', background: 'rgba(255, 255, 255, 0.03)' }}>
-              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Lead Temperature</th>
+              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Lead Priority</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Query ID</th>
-              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Gold/Silver</th>
+              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>MTO Type</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Image</th>
-              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>SKU (if any)</th>
+              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>SKU (If any)</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Query Date</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Customer Name</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Customer No.</th>
-              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Placed By</th>
+              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Placed By (Staff)</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Category</th>
-              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Sub Category</th>
+              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Studded (Yes/No)</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Metal KT</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Metal Colour</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Size</th>
-              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Weight</th>
+              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Approx Gold Weight</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Diamond Carat</th>
-              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Voice of Customer</th>
+              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Design Notes</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Actions</th>
             </tr>
           </thead>
@@ -54,7 +54,7 @@ export default async function MtosPage() {
                   </span>
                 </td>
                 <td style={{ padding: '0.75rem', fontWeight: 600 }}>{mto.id.slice(-6).toUpperCase()}</td>
-                <td style={{ padding: '0.75rem' }}>{mto.metalType}</td>
+                <td style={{ padding: '0.75rem' }}>{mto.mtoType}</td>
                 <td style={{ padding: '0.75rem' }}>
                   {mto.referenceImages ? <span style={{ color: 'var(--primary)' }}>Yes</span> : <span style={{ color: 'var(--text-muted)' }}>No</span>}
                 </td>
@@ -64,7 +64,7 @@ export default async function MtosPage() {
                 <td style={{ padding: '0.75rem' }}>{mto.customer.phone}</td>
                 <td style={{ padding: '0.75rem' }}>{mto.staff?.name || '-'}</td>
                 <td style={{ padding: '0.75rem', textTransform: 'capitalize' }}>{mto.category.toLowerCase()}</td>
-                <td style={{ padding: '0.75rem' }}>-</td>
+                <td style={{ padding: '0.75rem' }}>{mto.isStudded ? 'Yes' : 'No'}</td>
                 <td style={{ padding: '0.75rem' }}>{mto.goldKaratage || '-'}</td>
                 <td style={{ padding: '0.75rem' }}>{mto.metalColor || '-'}</td>
                 <td style={{ padding: '0.75rem' }}>{mto.size || '-'}</td>
