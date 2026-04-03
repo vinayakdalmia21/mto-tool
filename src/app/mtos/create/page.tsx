@@ -102,11 +102,24 @@ export default function CreateMtoPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
-              <input type="hidden" name="metalType" value="GOLD" />
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Size (Optional)</label>
-              <input name="size" placeholder="e.g. Ring Size 12" />
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Karatage</label>
+              <select name="goldKaratage">
+                <option value="18K">18K (Default)</option>
+                <option value="9K">9K</option>
+                <option value="14K">14K</option>
+                <option value="22K">22K</option>
+                <option value="24K">24K</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Metal Color *</label>
+              <select name="metalColor" required>
+                <option value="Yellow Gold">Yellow Gold</option>
+                <option value="White Gold">White Gold</option>
+                <option value="Rose Gold">Rose Gold</option>
+              </select>
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Studded?</label>
@@ -115,37 +128,21 @@ export default function CreateMtoPage() {
                 <option value="false">No</option>
               </select>
             </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Gold Weight (Optional)</label>
-              <input name="goldWeight" placeholder="e.g. ~12.5g" />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Karatage</label>
-                  <select name="goldKaratage">
-                    <option value="18K">18K (Default)</option>
-                    <option value="9K">9K</option>
-                    <option value="14K">14K</option>
-                    <option value="22K">22K</option>
-                    <option value="24K">24K</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Metal Color *</label>
-                  <select name="metalColor" required>
-                    <option value="Yellow Gold">Yellow Gold</option>
-                    <option value="White Gold">White Gold</option>
-                    <option value="Rose Gold">Rose Gold</option>
-                  </select>
-                </div>
             {isStudded === 'true' && (
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Diamond Caratage</label>
                 <input name="diamondCaratage" placeholder="e.g. 1.5 Ct" />
               </div>
             )}
+            <div>
+              <input type="hidden" name="metalType" value="GOLD" />
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Size (Optional)</label>
+              <input name="size" placeholder="e.g. Ring Size 12" />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Gold Weight (Optional)</label>
+              <input name="goldWeight" placeholder="e.g. ~12.5g" />
+            </div>
           </div>
 
 
