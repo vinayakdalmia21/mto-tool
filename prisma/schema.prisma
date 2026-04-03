@@ -37,6 +37,7 @@ model MtoQuery {
   goldKaratage    String?  // Optional 9K, 14K, 18K etc
   metalColor      String?  // Yellow Gold, White Gold, Rose Gold
   goldWeight      String?  // Exact or estimated gold weight
+  size            String?  // Ring size, bracelet size, etc
   notes           String?
   status          String   // OPEN, ESTIMATING, AWAITING_RESPONSE, NEGOTIATION, ACCEPTED, DROPPED
   referenceImages String?  // JSON string

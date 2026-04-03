@@ -105,6 +105,10 @@ export default function CreateMtoPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
               <input type="hidden" name="metalType" value="GOLD" />
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Size (Optional)</label>
+              <input name="size" placeholder="e.g. Ring Size 12" />
+            </div>
+            <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Studded?</label>
               <select name="isStudded" value={isStudded} onChange={(e) => setIsStudded(e.target.value)}>
                 <option value="true">Yes</option>

@@ -55,6 +55,7 @@ export async function createMtoQuery(formData: FormData) {
   const metalColor = formData.get('metalColor') as string;
   const diamondCaratage = formData.get('diamondCaratage') as string;
   const goldWeight = formData.get('goldWeight') as string;
+  const size = formData.get('size') as string;
 
   // 3. Create MTO
   const mto = await prisma.mtoQuery.create({
@@ -72,6 +73,7 @@ export async function createMtoQuery(formData: FormData) {
       goldKaratage: goldKaratage || null,
       goldWeight: goldWeight || null,
       metalColor: metalColor || null,
+      size: size || null,
       notes,
       referenceImages: base64Image,
       status: 'OPEN'
