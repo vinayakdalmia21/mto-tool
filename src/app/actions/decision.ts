@@ -76,7 +76,7 @@ export async function processPaymentAndLockPricing(mtoId: string, amount: number
     data: { status: 'ACCEPTED' }
   });
 
-  revalidatePath `/mtos/${mtoId}`;
-  revalidatePath `/payments`;
+  revalidatePath(`/mtos/${mtoId}`);
+  revalidatePath(`/payments`);
   return { success: true };
 }
