@@ -8,14 +8,14 @@ export default async function MtosPage() {
 
   return (
     <div style={{ maxWidth: '100%', margin: '0 2rem' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>CRM Pipeline</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Track and manage all Make-to-Order queries.</p>
+      <header style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 700, margin: 0 }}>CRM Pipeline</h1>
+          <Link href="/mtos/create" className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>
+            + New MTO Query
+          </Link>
         </div>
-        <Link href="/mtos/create" className="btn btn-primary">
-          + New MTO Query
-        </Link>
+        <p style={{ color: 'var(--text-muted)', margin: 0 }}>Track and manage all Make-to-Order queries.</p>
       </header>
 
       <div className="glass-panel" style={{ overflowX: 'auto', paddingBottom: '1rem' }}>
