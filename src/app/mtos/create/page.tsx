@@ -120,8 +120,8 @@ export default function CreateMtoPage() {
               <input name="weightRange" placeholder="e.g. 10g - 15g" />
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Exact Gold Weight (Optional)</label>
-              <input name="goldWeight" placeholder="e.g. 12.5g" />
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Gold Weight (Optional)</label>
+              <input name="goldWeight" placeholder="e.g. ~12.5g" />
             </div>
           </div>
 
