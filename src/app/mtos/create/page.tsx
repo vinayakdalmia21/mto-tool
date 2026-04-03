@@ -116,10 +116,6 @@ export default function CreateMtoPage() {
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Weight Range</label>
-              <input name="weightRange" placeholder="e.g. 10g - 15g" />
-            </div>
-            <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Gold Weight (Optional)</label>
               <input name="goldWeight" placeholder="e.g. ~12.5g" />
             </div>
@@ -150,6 +146,11 @@ export default function CreateMtoPage() {
                 <input name="diamondCaratage" placeholder="e.g. 1.5 Ct" />
               </div>
             )}
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Weight Range</label>
+            <input name="weightRange" placeholder="e.g. 10g - 15g" />
           </div>
 
           <div>
