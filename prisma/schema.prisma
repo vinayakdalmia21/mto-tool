@@ -8,130 +8,131 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
+  id    Int        @id @default(autoincrement())
   name  String
-  role  String  // SALES, MANAGER, OPERATIONS, FINANCE
-  email String  @unique
+  role  String // SALES, MANAGER, OPERATIONS, FINANCE
+  email String     @unique
   phone String?
   mtos  MtoQuery[]
 }
 
 model Customer {
-  id    Int     @id @default(autoincrement())
+  id    Int        @id @default(autoincrement())
   name  String
-  phone String  @unique
+  phone String     @unique
   mtos  MtoQuery[]
 }
 
 model MtoQuery {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
+  queryNo         Int     @unique @default(autoincrement())
   customerId      Int
   staffId         Int
-  leadType        String   // HIGH, MEDIUM, LOW
-  mtoType         String   // REGULAR, CUSTOM
-  category        String   // RING, BRACELET, EARRINGS, etc.
-  metalType       String   // GOLD, SILVER
+  leadType        String // HIGH, MEDIUM, LOW
+  mtoType         String // REGULAR, CUSTOM
+  category        String // RING, BRACELET, EARRINGS, etc.
+  metalType       String // GOLD, SILVER
   isStudded       Boolean
-  diamondCaratage String?  // Optional caratage
+  diamondCaratage String? // Optional caratage
   weightRange     String
-  goldKaratage    String?  // Optional 9K, 14K, 18K etc
-  metalColor      String?  // Yellow Gold, White Gold, Rose Gold
-  goldWeight      String?  // Exact or estimated gold weight
-  size            String?  // Ring size, bracelet size, etc
+  goldKaratage    String? // Optional 9K, 14K, 18K etc
+  metalColor      String? // Yellow Gold, White Gold, Rose Gold
+  goldWeight      String? // Exact or estimated gold weight
+  size            String? // Ring size, bracelet size, etc
   notes           String?
-  status          String   // OPEN, ESTIMATING, AWAITING_RESPONSE, NEGOTIATION, ACCEPTED, DROPPED
-  referenceImages String?  // JSON string
-  catalogueSku    String?  // Optional SKU for regular MTOs
-  
-  customer        Customer @relation(fields: [customerId], references: [id])
-  staff           User     @relation(fields: [staffId], references: [id])
+  status          String // OPEN, ESTIMATING, AWAITING_RESPONSE, NEGOTIATION, ACCEPTED, DROPPED
+  referenceImages String? // JSON string
+  catalogueSku    String? // Optional SKU for regular MTOs
 
-  estimations     Estimation[]
-  pricing         PromisedPricing?
-  order           MtoOrder?
-  payment         Payment[]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  customer Customer @relation(fields: [customerId], references: [id])
+  staff    User     @relation(fields: [staffId], references: [id])
+
+  estimations Estimation[]
+  pricing     PromisedPricing?
+  order       MtoOrder?
+  payment     Payment[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 }
 
 model Estimation {
-  id              Int      @id @default(autoincrement())
-  mtoQueryId      String
-  version         Int
-  goldWeight      String   
-  goldRate        Float
-  diamondWeight   Float?
-  diamondRate     Float?
-  makingCharges   Float   // Using Float to support decimals if needed
-  wastage         Float
-  otherStones     Float?
+  id                  Int      @id @default(autoincrement())
+  mtoQueryId          String
+  version             Int
+  goldWeight          String
+  goldRate            Float
+  diamondWeight       Float?
+  diamondRate         Float?
+  makingCharges       Float // Using Float to support decimals if needed
+  wastage             Float
+  otherStones         Float?
   finalEstimatedPrice Float
-  notes           String?
-  mtoQuery        MtoQuery @relation(fields: [mtoQueryId], references: [id])
+  notes               String?
+  mtoQuery            MtoQuery @relation(fields: [mtoQueryId], references: [id])
 
-  createdAt       DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model PromisedPricing {
-  id              Int      @id @default(autoincrement())
-  mtoQueryId      String   @unique
-  goldWeight      String
-  makingCharges   Float
-  wastage         Float
-  stoneDetails    String
-  finalPrice      Float
-  lockedAt        DateTime @default(now())
-  mtoQuery        MtoQuery @relation(fields: [mtoQueryId], references: [id])
+  id            Int      @id @default(autoincrement())
+  mtoQueryId    String   @unique
+  goldWeight    String
+  makingCharges Float
+  wastage       Float
+  stoneDetails  String
+  finalPrice    Float
+  lockedAt      DateTime @default(now())
+  mtoQuery      MtoQuery @relation(fields: [mtoQueryId], references: [id])
 }
 
 model Payment {
-  id              Int      @id @default(autoincrement())
-  mtoQueryId      String
-  amount          Float
-  status          String   // PENDING, PAID
-  createdAt       DateTime @default(now())
-  mtoQuery        MtoQuery @relation(fields: [mtoQueryId], references: [id])
+  id         Int      @id @default(autoincrement())
+  mtoQueryId String
+  amount     Float
+  status     String // PENDING, PAID
+  createdAt  DateTime @default(now())
+  mtoQuery   MtoQuery @relation(fields: [mtoQueryId], references: [id])
 }
 
 model MtoOrder {
-  id              Int      @id @default(autoincrement())
-  mtoQueryId      String   @unique
-  posRefId        String?
-  mtoQuery        MtoQuery @relation(fields: [mtoQueryId], references: [id])
-  purchaseOrder   PurchaseOrder?
-  invoice         Invoice?
-  createdAt       DateTime @default(now())
+  id            Int            @id @default(autoincrement())
+  mtoQueryId    String         @unique
+  posRefId      String?
+  mtoQuery      MtoQuery       @relation(fields: [mtoQueryId], references: [id])
+  purchaseOrder PurchaseOrder?
+  invoice       Invoice?
+  createdAt     DateTime       @default(now())
 }
 
 model PurchaseOrder {
-  id              Int      @id @default(autoincrement())
-  mtoOrderId      Int      @unique
-  vendorName      String
-  lockedGoldPrice Float
+  id               Int       @id @default(autoincrement())
+  mtoOrderId       Int       @unique
+  vendorName       String
+  lockedGoldPrice  Float
   deliveryTimeline String
-  status          String   // RAISED, IN_PRODUCTION, DISPATCHED
-  mtoOrder        MtoOrder @relation(fields: [mtoOrderId], references: [id])
-  qcRecord        QcRecord?
-  createdAt       DateTime @default(now())
+  status           String // RAISED, IN_PRODUCTION, DISPATCHED
+  mtoOrder         MtoOrder  @relation(fields: [mtoOrderId], references: [id])
+  qcRecord         QcRecord?
+  createdAt        DateTime  @default(now())
 }
 
 model QcRecord {
-  id              Int      @id @default(autoincrement())
-  purchaseOrderId Int      @unique
-  status          String   // PASS, REJECT
-  iterations      Int      @default(0)
+  id              Int           @id @default(autoincrement())
+  purchaseOrderId Int           @unique
+  status          String // PASS, REJECT
+  iterations      Int           @default(0)
   notes           String?
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
-  createdAt       DateTime @default(now())
+  createdAt       DateTime      @default(now())
 }
 
 model Invoice {
-  id              Int      @id @default(autoincrement())
-  mtoOrderId      Int      @unique
-  totalAmount     Float
-  paidAmount      Float
-  balanceAmount   Float
-  status          String   // COMPLETED
-  mtoOrder        MtoOrder @relation(fields: [mtoOrderId], references: [id])
-  createdAt       DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  mtoOrderId    Int      @unique
+  totalAmount   Float
+  paidAmount    Float
+  balanceAmount Float
+  status        String // COMPLETED
+  mtoOrder      MtoOrder @relation(fields: [mtoOrderId], references: [id])
+  createdAt     DateTime @default(now())
 }
