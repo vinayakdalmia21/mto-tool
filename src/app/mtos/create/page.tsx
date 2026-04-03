@@ -148,10 +148,7 @@ export default function CreateMtoPage() {
             )}
           </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Weight Range</label>
-            <input name="weightRange" placeholder="e.g. 10g - 15g" />
-          </div>
+
 
           <div>
              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Design Notes / Customer Specs</label>

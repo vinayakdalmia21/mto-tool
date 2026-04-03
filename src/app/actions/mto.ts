@@ -16,7 +16,7 @@ export async function createMtoQuery(formData: FormData) {
   }
   const metalType = formData.get('metalType') as string;
   const isStudded = formData.get('isStudded') === 'true';
-  const weightRange = formData.get('weightRange') as string;
+  const weightRange = (formData.get('weightRange') as string) || '';
   const notes = formData.get('notes') as string;
 
   const staffName = formData.get('staffName') as string;
