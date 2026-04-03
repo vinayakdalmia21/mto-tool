@@ -8,6 +8,8 @@ export default function CreateMtoPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [mtoType, setMtoType] = useState('REGULAR');
+  const [metalType, setMetalType] = useState('GOLD');
+  const [isStudded, setIsStudded] = useState('true');
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -97,15 +99,14 @@ export default function CreateMtoPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Metal Preference</label>
-              <select name="metalType">
-                <option value="GOLD">Gold (18K / 22K)</option>
-                <option value="SILVER">Silver</option>
+              <select name="metalType" value={metalType} onChange={(e) => setMetalType(e.target.value)}>
+                <option value="GOLD">Gold</option>
                 <option value="PLATINUM">Platinum</option>
               </select>
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Studded?</label>
-              <select name="isStudded">
+              <select name="isStudded" value={isStudded} onChange={(e) => setIsStudded(e.target.value)}>
                 <option value="true">Yes</option>
                 <option value="false">No</option>
               </select>
@@ -114,6 +115,27 @@ export default function CreateMtoPage() {
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Weight Range</label>
               <input name="weightRange" placeholder="e.g. 10g - 15g" />
             </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            {metalType === 'GOLD' && (
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Karatage</label>
+                <select name="goldKaratage">
+                  <option value="18K">18K (Default)</option>
+                  <option value="9K">9K</option>
+                  <option value="14K">14K</option>
+                  <option value="22K">22K</option>
+                  <option value="24K">24K</option>
+                </select>
+              </div>
+            )}
+            {isStudded === 'true' && (
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Diamond Caratage</label>
+                <input name="diamondCaratage" placeholder="e.g. 1.5 Ct" />
+              </div>
+            )}
           </div>
 
           <div>

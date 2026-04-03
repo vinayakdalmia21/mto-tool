@@ -48,6 +48,9 @@ export async function createMtoQuery(formData: FormData) {
     base64Image = `data:${rawImage.type};base64,${base64Str}`;
   }
 
+  const goldKaratage = formData.get('goldKaratage') as string;
+  const diamondCaratage = formData.get('diamondCaratage') as string;
+
   // 3. Create MTO
   const mto = await prisma.mtoQuery.create({
     data: {
@@ -59,7 +62,9 @@ export async function createMtoQuery(formData: FormData) {
       category,
       metalType,
       isStudded,
+      diamondCaratage: diamondCaratage || null,
       weightRange,
+      goldKaratage: goldKaratage || null,
       notes,
       referenceImages: base64Image,
       status: 'OPEN'
