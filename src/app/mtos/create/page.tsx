@@ -105,8 +105,6 @@ export default function CreateMtoPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
               <input type="hidden" name="metalType" value="GOLD" />
-            </div>
-            <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Studded?</label>
               <select name="isStudded" value={isStudded} onChange={(e) => setIsStudded(e.target.value)}>
                 <option value="true">Yes</option>
@@ -116,6 +114,10 @@ export default function CreateMtoPage() {
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Weight Range</label>
               <input name="weightRange" placeholder="e.g. 10g - 15g" />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Exact Gold Weight (Optional)</label>
+              <input name="goldWeight" placeholder="e.g. 12.5g" />
             </div>
           </div>
 
