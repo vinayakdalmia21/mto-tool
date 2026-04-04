@@ -49,9 +49,9 @@ export default function Sidebar() {
       <div className={styles.roleSelector}>
         <label>View As:</label>
         <select value={role} onChange={handleRoleChange} className={styles.select}>
-          <option value="SALES">Sales Staff</option>
-          <option value="MANAGER">Store Manager</option>
+          <option value="SALES">Store Staff</option>
           <option value="OPERATIONS">Operations</option>
+          <option value="MANAGER">Store Manager</option>
         </select>
       </div>
 
