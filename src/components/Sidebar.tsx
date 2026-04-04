@@ -13,8 +13,8 @@ import {
   Building2, 
   ClipboardCheck, 
   FileText,
-  Settings,
-  TrendingUp
+  TrendingUp,
+  Image as ImageIcon
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -28,15 +28,15 @@ export default function Sidebar() {
   };
 
   const menuItems = [
-    { label: 'Dashboard', icon: <LayoutDashboard size={20} />, href: '/', roles: ['SALES', 'MANAGER', 'OPERATIONS'] },
-    { label: 'CRM & MTOs', icon: <Briefcase size={20} />, href: '/mtos', roles: ['SALES', 'MANAGER'] },
-    { label: 'Estimations', icon: <Calculator size={20} />, href: '/estimations', roles: ['SALES', 'MANAGER'] },
-    { label: 'My Orders', icon: <Package size={20} />, href: '/orders-sales', roles: ['SALES', 'MANAGER'] },
-    { label: 'Vendor Estimates', icon: <Calculator size={20} />, href: '/vendor-estimations', roles: ['OPERATIONS', 'MANAGER'] },
-    { label: 'Active Orders', icon: <FileText size={20} />, href: '/active-orders', roles: ['OPERATIONS', 'MANAGER'] },
-    { label: 'Pricing Hub', icon: <TrendingUp size={20} />, href: '/pricing', roles: ['OPERATIONS', 'MANAGER'] },
-    { label: 'Purchase Orders', icon: <Building2 size={20} />, href: '/orders', roles: ['OPERATIONS', 'MANAGER'] },
-    { label: 'Production & QC', icon: <ClipboardCheck size={20} />, href: '/qc', roles: ['OPERATIONS', 'MANAGER'] },
+    { label: 'Dashboard', icon: <LayoutDashboard size={20} />, href: '/', roles: ['SALES', 'OPERATIONS'] },
+    { label: 'Queries', icon: <Briefcase size={20} />, href: '/mtos', roles: ['SALES', 'OPERATIONS'] },
+    { label: 'Vendor Estimates', icon: <Building2 size={20} />, href: '/vendor-estimations', roles: ['OPERATIONS'] },
+    { label: 'Estimations for Customer', icon: <Calculator size={20} />, href: '/estimations', roles: ['SALES', 'OPERATIONS'] },
+    { label: 'MTO and Advance', icon: <Package size={20} />, href: '/orders-sales', roles: ['SALES', 'OPERATIONS'] },
+    { label: 'CAD Upload', icon: <ImageIcon size={20} />, href: '/active-orders', roles: ['OPERATIONS'] },
+    { label: 'Purchase Orders', icon: <Building2 size={20} />, href: '/orders', roles: ['OPERATIONS'] },
+    { label: 'Production & QC', icon: <ClipboardCheck size={20} />, href: '/qc', roles: ['OPERATIONS'] },
+    { label: 'Pricing Hub', icon: <TrendingUp size={20} />, href: '/pricing', roles: ['OPERATIONS'] },
   ];
 
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
@@ -53,7 +53,6 @@ export default function Sidebar() {
         <select value={role} onChange={handleRoleChange} className={styles.select}>
           <option value="SALES">Store Staff</option>
           <option value="OPERATIONS">Operations</option>
-          <option value="MANAGER">Store Manager</option>
         </select>
       </div>
 
@@ -76,7 +75,7 @@ export default function Sidebar() {
           </div>
           <div className={styles.userInfo}>
             <p className={styles.userName}>{userName}</p>
-            <p className={styles.userRole}>{role}</p>
+            <p className={styles.userRole}>{role === 'SALES' ? 'Store Staff' : 'Operations'}</p>
           </div>
         </div>
       </div>

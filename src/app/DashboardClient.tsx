@@ -102,7 +102,7 @@ export default function DashboardClient({ stats, allQueries }: { stats: any, all
           <>
             <h2>Dashboard Action Center</h2>
             <p style={{ marginTop: '1rem', color: 'var(--text-muted)' }}>
-              To view your specific tasks, use the sidebar to navigate to the module that corresponds with your current role ({role}).
+              Use the sidebar to navigate between operational modules. In your current role ({role === 'SALES' ? 'Store Staff' : 'Operations'}), you have access to the relevant subsections for the MTO pipeline.
             </p>
           </>
         ) : (
