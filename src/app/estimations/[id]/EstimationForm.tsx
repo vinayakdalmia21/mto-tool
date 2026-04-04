@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { saveEstimation } from '../../actions/estimation';
+import { lockPrice } from '../../actions/order-flow';
 import { useRouter } from 'next/navigation';
 
 export default function EstimationForm({ 
@@ -18,6 +19,8 @@ export default function EstimationForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [savedId, setSavedId] = useState<number | null>(null);
+  const [locking, setLocking] = useState(false);
+  const [priceLocked, setPriceLocked] = useState(false);
   
   // Dynamic Pricing Extraction
   const karr = mto.goldKaratage || '18K';
@@ -89,6 +92,18 @@ export default function EstimationForm({
     const shareUrl = `${origin}/share/estimate/${mtoId}`;
     navigator.clipboard.writeText(shareUrl);
     alert('Estimation Share Link copied to clipboard!');
+  };
+
+  const handleLockPrice = async () => {
+    setLocking(true);
+    try {
+      await lockPrice(mtoId);
+      setPriceLocked(true);
+      router.refresh();
+    } catch (err: any) {
+      alert('Error locking price: ' + err.message);
+    }
+    setLocking(false);
   };
 
   return (
@@ -206,17 +221,26 @@ export default function EstimationForm({
       </form>
 
       {savedId && (
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--success)' }}>
+        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid var(--success)' }}>
           <div>
             <h4 style={{ color: 'var(--success)', marginBottom: '0.2rem' }}>Estimation Saved Successfully!</h4>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>You can now share this formal quote with the customer.</p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>You can share this quote or lock the price for order placement.</p>
           </div>
-          <button onClick={handleShare} className="btn" style={{ background: 'var(--success)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-             Generate Share Link
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <button onClick={handleShare} className="btn" style={{ background: 'var(--info)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+               📋 Share Estimate Link
+            </button>
+            <button onClick={handleLockPrice} className="btn" disabled={locking || priceLocked} style={{ background: priceLocked ? 'var(--success)' : 'var(--warning)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+               {priceLocked ? '✅ Price Locked' : locking ? '🔒 Locking...' : '🔒 Lock Price'}
+            </button>
+          </div>
+          {priceLocked && (
+            <p style={{ fontSize: '0.85rem', color: 'var(--success)', margin: 0 }}>
+              Price locked at ₹{finalValue.toLocaleString()}. Go to <strong>My Orders</strong> to enter Order ID and advance payment.
+            </p>
+          )}
         </div>
       )}
     </div>
   );
 }
-

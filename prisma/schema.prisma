@@ -111,13 +111,18 @@ model Payment {
 }
 
 model MtoOrder {
-  id            Int            @id @default(autoincrement())
-  mtoQueryId    String         @unique
-  posRefId      String?
-  mtoQuery      MtoQuery       @relation(fields: [mtoQueryId], references: [id])
-  purchaseOrder PurchaseOrder?
-  invoice       Invoice?
-  createdAt     DateTime       @default(now())
+  id              Int            @id @default(autoincrement())
+  mtoQueryId      String         @unique
+  posRefId        String?        // POS reference entered by staff
+  orderRefId      String?        // Manual Order ID entered by staff
+  advanceAmount   Float          @default(0)
+  remainingAmount Float          @default(0)
+  cadDesigns      String?        // JSON array of CAD URLs/paths
+  orderStatus     String         @default("PENDING") // PENDING, MOVED_TO_OPS, CAD_UPLOADED
+  mtoQuery        MtoQuery       @relation(fields: [mtoQueryId], references: [id])
+  purchaseOrder   PurchaseOrder?
+  invoice         Invoice?
+  createdAt       DateTime       @default(now())
 }
 
 model PurchaseOrder {
