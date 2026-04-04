@@ -37,7 +37,7 @@ export default async function SharedMtoPage({ params }: { params: Promise<{ id: 
           <DetailBlock label="Metal Color" value={mto.metalColor || 'N/A'} />
           <DetailBlock label="Studded" value={mto.isStudded ? 'Yes' : 'No'} />
           <DetailBlock label="Diamond Caratage" value={mto.diamondCaratage || 'N/A'} />
-          <DetailBlock label="Product Size" value={mto.productSize || 'N/A'} />
+          <DetailBlock label="Product Size" value={mto.size || 'N/A'} />
           <DetailBlock label="Target Weight" value={mto.weightRange} />
         </div>
 
