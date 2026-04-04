@@ -44,6 +44,7 @@ model MtoQuery {
   status          String // OPEN, ESTIMATING, AWAITING_RESPONSE, NEGOTIATION, ACCEPTED, DROPPED
   referenceImages String? // JSON string
   catalogueSku    String? // Optional SKU for regular MTOs
+  dropReason      String? // Reason if status is DROPPED
 
   customer Customer @relation(fields: [customerId], references: [id])
   staff    User     @relation(fields: [staffId], references: [id])
@@ -53,8 +54,17 @@ model MtoQuery {
   pricing           PromisedPricing?
   order             MtoOrder?
   payment           Payment[]
+  statusHistory     MtoStatusHistory[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+}
+
+model MtoStatusHistory {
+  id         String   @id @default(cuid())
+  mtoQueryId String
+  status     String
+  createdAt  DateTime @default(now())
+  mtoQuery   MtoQuery @relation(fields: [mtoQueryId], references: [id])
 }
 
 model VendorEstimation {

@@ -7,12 +7,20 @@ export async function processCustomerDecision(mtoId: string, decision: 'ACCEPT' 
   if (decision === 'REJECT') {
     await prisma.mtoQuery.update({
       where: { id: mtoId },
-      data: { status: 'DROPPED', notes: `Rejected. Reason: ${reason}` }
+      data: { 
+        status: 'DROPPED', 
+        dropReason: reason,
+        notes: `Rejected. Reason: ${reason}`,
+        statusHistory: { create: { status: 'DROPPED' } }
+      }
     });
   } else if (decision === 'NEGOTIATE') {
     await prisma.mtoQuery.update({
       where: { id: mtoId },
-      data: { status: 'NEGOTIATION' }
+      data: { 
+        status: 'NEGOTIATION',
+        statusHistory: { create: { status: 'NEGOTIATION' } }
+      }
     });
   } else if (decision === 'ACCEPT') {
     // "Accept" conceptually just means the customer agreed, but locking pricing 
@@ -21,7 +29,10 @@ export async function processCustomerDecision(mtoId: string, decision: 'ACCEPT' 
     // Let's just keep it AWAITING_RESPONSE until paid, or mark PAYMENT_PENDING.
     await prisma.mtoQuery.update({
       where: { id: mtoId },
-      data: { status: 'PAYMENT_PENDING' } // Using a pseudo-status before payment
+      data: { 
+        status: 'PAYMENT_PENDING',
+        statusHistory: { create: { status: 'PAYMENT_PENDING' } }
+      } 
     });
   }
 
@@ -69,7 +80,10 @@ export async function processPaymentAndLockPricing(mtoId: string, amount: number
   // 4. Update MTO Status
   await prisma.mtoQuery.update({
     where: { id: mtoId },
-    data: { status: 'ACCEPTED' }
+    data: { 
+      status: 'ACCEPTED',
+      statusHistory: { create: { status: 'ACCEPTED' } }
+    }
   });
 
   revalidatePath(`/mtos/${mtoId}`);

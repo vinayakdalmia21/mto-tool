@@ -115,7 +115,10 @@ export async function moveToOperations(mtoId: string) {
 
   await prisma.mtoQuery.update({
     where: { id: mtoId },
-    data: { status: 'ORDER_PLACED' }
+    data: { 
+      status: 'ORDER_PLACED',
+      statusHistory: { create: { status: 'ORDER_PLACED' } }
+    }
   });
 
   revalidatePath('/orders-sales');
@@ -165,7 +168,10 @@ export async function uploadCadDesigns(mtoQueryId: string, cadUrls: string[]) {
 
   await prisma.mtoQuery.update({
     where: { id: mtoQueryId },
-    data: { status: 'CAD_UPLOADED' }
+    data: { 
+      status: 'CAD_UPLOADED',
+      statusHistory: { create: { status: 'CAD_UPLOADED' } }
+    }
   });
 
   revalidatePath('/active-orders');

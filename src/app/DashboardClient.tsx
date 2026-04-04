@@ -3,8 +3,19 @@
 import { useAuth } from './auth-context';
 import { useState } from 'react';
 import Link from 'next/link';
+import OperationsMasterDashboard from './dashboard/OperationsMasterDashboard';
 
-export default function DashboardClient({ stats, allQueries }: { stats: any, allQueries: any[] }) {
+export default function DashboardClient({ 
+  stats, 
+  allQueries,
+  masterStats,
+  masterQueries
+}: { 
+  stats: any, 
+  allQueries: any[],
+  masterStats?: any,
+  masterQueries?: any[]
+}) {
   const { role, userName } = useAuth();
   const [activeTab, setActiveTab] = useState<'action' | 'all'>('action');
 
@@ -33,7 +44,7 @@ export default function DashboardClient({ stats, allQueries }: { stats: any, all
     }
   };
 
-  return (
+  const actionView = (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       <header style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>
@@ -165,4 +176,16 @@ export default function DashboardClient({ stats, allQueries }: { stats: any, all
       </div>
     </div>
   );
+
+  if (role === 'OPERATIONS' && masterStats && masterQueries) {
+    return (
+      <OperationsMasterDashboard 
+        stats={masterStats} 
+        masterQueries={masterQueries} 
+        actionView={actionView} 
+      />
+    );
+  }
+
+  return actionView;
 }

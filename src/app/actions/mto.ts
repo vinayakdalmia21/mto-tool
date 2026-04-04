@@ -74,7 +74,12 @@ export async function createMtoQuery(formData: FormData) {
       size: size || null,
       notes,
       referenceImages: base64Image,
-      status: 'OPEN'
+      status: 'OPEN',
+      statusHistory: {
+        create: {
+          status: 'OPEN'
+        }
+      }
     }
   });
 
