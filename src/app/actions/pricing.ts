@@ -1,10 +1,8 @@
 "use server";
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from 'next/cache';
 import https from 'https';
-
-const prisma = new PrismaClient();
 
 export async function getGlobalPricing() {
   let pricing = await prisma.globalPricing.findUnique({

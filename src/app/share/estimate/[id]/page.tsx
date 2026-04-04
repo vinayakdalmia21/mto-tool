@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
 import { notFound } from 'next/navigation';
 import PrintButton from './PrintButton';
-
-const prisma = new PrismaClient();
 
 export default async function SharedEstimatePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

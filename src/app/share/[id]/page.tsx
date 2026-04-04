@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-
-const prisma = new PrismaClient();
 
 export default async function SharedMtoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

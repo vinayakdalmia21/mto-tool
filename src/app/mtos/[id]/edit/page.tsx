@@ -1,10 +1,9 @@
 import { getMtoQueryDetails } from '../../../actions/estimation';
 import EditMtoForm from './EditMtoForm';
 import { notFound } from 'next/navigation';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
-const prisma = new PrismaClient();
 
 export default async function EditMtoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

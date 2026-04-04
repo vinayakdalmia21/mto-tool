@@ -1,9 +1,7 @@
 "use server";
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from 'next/cache';
-
-const prisma = new PrismaClient();
 
 export async function createMtoQuery(formData: FormData) {
   const customerName = formData.get('customerName') as string;
