@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "./auth-context";
-import Sidebar from "../components/Sidebar";
+import LayoutWrapper from "./LayoutWrapper";
 
 export const metadata: Metadata = {
   title: "Veda MTO System",
@@ -17,12 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          <div style={{ display: 'flex', minHeight: '100vh' }}>
-            <Sidebar />
-            <main style={{ flex: 1, padding: '2rem', marginLeft: '260px' }}>
-              {children}
-            </main>
-          </div>
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
         </AuthProvider>
       </body>
     </html>
