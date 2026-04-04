@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { notFound } from 'next/navigation';
+import PrintButton from './PrintButton';
 
 const prisma = new PrismaClient();
 
@@ -29,7 +30,9 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
   const diamondTotal = (est.diamondWeight || 0) * (est.diamondRate || 0);
   const subtotal1 = goldTotal + diamondTotal;
   const makingCharge = subtotal1 * (est.makingPercent / 100);
-  const subtotal2 = subtotal1 + makingCharge + (est.otherStones || 0);
+  const hasDiamond = diamondTotal > 0;
+  const hasOtherStones = est.otherStones != null && est.otherStones > 0;
+  const hasDiscount = est.discountAmount > 0;
 
   return (
     <div style={{ maxWidth: 800, margin: '2rem auto', padding: '0 1.5rem', fontFamily: 'Inter, sans-serif' }}>
@@ -57,7 +60,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
             <tr>
               <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)' }}>
                 <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Gold Fine</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{mto.goldKaratage} {mto.metalColor} @ ₹{est.goldRate.toLocaleString()}/gm</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{mto.goldKaratage || ''} {mto.metalColor || ''} @ ₹{est.goldRate.toLocaleString()}/gm</div>
               </td>
               <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'center', fontWeight: 500 }}>
                 {est.goldWeight} g
@@ -67,8 +70,8 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
               </td>
             </tr>
 
-            {/* Diamond */}
-            {diamondTotal > 0 && (
+            {/* Diamond - use ternary instead of && to avoid rendering 0 */}
+            {hasDiamond ? (
               <tr>
                 <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)' }}>
                   <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Diamonds</div>
@@ -81,7 +84,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
                   ₹{diamondTotal.toLocaleString()}
                 </td>
               </tr>
-            )}
+            ) : null}
 
             {/* Making */}
             <tr>
@@ -96,17 +99,17 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
             </tr>
 
             {/* Other Stones */}
-            {est.otherStones && est.otherStones > 0 && (
+            {hasOtherStones ? (
               <tr>
                 <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)' }}>
                   <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Other Stones / Extras</div>
                 </td>
                 <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'center' }}>-</td>
                 <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'right', fontWeight: 600 }}>
-                  ₹{est.otherStones.toLocaleString()}
+                  ₹{(est.otherStones || 0).toLocaleString()}
                 </td>
               </tr>
-            )}
+            ) : null}
           </tbody>
         </table>
 
@@ -117,12 +120,12 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
             <span style={{ fontWeight: 600, width: '100px', textAlign: 'right' }}>₹{est.gstAmount.toLocaleString()}</span>
           </div>
           
-          {est.discountAmount > 0 && (
+          {hasDiscount ? (
             <div style={{ display: 'flex', gap: '2rem', fontSize: '0.95rem', color: 'var(--success)' }}>
               <span>Discount ({est.discountPercent}%)</span>
               <span style={{ fontWeight: 600, width: '100px', textAlign: 'right' }}>- ₹{est.discountAmount.toLocaleString()}</span>
             </div>
-          )}
+          ) : null}
 
           <div style={{ marginTop: '1rem', paddingTop: '1.5rem', borderTop: '2px solid var(--surface-border)', display: 'flex', gap: '2rem', fontSize: '1.5rem', fontWeight: 800 }}>
              <span style={{ color: 'var(--text-main)' }}>Total Value</span>
@@ -131,19 +134,17 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
         </div>
 
         {/* Design Notes */}
-        {est.notes && (
+        {est.notes ? (
           <div style={{ marginTop: '3rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--surface-border)' }}>
              <h4 style={{ marginBottom: '0.75rem', fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Terms & Design Notes</h4>
              <p style={{ margin: 0, lineHeight: 1.6, color: 'var(--text-main)' }}>{est.notes}</p>
           </div>
-        )}
+        ) : null}
 
       </div>
 
       <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-        <button onClick={() => window.print()} className="btn" style={{ background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-muted)', padding: '0.6rem 1.5rem' }}>
-           Print Quotation
-        </button>
+        <PrintButton />
         <p style={{ marginTop: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
           Generated by VEDA MTO System. Prices valid for 24 hours due to bullion fluctuations.
         </p>
