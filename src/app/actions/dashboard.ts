@@ -35,3 +35,18 @@ export async function getDashboardStats() {
     totalRevenue
   };
 }
+
+export async function getAllQueriesForDashboard() {
+  return await prisma.mtoQuery.findMany({
+    include: {
+      customer: true,
+      order: true,
+      pricing: true,
+      vendorEstimations: { 
+        where: { isAccepted: true },
+        take: 1 
+      }
+    },
+    orderBy: { updatedAt: 'desc' }
+  });
+}

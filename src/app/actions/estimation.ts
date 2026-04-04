@@ -9,7 +9,7 @@ export async function getOpenMtosForEstimation() {
   return await prisma.mtoQuery.findMany({
     where: {
       status: {
-        in: ['OPEN', 'ESTIMATING', 'NEGOTIATION']
+        in: ['OPEN', 'ESTIMATING', 'NEGOTIATION', 'AWAITING_RESPONSE']
       }
     },
     include: { customer: true },
