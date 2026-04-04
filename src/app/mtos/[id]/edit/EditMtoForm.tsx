@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { updateMtoQuery } from '../../../actions/mto';
 import { useRouter } from 'next/navigation';
 
-export default function EditMtoForm({ mto }: { mto: any }) {
+export default function EditMtoForm({ mto, staffList }: { mto: any, staffList: any[] }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [mtoType, setMtoType] = useState(mto.mtoType);
@@ -35,16 +35,21 @@ export default function EditMtoForm({ mto }: { mto: any }) {
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Staff Member (View Only)</label>
-              <input value={mto.staff?.name || ''} disabled style={{ opacity: 0.7 }} />
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Staff Member *</label>
+              <select name="staffId" defaultValue={mto.staffId} required style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--surface-border)', background: 'rgba(255,255,255,0.03)' }}>
+                <option value="">-- Assign Staff --</option>
+                {staffList.map(staff => (
+                  <option key={staff.id} value={staff.id}>{staff.name} ({staff.role})</option>
+                ))}
+              </select>
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Customer Name *</label>
               <input name="customerName" required defaultValue={mto.customer?.name} placeholder="e.g. Priya Sharma" />
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Phone Number (Identifier, View Only)</label>
-              <input name="phoneNumber" type="tel" required defaultValue={mto.customer?.phone} readOnly style={{ opacity: 0.7 }} />
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Phone Number *</label>
+              <input name="phoneNumber" type="tel" required defaultValue={mto.customer?.phone} />
             </div>
           </div>
 

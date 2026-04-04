@@ -107,12 +107,14 @@ export async function updateMtoQuery(id: string, formData: FormData) {
   const isStudded = formData.get('isStudded') === 'true';
   const notes = formData.get('notes') as string;
 
-  // Assume customer/staff don't change or if they do we update just the customer details
-  // For safety, let's just update the customer's name on their profile
-  await prisma.customer.update({
-    where: { phone: phoneNumber },
-    data: { name: customerName }
-  }).catch(() => null);
+  // Allow full editing of base entities
+  const originalMto = await prisma.mtoQuery.findUnique({ where: { id } });
+  if (originalMto) {
+    await prisma.customer.update({
+      where: { id: originalMto.customerId },
+      data: { name: customerName, phone: phoneNumber }
+    }).catch(() => null);
+  }
 
   const rawImage = formData.get('referenceImage');
   let base64Image: string | undefined = undefined;
@@ -122,6 +124,7 @@ export async function updateMtoQuery(id: string, formData: FormData) {
     base64Image = `data:${rawImage.type};base64,${base64Str}`;
   }
 
+  const staffIdStr = formData.get('staffId') as string;
   const goldKaratage = formData.get('goldKaratage') as string;
   const metalColor = formData.get('metalColor') as string;
   const diamondCaratage = formData.get('diamondCaratage') as string;
@@ -129,6 +132,7 @@ export async function updateMtoQuery(id: string, formData: FormData) {
   const size = formData.get('size') as string;
 
   const dataToUpdate: any = {
+    staffId: staffIdStr ? parseInt(staffIdStr) : undefined,
     leadType,
     mtoType,
     category,
