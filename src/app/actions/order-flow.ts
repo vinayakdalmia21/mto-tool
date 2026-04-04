@@ -1,9 +1,7 @@
 "use server";
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from 'next/cache';
-
-const prisma = new PrismaClient();
 
 // Lock the price for a given MTO query
 export async function lockPrice(mtoId: string) {
@@ -21,12 +19,14 @@ export async function lockPrice(mtoId: string) {
       goldWeight: latestEst.goldWeight,
       stoneDetails: `Diam: ${latestEst.diamondWeight || 0}ct, Other: ₹${latestEst.otherStones || 0}`,
       finalPrice: latestEst.finalEstimatedPrice,
+      goldRate: latestEst.goldRate,
     },
     create: {
       mtoQueryId: mtoId,
       goldWeight: latestEst.goldWeight,
       stoneDetails: `Diam: ${latestEst.diamondWeight || 0}ct, Other: ₹${latestEst.otherStones || 0}`,
       finalPrice: latestEst.finalEstimatedPrice,
+      goldRate: latestEst.goldRate,
     }
   });
 
@@ -81,7 +81,7 @@ export async function placeOrder(mtoId: string, orderRefId: string, advanceAmoun
       orderRefId,
       advanceAmount,
       remainingAmount: remaining > 0 ? remaining : 0,
-      orderStatus: 'PENDING',
+      status: 'PENDING',
     }
   });
 
@@ -110,7 +110,7 @@ export async function moveToOperations(mtoId: string) {
 
   await prisma.mtoOrder.update({
     where: { mtoQueryId: mtoId },
-    data: { orderStatus: 'MOVED_TO_OPS' }
+    data: { status: 'MOVED_TO_OPS' }
   });
 
   await prisma.mtoQuery.update({
@@ -127,7 +127,9 @@ export async function moveToOperations(mtoId: string) {
 export async function getActiveOrders() {
   return await prisma.mtoOrder.findMany({
     where: {
-      orderStatus: { in: ['MOVED_TO_OPS', 'CAD_UPLOADED'] }
+      mtoQuery: {
+        status: { in: ['ORDER_PLACED', 'CAD_UPLOADED'] }
+      }
     },
     include: {
       mtoQuery: {
@@ -157,8 +159,13 @@ export async function uploadCadDesigns(mtoQueryId: string, cadUrls: string[]) {
     where: { mtoQueryId },
     data: {
       cadDesigns: JSON.stringify(merged),
-      orderStatus: 'CAD_UPLOADED'
+      status: 'CAD_UPLOADED'
     }
+  });
+
+  await prisma.mtoQuery.update({
+    where: { id: mtoQueryId },
+    data: { status: 'CAD_UPLOADED' }
   });
 
   revalidatePath('/active-orders');

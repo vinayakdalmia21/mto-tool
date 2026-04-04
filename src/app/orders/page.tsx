@@ -10,11 +10,9 @@ export default async function OrdersPage() {
   async function handleCreatePO(formData: FormData) {
     "use server";
     const orderId = Number(formData.get('orderId'));
-    const vendorName = formData.get('vendorName') as string;
-    const goldPrice = parseFloat(formData.get('goldPrice') as string);
     const delivery = formData.get('delivery') as string;
 
-    await createPurchaseOrder(orderId, vendorName, goldPrice, delivery);
+    await createPurchaseOrder(orderId, delivery);
   }
 
   async function handleUpdateStatus(formData: FormData) {
@@ -23,6 +21,13 @@ export default async function OrdersPage() {
     const status = formData.get('status') as string;
     await updatePurchaseOrderStatus(poId, status);
   }
+
+  // Sort: PO Pending on top
+  const sortedOrders = [...orders].sort((a: any, b: any) => {
+    if (!a.purchaseOrder && b.purchaseOrder) return -1;
+    if (a.purchaseOrder && !b.purchaseOrder) return 1;
+    return 0;
+  });
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -35,47 +40,49 @@ export default async function OrdersPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
-              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Order Ref</th>
-              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>MTO / Customer</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>MTO ID</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Customer</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Category</th>
               <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>PO Status</th>
-              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Vendor actions</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {orders.length === 0 ? (
-              <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No active orders.</td></tr>
+            {sortedOrders.length === 0 ? (
+              <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No active orders.</td></tr>
             ) : null}
-            {orders.map(order => (
+            {sortedOrders.map((order: any) => (
               <tr key={order.id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                <td style={{ padding: '1rem', fontWeight: 500 }}>{order.posRefId}</td>
-                <td style={{ padding: '1rem' }}>
-                  <div style={{ fontWeight: 600 }}>{order.mtoQuery.customer.name}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>MTO: {order.mtoQuery.id.slice(-6).toUpperCase()}</div>
-                </td>
-                
+                <td style={{ padding: '1rem' }}>MTO-{String(order.mtoQuery?.queryNo || 0).padStart(4, '0')}</td>
+                <td style={{ padding: '1rem' }}>{order.mtoQuery?.customer?.name || 'Unknown'}</td>
+                <td style={{ padding: '1rem' }}>{order.mtoQuery?.category}</td>
                 <td style={{ padding: '1rem' }}>
                   {order.purchaseOrder ? (
-                     <span className={`badge ${order.purchaseOrder.status === 'RAISED' ? 'badge-primary' : 'badge-warning'}`}>
-                       {order.purchaseOrder.status}
-                     </span>
+                    <span className={`badge ${order.purchaseOrder.status === 'RAISED' ? 'badge-info' : 'badge-success'}`}>
+                      PO: {order.purchaseOrder.status}
+                    </span>
                   ) : (
-                     <span className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--text-muted)' }}>No PO Raised</span>
+                    <span className="badge badge-warning">PO Pending</span>
                   )}
                 </td>
-
-                <td style={{ padding: '1rem' }}>
+                <td style={{ padding: '1rem', textAlign: 'right' }}>
                   {!order.purchaseOrder ? (
-                    <form action={handleCreatePO} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <form action={handleCreatePO} style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                       <input type="hidden" name="orderId" value={order.id} />
-                      <input name="vendorName" placeholder="Vendor Name" required style={{ padding: '0.3rem', width: '120px', fontSize: '0.8rem' }} />
-                      <input type="number" name="goldPrice" placeholder="Locked Gold ₹" required style={{ padding: '0.3rem', width: '120px', fontSize: '0.8rem' }} />
-                      <input name="delivery" placeholder="Delivery Time" required style={{ padding: '0.3rem', width: '120px', fontSize: '0.8rem' }} />
-                      <button type="submit" className="btn btn-primary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>Raise PO</button>
+                      <input 
+                        type="text" 
+                        name="delivery" 
+                        placeholder="e.g., 20-25 days" 
+                        className="input-field" 
+                        style={{ maxWidth: '150px', padding: '0.4rem' }} 
+                        required 
+                      />
+                      <button type="submit" className="btn btn-primary" style={{ fontSize: '0.85rem' }}>Raise PO</button>
                     </form>
                   ) : (
-                    <form action={handleUpdateStatus} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      <input type="hidden" name="poId" value={order.purchaseOrder.id} />
-                      <select name="status" defaultValue={order.purchaseOrder.status} style={{ padding: '0.3rem', fontSize: '0.8rem' }}>
+                    <form action={handleUpdateStatus} style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                       <input type="hidden" name="poId" value={order.purchaseOrder.id} />
+                       <select name="status" defaultValue={order.purchaseOrder.status} style={{ padding: '0.3rem', fontSize: '0.8rem' }}>
                         <option value="RAISED">Raised</option>
                         <option value="IN_PRODUCTION">In Production</option>
                         <option value="DISPATCHED">Dispatched for QC</option>
@@ -84,7 +91,6 @@ export default async function OrdersPage() {
                     </form>
                   )}
                 </td>
-
               </tr>
             ))}
           </tbody>

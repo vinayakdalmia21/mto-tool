@@ -1,105 +1,84 @@
 "use server";
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma"
 import { revalidatePath } from 'next/cache';
-
-const prisma = new PrismaClient();
 
 export async function getReceivedPos() {
   return await prisma.purchaseOrder.findMany({
     where: {
-      status: 'DISPATCHED' // Arrived for QC conceptually
+      status: { in: ['RAISED', 'IN_PRODUCTION', 'DISPATCHED'] }
     },
     include: {
       mtoOrder: {
         include: {
           mtoQuery: {
-            include: { customer: true, pricing: true }
+            include: {
+              customer: true,
+              pricing: true,
+              vendorEstimations: { where: { isAccepted: true }, take: 1 }
+            }
           }
         }
       },
       qcRecord: true
-    }
+    },
+    orderBy: { createdAt: 'desc' }
   });
 }
 
-export async function processQcFail(poId: number, notes: string) {
-  const qc = await prisma.qcRecord.findUnique({ where: { purchaseOrderId: poId } });
+export async function recordQcActuals(poId: number, data: {
+  actualGoldWeight: number;
+  actualMakingCharges: number;
+  actualStoneWeight: number;
+  actualStoneValue: number;
+  actualOtherCharges: number;
+  notes?: string;
+  status: string;
+}) {
+  const existing = await prisma.qcRecord.findUnique({ where: { purchaseOrderId: poId } });
   
-  if (qc) {
-    await prisma.qcRecord.update({
-      where: { id: qc.id },
-      data: { status: 'REJECT', iterations: qc.iterations + 1, notes }
-    });
-  } else {
-    await prisma.qcRecord.create({
-      data: { purchaseOrderId: poId, status: 'REJECT', iterations: 1, notes }
-    });
-  }
+  const qc = await prisma.qcRecord.upsert({
+    where: { purchaseOrderId: poId },
+    update: {
+      actualGoldWeight: data.actualGoldWeight,
+      actualMakingCharges: data.actualMakingCharges,
+      actualStoneWeight: data.actualStoneWeight,
+      actualStoneValue: data.actualStoneValue,
+      actualOtherCharges: data.actualOtherCharges,
+      notes: data.notes,
+      status: data.status,
+      iterations: data.status === 'REJECT' ? (existing?.iterations || 0) + 1 : (existing?.iterations || 0)
+    },
+    create: {
+      purchaseOrderId: poId,
+      actualGoldWeight: data.actualGoldWeight,
+      actualMakingCharges: data.actualMakingCharges,
+      actualStoneWeight: data.actualStoneWeight,
+      actualStoneValue: data.actualStoneValue,
+      actualOtherCharges: data.actualOtherCharges,
+      notes: data.notes,
+      status: data.status,
+      iterations: data.status === 'REJECT' ? 1 : 0
+    }
+  });
 
-  // Push PO back to IN_PRODUCTION
+  // Update PO status based on outcome
   await prisma.purchaseOrder.update({
     where: { id: poId },
-    data: { status: 'IN_PRODUCTION' }
-  });
-
-  revalidatePath('/qc');
-  revalidatePath('/orders');
-  return { success: true };
-}
-
-export async function processQcPassAndGenerateInvoice(poId: number, actualData: any) {
-  const po = await prisma.purchaseOrder.findUnique({
-    where: { id: poId },
-    include: { mtoOrder: { include: { mtoQuery: { include: { pricing: true, payment: true } } } } }
-  });
-
-  if (!po) throw new Error("PO not found");
-
-  const qc = await prisma.qcRecord.findUnique({ where: { purchaseOrderId: poId } });
-  if (qc) {
-    await prisma.qcRecord.update({
-      where: { id: qc.id },
-      data: { status: 'PASS' }
-    });
-  } else {
-    await prisma.qcRecord.create({
-      data: { purchaseOrderId: poId, status: 'PASS' }
-    });
-  }
-
-  // Generate Invoice based on actuals
-  const pricing = po.mtoOrder.mtoQuery.pricing;
-  
-  if (!pricing) throw new Error("Promised pricing not found");
-
-  // Recalculate based on actuals
-  const actualGW = parseFloat(actualData.actualGoldWeight);
-  const actualLockedGoldPrice = po.lockedGoldPrice;
-  const actualDiamondValue = parseFloat(actualData.actualDiamondValue) || 0;
-  
-  // For simplicity after the pricing overhaul:
-  // (Actual Gold + Actual Diamond) + Fixed Making & GST calculated during estimation
-  // We'll use the finalPrice as a baseline or re-verify.
-  // Given the user's focus on "final value" in the estimation, we'll use that as the target.
-  const grandTotal = pricing.finalPrice; // Defaulting to promised price for now
-
-  // Payments received
-  const payments = po.mtoOrder.mtoQuery.payment;
-  const advancePaid = payments.reduce((sum, p) => sum + p.amount, 0);
-  const balance = grandTotal - advancePaid;
-
-  await prisma.invoice.create({
-    data: {
-      mtoOrderId: po.mtoOrder.id,
-      totalAmount: grandTotal,
-      paidAmount: advancePaid,
-      balanceAmount: balance > 0 ? balance : 0,
-      status: 'PENDING'
+    data: { 
+      status: data.status === 'PASS' ? 'COMPLETED' : 'REWORKING' 
     }
   });
 
   revalidatePath('/qc');
-  revalidatePath('/billing');
+  return { success: true, qcId: qc.id };
+}
+
+export async function markAsBilled(qcId: number) {
+  await prisma.qcRecord.update({
+    where: { id: qcId },
+    data: { isBilled: true }
+  });
+  revalidatePath('/qc');
   return { success: true };
 }

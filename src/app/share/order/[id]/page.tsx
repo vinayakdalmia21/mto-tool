@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma"
 import { notFound } from 'next/navigation';
 import PrintButton from '../../estimate/[id]/PrintButton';
-
-const prisma = new PrismaClient();
 
 export default async function SharedOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -81,15 +79,24 @@ export default async function SharedOrderPage({ params }: { params: Promise<{ id
           <h2 style={{ marginBottom: '1.5rem', fontSize: '1.3rem' }}>CAD Designs</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
             {cadDesigns.map((cad, i) => (
-              <div key={i} style={{ border: '1px solid var(--surface-border)', borderRadius: '12px', overflow: 'hidden' }}>
+              <div key={i} style={{ border: '1px solid var(--surface-border)', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
                 {cad.startsWith('data:image') || cad.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
-                  <img src={cad} alt={`CAD Design ${i + 1}`} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                  <>
+                    <img src={cad} alt={`CAD Design ${i + 1}`} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                    <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+                      <a href={cad} download={`CAD_Design_${i+1}.png`} style={{ background: 'rgba(0,0,0,0.6)', color: 'white', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', textDecoration: 'none' }}>
+                        📥 Download
+                      </a>
+                    </div>
+                  </>
                 ) : (
-                  <a href={cad} target="_blank" rel="noopener noreferrer" style={{ display: 'block', padding: '1.5rem', color: 'var(--info)', wordBreak: 'break-all' }}>
-                    📎 {cad}
-                  </a>
+                  <div style={{ padding: '2rem', textAlign: 'center' }}>
+                    <a href={cad} target="_blank" rel="noopener noreferrer" style={{ display: 'block', color: 'var(--info)', wordBreak: 'break-all' }}>
+                      📎 View Document
+                    </a>
+                  </div>
                 )}
-                <div style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Design {i + 1}</div>
+                <div style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.05)' }}>Design {i + 1}</div>
               </div>
             ))}
           </div>

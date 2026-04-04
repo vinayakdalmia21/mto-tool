@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -97,6 +98,7 @@ model PromisedPricing {
   goldWeight    String
   stoneDetails  String
   finalPrice    Float
+  goldRate      Float    @default(0) // Locked Gold Price
   lockedAt      DateTime @default(now())
   mtoQuery      MtoQuery @relation(fields: [mtoQueryId], references: [id])
 }
@@ -118,7 +120,7 @@ model MtoOrder {
   advanceAmount   Float          @default(0)
   remainingAmount Float          @default(0)
   cadDesigns      String?        // JSON array of CAD URLs/paths
-  orderStatus     String         @default("PENDING") // PENDING, MOVED_TO_OPS, CAD_UPLOADED
+  status          String         @default("PENDING") // PENDING, MOVED_TO_OPS, CAD_UPLOADED
   mtoQuery        MtoQuery       @relation(fields: [mtoQueryId], references: [id])
   purchaseOrder   PurchaseOrder?
   invoice         Invoice?
@@ -142,8 +144,14 @@ model QcRecord {
   purchaseOrderId Int           @unique
   status          String // PASS, REJECT
   iterations      Int           @default(0)
-  notes           String?
-  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  notes              String?
+  actualGoldWeight   Float?
+  actualMakingCharges Float?
+  actualStoneWeight  Float?
+  actualStoneValue   Float?
+  actualOtherCharges Float?
+  isBilled           Boolean @default(false)
+  purchaseOrder      PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
   createdAt       DateTime      @default(now())
 }
 

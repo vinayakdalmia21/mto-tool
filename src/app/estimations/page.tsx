@@ -6,6 +6,13 @@ export const dynamic = "force-dynamic";
 export default async function EstimationsPage() {
   const mtos = await getOpenMtosForEstimation();
 
+  // Sort: OPEN > ESTIMATING > NEGOTIATION > Others
+  const sortedMtos = [...mtos].sort((a, b) => {
+    if (a.status === 'OPEN' && b.status !== 'OPEN') return -1;
+    if (a.status !== 'OPEN' && b.status === 'OPEN') return 1;
+    return 0;
+  });
+
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       <header style={{ marginBottom: '2rem' }}>
@@ -19,23 +26,29 @@ export default async function EstimationsPage() {
             <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
               <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>MTO ID</th>
               <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Customer</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Status</th>
               <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Specs</th>
               <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Priority</th>
-              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Action</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'right' }}>Action</th>
             </tr>
           </thead>
           <tbody>
-            {mtos.length === 0 ? (
-              <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No MTOs need estimation right now.</td></tr>
+            {sortedMtos.length === 0 ? (
+              <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No MTOs for estimation.</td></tr>
             ) : null}
-            {mtos.map(mto => (
+            {sortedMtos.map((mto: any) => (
               <tr key={mto.id} style={{ borderBottom: '1px solid var(--surface-border)' }} className="glass-panel-interactive">
-                <td style={{ padding: '1rem', fontWeight: 500 }}>{mto.id.slice(-6).toUpperCase()}</td>
+                <td style={{ padding: '1rem', fontWeight: 500 }}>MTO-{String(mto.queryNo || 0).padStart(4, '0')}</td>
                 <td style={{ padding: '1rem' }}>
-                  <div style={{ fontWeight: 600 }}>{mto.customer.name}</div>
+                  <div style={{ fontWeight: 600 }}>{mto.customer?.name}</div>
                 </td>
                 <td style={{ padding: '1rem' }}>
-                  <div>{mto.category} • {mto.metalType}</div>
+                  <span className={`badge ${mto.status === 'OPEN' ? 'badge-primary' : 'badge-info'}`}>
+                    {mto.status.replace(/_/g, ' ')}
+                  </span>
+                </td>
+                <td style={{ padding: '1rem' }}>
+                  <div style={{ fontSize: '0.9rem' }}>{mto.category} • {mto.metalType}</div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Weight: {mto.weightRange}</div>
                 </td>
                 <td style={{ padding: '1rem' }}>
@@ -43,7 +56,7 @@ export default async function EstimationsPage() {
                     {mto.leadType}
                   </span>
                 </td>
-                <td style={{ padding: '1rem' }}>
+                <td style={{ padding: '1rem', textAlign: 'right' }}>
                    <Link href={`/estimations/${mto.id}`} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
                      View Estimate
                    </Link>

@@ -1,102 +1,165 @@
 "use client";
 
-import { processQcFail, processQcPassAndGenerateInvoice } from '../actions/qc';
+import { recordQcActuals, markAsBilled } from '../actions/qc';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function QcItemCard({ po }: { po: any }) {
+  const router = useRouter();
   const [rejectMode, setRejectMode] = useState(false);
   const [passMode, setPassMode] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Actuals
-  const [actualGold, setActualGold] = useState("");
-  const [actualDiamonds, setActualDiamonds] = useState("");
+  // Promised Data (from Pricing/Vendor Est)
+  const promised = po.mtoOrder.mtoQuery.pricing;
+  const vendorEst = po.mtoOrder.mtoQuery.vendorEstimations[0];
 
-  const pricing = po.mtoOrder.mtoQuery.pricing;
+  // Actuals State
+  const [actuals, setActuals] = useState({
+    goldWeight: promised?.goldWeight || vendorEst?.goldWeight || 0,
+    makingCharges: vendorEst?.makingCharges || 0,
+    stoneWeight: vendorEst?.diamondWeight || 0,
+    stoneValue: vendorEst?.diamondValue || 0,
+    otherCharges: 0,
+    notes: ""
+  });
 
-  async function handleReject() {
+  const handleInputChange = (field: string, value: string) => {
+    setActuals(prev => ({ ...prev, [field]: value === "" ? "" : parseFloat(value) }));
+  };
+
+  // Calculations for Comparison
+  const promisedGoldValue = (promised?.goldRate || 0) * (parseFloat(promised?.goldWeight) || 0);
+  const actualGoldValue = (promised?.goldRate || 0) * (actuals.goldWeight || 0);
+  
+  const actualTotal = actualGoldValue + (actuals.makingCharges * (actuals.goldWeight || 0)) + (actuals.stoneValue || 0) + (actuals.otherCharges || 0);
+  const difference = actualTotal - (promised?.finalPrice || 0);
+
+  async function handleSaveActuals(status: string) {
     setLoading(true);
-    await processQcFail(po.id, rejectReason);
+    try {
+      await recordQcActuals(po.id, {
+        actualGoldWeight: Number(actuals.goldWeight),
+        actualMakingCharges: Number(actuals.makingCharges),
+        actualStoneWeight: Number(actuals.stoneWeight),
+        actualStoneValue: Number(actuals.stoneValue),
+        actualOtherCharges: Number(actuals.otherCharges),
+        notes: actuals.notes,
+        status: status
+      });
+      if (status === 'PASS') {
+        setPassMode(true);
+      }
+      router.refresh();
+      alert(`Status updated to ${status}`);
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    }
     setLoading(false);
   }
 
-  async function handlePass() {
+  async function handleFinalizeBilling() {
+    if (!po.qcRecord) return;
     setLoading(true);
-    await processQcPassAndGenerateInvoice(po.id, {
-      actualGoldWeight: actualGold,
-      actualDiamondValue: actualDiamonds
-    });
+    await markAsBilled(po.qcRecord.id);
+    router.refresh();
     setLoading(false);
+    alert('Marked as Billed. Order complete.');
   }
 
   return (
-    <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem' }}>
+    <div className="glass-panel" style={{ padding: '2rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
-          <h3 style={{ fontSize: '1.1rem' }}>PO: #{po.id} ({po.vendorName})</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>MTO Ref: {po.mtoOrder.mtoQuery.id.slice(-6).toUpperCase()} | Customer: {po.mtoOrder.mtoQuery.customer.name}</p>
+          <h3 style={{ margin: 0 }}>PO #{String(po.id).padStart(4, '0')}</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            Vendor: <strong>{po.vendorName}</strong> | {po.mtoOrder.mtoQuery.customer.name}
+          </p>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <span className="badge badge-warning">QC PENDING</span>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.3rem' }}>
-            Iterations: {po.qcRecord ? po.qcRecord.iterations : 0}
-          </p>
+          <span className={`badge ${po.qcRecord?.status === 'PASS' ? 'badge-success' : 'badge-warning'}`}>
+            QC: {po.qcRecord?.status || 'PENDING'}
+          </span>
+          {po.qcRecord?.isBilled && <span className="badge badge-primary" style={{ marginLeft: '0.5rem' }}>BILLED</span>}
         </div>
       </div>
 
-      {!rejectMode && !passMode && (
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn btn-primary" onClick={() => setPassMode(true)}>QC Pass & Verify Actuals</button>
-          <button className="btn" onClick={() => setRejectMode(true)} style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)' }}>Reject / Rework</button>
-        </div>
-      )}
-
-      {rejectMode && (
-        <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--danger)' }}>
-          <h4 style={{ color: 'var(--danger)', marginBottom: '0.5rem' }}>Reject Reason for Vendor</h4>
-          <textarea rows={3} value={rejectReason} onChange={e => setRejectReason(e.target.value)} style={{ marginBottom: '1rem' }} placeholder="Specify defects..."></textarea>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-             <button className="btn" onClick={handleReject} disabled={!rejectReason || loading} style={{ background: 'var(--danger)', color: 'white' }}>Confirm Reject & Sent to Vendor</button>
-             <button className="btn" onClick={() => setRejectMode(false)} style={{ background: 'transparent' }}>Cancel</button>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+        {/* Actuals Form */}
+        <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
+          <h4 style={{ marginBottom: '1rem', fontSize: '1rem' }}>📥 Recording Actuals</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Gold Weight (g)</label>
+              <input type="number" step="0.001" value={actuals.goldWeight} onChange={e => handleInputChange('goldWeight', e.target.value)} style={{ padding: '0.5rem' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Making Chg (₹/g)</label>
+              <input type="number" value={actuals.makingCharges} onChange={e => handleInputChange('makingCharges', e.target.value)} style={{ padding: '0.5rem' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stone Weight (ct)</label>
+              <input type="number" step="0.01" value={actuals.stoneWeight} onChange={e => handleInputChange('stoneWeight', e.target.value)} style={{ padding: '0.5rem' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stone Value (₹)</label>
+              <input type="number" value={actuals.stoneValue} onChange={e => handleInputChange('stoneValue', e.target.value)} style={{ padding: '0.5rem' }} />
+            </div>
+          </div>
+          <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+            <button onClick={() => handleSaveActuals('PASS')} className="btn btn-primary" disabled={loading} style={{ flex: 1 }}>Pass QC</button>
+            <button onClick={() => handleSaveActuals('REJECT')} className="btn" disabled={loading} style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--danger)' }}>Reject</button>
           </div>
         </div>
-      )}
 
-      {passMode && (
-        <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--success)' }}>
-          <h4 style={{ color: 'var(--success)', marginBottom: '1rem' }}>⭐ Promised vs Actual Verification & Invoice Prep</h4>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr)', gap: '1.5rem', marginBottom: '1.5rem' }}>
-             <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '6px' }}>
-                <h5 style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Promised Specs (Customer Expectation)</h5>
-                <div>Gold: <span style={{ fontWeight: 600 }}>{pricing?.goldWeight}g</span></div>
-                <div>Making Chg: <span style={{ fontWeight: 600 }}>₹{pricing?.makingCharges}/g</span></div>
-                <div>Locked Price: <span style={{ fontWeight: 600 }}>₹{pricing?.finalPrice.toLocaleString()}</span></div>
-             </div>
+        {/* Comparison Table */}
+        <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.15)' }}>
+          <h4 style={{ marginBottom: '1rem', fontSize: '1rem' }}>📊 Promised vs Actual Comparison</h4>
+          <table style={{ width: '100%', fontSize: '0.85rem' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
+                <th style={{ padding: '0.5rem 0', color: 'var(--text-muted)' }}>Item</th>
+                <th style={{ padding: '0.5rem 0' }}>Promised</th>
+                <th style={{ padding: '0.5rem 0' }}>Actual</th>
+                <th style={{ padding: '0.5rem 0', textAlign: 'right' }}>Diff</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ padding: '0.5rem 0' }}>Gold</td>
+                <td>{promised?.goldWeight}g</td>
+                <td>{actuals.goldWeight}g</td>
+                <td style={{ textAlign: 'right', color: actuals.goldWeight > (parseFloat(promised?.goldWeight) || 0) ? 'var(--warning)' : 'var(--success)' }}>
+                  {(parseFloat(actuals.goldWeight.toString()) - (parseFloat(promised?.goldWeight) || 0)).toFixed(3)}g
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: '0.5rem 0' }}>Stone Value</td>
+                <td>₹{vendorEst?.diamondValue || 0}</td>
+                <td>₹{actuals.stoneValue}</td>
+                <td style={{ textAlign: 'right' }}>₹{(actuals.stoneValue - (vendorEst?.diamondValue || 0)).toLocaleString()}</td>
+              </tr>
+              <tr style={{ borderTop: '1px solid var(--surface-border)', fontWeight: 700 }}>
+                <td style={{ padding: '0.5rem 0' }}>TOTAL</td>
+                <td>₹{promised?.finalPrice?.toLocaleString()}</td>
+                <td>₹{actualTotal.toLocaleString()}</td>
+                <td style={{ textAlign: 'right', color: difference > 0 ? 'var(--error)' : 'var(--success)' }}>
+                  ₹{difference.toLocaleString()}
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-             <div style={{ padding: '1rem', border: '1px solid var(--primary)', borderRadius: '6px' }}>
-                <h5 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>Actuals (Post-Production)</h5>
-                <div style={{ marginBottom: '0.5rem' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Actual Gold Weight (g) *</label>
-                  <input type="number" step="0.01" value={actualGold} onChange={e => setActualGold(e.target.value)} style={{ padding: '0.4rem' }} required />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Actual Diamond Value (₹) *</label>
-                  <input type="number" value={actualDiamonds} onChange={e => setActualDiamonds(e.target.value)} style={{ padding: '0.4rem' }} required />
-                </div>
-             </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '1rem' }}>
-             <button className="btn btn-primary" onClick={handlePass} disabled={!actualGold || !actualDiamonds || loading}>
-               Generate Final Invoice & Compare
-             </button>
-             <button className="btn" onClick={() => setPassMode(false)} style={{ background: 'transparent' }}>Cancel</button>
-          </div>
+          {po.qcRecord?.status === 'PASS' && !po.qcRecord?.isBilled && (
+            <div style={{ marginTop: '1.5rem', textAlign: 'center', background: 'rgba(16, 185, 129, 0.1)', padding: '1rem', borderRadius: '8px' }}>
+              <p style={{ fontSize: '0.85rem', marginBottom: '0.8rem' }}>Comparison looks good? Proceed to final billing.</p>
+              <button onClick={handleFinalizeBilling} className="btn btn-primary" style={{ width: '100%' }}>
+                ✅ Finalize & Mark as Billed
+              </button>
+            </div>
+          )}
         </div>
-      )}
-
+      </div>
     </div>
   );
 }

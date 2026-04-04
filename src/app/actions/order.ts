@@ -1,15 +1,17 @@
 "use server";
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma"
 import { revalidatePath } from 'next/cache';
-
-const prisma = new PrismaClient();
 
 export async function getOrdersForOperations() {
   return await prisma.mtoOrder.findMany({
     include: {
       mtoQuery: {
-        include: { customer: true }
+        include: { 
+          customer: true,
+          vendorEstimations: { where: { isAccepted: true }, take: 1 },
+          pricing: true
+        }
       },
       purchaseOrder: true
     },
@@ -17,14 +19,31 @@ export async function getOrdersForOperations() {
   });
 }
 
-export async function createPurchaseOrder(mtoOrderId: number, vendorName: string, lockedGoldPrice: number, deliveryTimeline: string) {
+export async function createPurchaseOrder(mtoOrderId: number, deliveryTimeline: string) {
+  const order = await prisma.mtoOrder.findUnique({
+    where: { id: mtoOrderId },
+    include: {
+      mtoQuery: {
+        include: {
+          vendorEstimations: { where: { isAccepted: true }, take: 1 },
+          pricing: true
+        }
+      }
+    }
+  });
+
+  if (!order || !order.mtoQuery.pricing) throw new Error("Order or pricing not found");
+  
+  const vendorName = order.mtoQuery.vendorEstimations[0]?.vendorName || "Unknown Vendor";
+  const lockedGoldPrice = order.mtoQuery.pricing.goldRate;
+
   const po = await prisma.purchaseOrder.create({
     data: {
       mtoOrderId,
       vendorName,
       lockedGoldPrice,
       deliveryTimeline,
-      status: 'RAISED' // RAISED, IN_PRODUCTION, DISPATCHED
+      status: 'RAISED'
     }
   });
 

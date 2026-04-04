@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 export default function ActiveOrdersClient({ orders }: { orders: any[] }) {
   const router = useRouter();
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   if (orders.length === 0) {
     return (
@@ -15,56 +16,120 @@ export default function ActiveOrdersClient({ orders }: { orders: any[] }) {
     );
   }
 
+  // Sort orders: ORDER_PLACED (Awaiting CAD) on top
+  const sortedOrders = [...orders].sort((a, b) => {
+    const statusA = a.mtoQuery?.status || 'ORDER_PLACED';
+    const statusB = b.mtoQuery?.status || 'ORDER_PLACED';
+    if (statusA === 'ORDER_PLACED' && statusB !== 'ORDER_PLACED') return -1;
+    if (statusA !== 'ORDER_PLACED' && statusB === 'ORDER_PLACED') return 1;
+    return 0;
+  });
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {orders.map((order: any) => (
-        <ActiveOrderCard key={order.id} order={order} onRefresh={() => router.refresh()} />
-      ))}
+    <div className="glass-panel" style={{ padding: '1.5rem', overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <thead>
+          <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
+            <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>MTO ID</th>
+            <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Order Ref</th>
+            <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Customer</th>
+            <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Category</th>
+            <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Status</th>
+            <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'right' }}>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedOrders.map((order) => (
+            <React.Fragment key={order.id}>
+              <tr 
+                onClick={() => setExpandedOrderId(expandedOrderId === order.mtoQueryId ? null : order.mtoQueryId)}
+                style={{ 
+                  borderBottom: '1px solid var(--surface-border)', 
+                  cursor: 'pointer',
+                  background: expandedOrderId === order.mtoQueryId ? 'rgba(255,255,255,0.05)' : 'transparent'
+                }} 
+                className="glass-panel-interactive"
+              >
+                <td style={{ padding: '1rem', fontWeight: 600 }}>MTO-{String(order.mtoQuery.queryNo).padStart(4, '0')}</td>
+                <td style={{ padding: '1rem' }}>
+                  <span className="badge badge-info">{order.orderRefId}</span>
+                </td>
+                <td style={{ padding: '1rem' }}>{order.mtoQuery.customer.name}</td>
+                <td style={{ padding: '1rem' }}>{order.mtoQuery.category}</td>
+                <td style={{ padding: '1rem' }}>
+                  <span className={`badge ${order.mtoQuery?.status === 'CAD_UPLOADED' ? 'badge-success' : 'badge-warning'}`}>
+                    {order.mtoQuery?.status === 'CAD_UPLOADED' ? 'CAD Added' : 'Awaiting CAD'}
+                  </span>
+                </td>
+                <td style={{ padding: '1rem', textAlign: 'right' }}>
+                  <button className="btn" style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+                    {expandedOrderId === order.mtoQueryId ? 'Collapse' : 'Manage CAD'}
+                  </button>
+                </td>
+              </tr>
+              {expandedOrderId === order.mtoQueryId && (
+                <tr>
+                  <td colSpan={6} style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.1)' }}>
+                    <ActiveOrderCard order={order} onRefresh={() => router.refresh()} />
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
+// Helper to make React available if not global
+import React from 'react';
+
 function ActiveOrderCard({ order, onRefresh }: { order: any, onRefresh: () => void }) {
   const mto = order.mtoQuery;
-  const est = mto?.estimations?.[0];
   const vendorEst = mto?.vendorEstimations?.[0];
-  const existingCads: string[] = order.cadDesigns ? JSON.parse(order.cadDesigns) : [];
+  const serverCads: string[] = order.cadDesigns ? JSON.parse(order.cadDesigns) : [];
 
   const [cadUrl, setCadUrl] = useState('');
-  const [cadFile, setCadFile] = useState<File | null>(null);
+  const [pendingCads, setPendingCads] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  const handleAddUrl = async () => {
+  const handleAddPendingUrl = () => {
     if (!cadUrl.trim()) return;
+    setPendingCads([...pendingCads, cadUrl.trim()]);
+    setCadUrl('');
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setPendingCads([...pendingCads, dataUrl]);
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePending = (index: number) => {
+    setPendingCads(pendingCads.filter((_, i) => i !== index));
+  };
+
+  const handleSaveAll = async () => {
+    if (pendingCads.length === 0) return;
     setUploading(true);
     try {
-      await uploadCadDesigns(mto.id, [cadUrl.trim()]);
-      setCadUrl('');
+      await uploadCadDesigns(mto.id, pendingCads);
+      setPendingCads([]);
       onRefresh();
+      alert('CAD designs saved successfully!');
     } catch (err: any) {
       alert('Error: ' + err.message);
     }
     setUploading(false);
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    // Convert to base64 data URL for storage
-    setUploading(true);
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const dataUrl = reader.result as string;
-      try {
-        await uploadCadDesigns(mto.id, [dataUrl]);
-        onRefresh();
-      } catch (err: any) {
-        alert('Error: ' + err.message);
-      }
-      setUploading(false);
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleShare = () => {
@@ -75,94 +140,96 @@ function ActiveOrderCard({ order, onRefresh }: { order: any, onRefresh: () => vo
   };
 
   return (
-    <div className="glass-panel" style={{ padding: '2rem' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+    <div className="glass-panel" style={{ padding: '1.5rem', background: 'var(--surface)' }}>
+      {/* Detail Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.3rem' }}>
-            <h3 style={{ margin: 0 }}>{mto?.customer?.name}</h3>
-            <span className="badge badge-info">Order: {order.orderRefId}</span>
-            <span className={`badge ${order.orderStatus === 'CAD_UPLOADED' ? 'badge-success' : 'badge-warning'}`}>
-              {order.orderStatus === 'CAD_UPLOADED' ? 'CAD Added' : 'Awaiting CAD'}
-            </span>
-          </div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            MTO-{String(mto?.queryNo).padStart(4, '0')} • {mto?.category} • {mto?.goldKaratage || ''} {mto?.metalType}
-          </div>
+          <h4 style={{ margin: 0 }}>Design Management</h4>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Manage requirements and CAD designs for this order.</p>
         </div>
-        <button onClick={handleShare} className="btn" style={{ padding: '0.5rem 1rem', background: 'var(--info)', color: 'white', fontSize: '0.85rem' }}>
-          🔗 Share Link
+        <button onClick={handleShare} className="btn" style={{ background: 'var(--info)', color: 'white' }}>
+          🔗 Copy Share Link
         </button>
       </div>
 
-      {/* Requirements Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div className="glass-panel" style={{ padding: '1rem' }}>
-          <h4 style={{ marginBottom: '0.8rem', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Customer Requirements</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.9rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+        <div className="glass-panel" style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)' }}>
+          <h5 style={{ marginBottom: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Customer Requirements</h5>
+          <div style={{ fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             <div>Category: <strong>{mto?.category}</strong></div>
             <div>Metal: <strong>{mto?.goldKaratage} {mto?.metalType} {mto?.metalColor || ''}</strong></div>
-            <div>Studded: <strong>{mto?.isStudded ? 'Yes' : 'No'}</strong></div>
             <div>Target Weight: <strong>{mto?.weightRange}</strong></div>
-            {mto?.size && <div>Size: <strong>{mto.size}</strong></div>}
-            {mto?.notes && <div style={{ marginTop: '0.3rem', fontStyle: 'italic', color: 'var(--text-muted)' }}>"{mto.notes}"</div>}
+            {mto?.notes && <div style={{ marginTop: '0.5rem', fontStyle: 'italic', opacity: 0.8 }}>"{mto.notes}"</div>}
           </div>
         </div>
-        <div className="glass-panel" style={{ padding: '1rem' }}>
-          <h4 style={{ marginBottom: '0.8rem', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Vendor Estimates</h4>
-          {vendorEst ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.9rem' }}>
-              <div>Vendor: <strong>{vendorEst.vendorName}</strong></div>
-              <div>Gold Weight: <strong>{vendorEst.goldWeight}</strong></div>
-              {vendorEst.diamondWeight && <div>Diamond: <strong>{vendorEst.diamondWeight}</strong></div>}
-            </div>
-          ) : (
-            <p style={{ color: 'var(--text-muted)' }}>No vendor estimate available</p>
-          )}
+        <div className="glass-panel" style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)' }}>
+          <h5 style={{ marginBottom: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Vendor Ref</h5>
+          <div style={{ fontSize: '0.9rem' }}>
+            <div>Vendor: <strong>{vendorEst?.vendorName || 'Not Assigned'}</strong></div>
+            <div>Est. Gold Weight: <strong>{vendorEst?.goldWeight || '-'}</strong></div>
+          </div>
         </div>
       </div>
 
       {/* Existing CAD Designs */}
-      {existingCads.length > 0 && (
+      {serverCads.length > 0 && (
         <div style={{ marginBottom: '1.5rem' }}>
-          <h4 style={{ marginBottom: '0.8rem' }}>CAD Designs ({existingCads.length})</h4>
+          <h5 style={{ marginBottom: '1rem' }}>Uploaded Designs</h5>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            {existingCads.map((cad, i) => (
-              <div key={i} style={{ border: '1px solid var(--surface-border)', borderRadius: '8px', overflow: 'hidden', width: '150px' }}>
-                {cad.startsWith('data:image') || cad.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
-                  <img src={cad} alt={`CAD ${i + 1}`} style={{ width: '100%', height: '120px', objectFit: 'cover' }} />
-                ) : (
-                  <a href={cad} target="_blank" rel="noopener noreferrer" style={{ display: 'block', padding: '1rem', fontSize: '0.8rem', color: 'var(--info)', wordBreak: 'break-all' }}>
-                    {cad.length > 30 ? cad.substring(0, 30) + '...' : cad}
-                  </a>
-                )}
+            {serverCads.map((cad, i) => (
+              <div key={i} style={{ border: '1px solid var(--surface-border)', borderRadius: '8px', overflow: 'hidden', width: '120px' }}>
+                <img src={cad} alt={`CAD ${i + 1}`} style={{ width: '100%', height: '100px', objectFit: 'cover' }} />
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Upload Section */}
-      <div style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.15)', borderRadius: '8px' }}>
-        <h4 style={{ marginBottom: '1rem' }}>Add CAD Design</h4>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'end' }}>
-          {/* URL Input */}
-          <div style={{ flex: 1, minWidth: '200px' }}>
-            <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Image URL</label>
+      {/* Upload & Pending Section */}
+      <div style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px' }}>
+        <h5 style={{ marginBottom: '1rem' }}>Add New Designs</h5>
+        
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.3rem' }}>Image URL</label>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <input type="text" value={cadUrl} onChange={e => setCadUrl(e.target.value)} placeholder="https://..." style={{ flex: 1, padding: '0.6rem' }} />
-              <button onClick={handleAddUrl} className="btn" disabled={uploading || !cadUrl.trim()} style={{ padding: '0.6rem 1rem', background: 'var(--primary)', color: 'white' }}>
-                Add
-              </button>
+              <input type="text" value={cadUrl} onChange={e => setCadUrl(e.target.value)} placeholder="https://..." style={{ flex: 1, padding: '0.5rem' }} />
+              <button onClick={handleAddPendingUrl} className="btn" disabled={!cadUrl.trim()}>Add to List</button>
             </div>
           </div>
-          {/* File Upload */}
           <div>
-            <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Or Upload Image</label>
+            <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.3rem' }}>File Upload</label>
             <input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} style={{ padding: '0.4rem' }} />
           </div>
         </div>
-        {uploading && <p style={{ marginTop: '0.5rem', color: 'var(--warning)' }}>Uploading...</p>}
+
+        {/* Pending Preview */}
+        {pendingCads.length > 0 && (
+          <div style={{ marginBottom: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
+            <h5 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Pending Changes (Not Saved Yet)</h5>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              {pendingCads.map((cad, i) => (
+                <div key={i} style={{ position: 'relative', width: '100px' }}>
+                  <img src={cad} alt="Pending" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
+                  <button 
+                    onClick={() => handleRemovePending(i)}
+                    style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--error)', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer' }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button 
+              onClick={handleSaveAll} 
+              className="btn btn-primary" 
+              style={{ marginTop: '1.5rem', width: '100%', padding: '0.8rem' }}
+              disabled={uploading}
+            >
+              {uploading ? 'Saving...' : '💾 Save all CAD Designs'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -123,33 +123,39 @@ export default function DashboardClient({ stats, allQueries }: { stats: any, all
                   {allQueries.length === 0 ? (
                     <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No queries found.</td></tr>
                   ) : (
-                    allQueries.map(q => {
-                      const { team, action } = getActionRequired(q.status);
-                      return (
-                        <tr key={q.id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                          <td style={{ padding: '1rem', fontWeight: 600 }}>MTO-{String(q.queryNo || 0).padStart(4, '0')}</td>
-                          <td style={{ padding: '1rem' }}>{q.customer?.name}</td>
-                          <td style={{ padding: '1rem' }}>
-                            <span className="badge badge-info" style={{ textTransform: 'capitalize' }}>
-                              {q.status.replace(/_/g, ' ').toLowerCase()}
-                            </span>
-                          </td>
-                          <td style={{ padding: '1rem' }}>
-                            <div style={{ fontWeight: 600, color: team === 'Sales Staff' ? 'var(--primary)' : 'var(--warning)' }}>{team}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{action}</div>
-                          </td>
-                          <td style={{ padding: '1rem', textAlign: 'right' }}>
-                            <Link 
-                              href={q.status === 'OPEN' || q.status === 'ESTIMATING' || q.status === 'AWAITING_RESPONSE' || q.status === 'NEGOTIATION' ? `/estimations/${q.id}` : `/mtos/${q.id}`} 
-                              className="btn" 
-                              style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', border: '1px solid var(--surface-border)' }}
-                            >
-                              View Details
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })
+                    allQueries
+                      .sort((a, b) => {
+                        if (a.status === 'OPEN' && b.status !== 'OPEN') return -1;
+                        if (a.status !== 'OPEN' && b.status === 'OPEN') return 1;
+                        return 0;
+                      })
+                      .map(q => {
+                        const { team, action } = getActionRequired(q.status);
+                        return (
+                          <tr key={q.id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
+                            <td style={{ padding: '1rem', fontWeight: 600 }}>MTO-{String(q.queryNo || 0).padStart(4, '0')}</td>
+                            <td style={{ padding: '1rem' }}>{q.customer?.name}</td>
+                            <td style={{ padding: '1rem' }}>
+                              <span className="badge badge-info" style={{ textTransform: 'capitalize' }}>
+                                {q.status.replace(/_/g, ' ').toLowerCase()}
+                              </span>
+                            </td>
+                            <td style={{ padding: '1rem' }}>
+                              <div style={{ fontWeight: 600, color: team === 'Sales Staff' ? 'var(--primary)' : 'var(--warning)' }}>{team}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{action}</div>
+                            </td>
+                            <td style={{ padding: '1rem', textAlign: 'right' }}>
+                              <Link 
+                                href={q.status === 'OPEN' || q.status === 'ESTIMATING' || q.status === 'AWAITING_RESPONSE' || q.status === 'NEGOTIATION' ? `/estimations/${q.id}` : `/mtos/${q.id}`} 
+                                className="btn" 
+                                style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', border: '1px solid var(--surface-border)' }}
+                              >
+                                View Details
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })
                   )}
                 </tbody>
               </table>

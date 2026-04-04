@@ -1,5 +1,5 @@
 import { getReceivedPos } from '../actions/qc';
-import QcItemCard from './QcItemCard';
+import QcClient from './QcClient';
 
 export const dynamic = "force-dynamic";
 
@@ -13,17 +13,7 @@ export default async function QcPage() {
         <p style={{ color: 'var(--text-muted)' }}>Inspect POs arrived from vendors. Compare actuals vs promised before billing.</p>
       </header>
 
-      <div>
-        {pos.length === 0 ? (
-          <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <p>No new items have arrived for QC inspection.</p>
-          </div>
-        ) : null}
-
-        {pos.map(po => (
-           <QcItemCard key={po.id} po={po} />
-        ))}
-      </div>
+      <QcClient pos={pos} />
     </div>
   );
 }
