@@ -23,7 +23,6 @@ export async function getMtoQueryDetails(mtoId: string) {
     include: {
       customer: true,
       vendorEstimations: {
-        where: { isAccepted: true },
         orderBy: { createdAt: 'desc' }
       },
       estimations: {
@@ -41,7 +40,6 @@ export async function saveEstimation(mtoId: string, data: any) {
   });
   
   const nextVersion = lastEst ? lastEst.version + 1 : 1;
-  const finalPrice = parseFloat(data.finalEstimatedPrice);
 
   const estimation = await prisma.estimation.create({
     data: {
@@ -51,11 +49,14 @@ export async function saveEstimation(mtoId: string, data: any) {
       goldRate: parseFloat(data.goldRate),
       diamondWeight: data.diamondWeight ? parseFloat(data.diamondWeight) : null,
       diamondRate: data.diamondRate ? parseFloat(data.diamondRate) : null,
-      makingCharges: parseFloat(data.makingCharges),
-      wastage: parseFloat(data.wastage),
+      makingPercent: parseFloat(data.makingPercent),
+      discountPercent: parseFloat(data.discountPercent),
       otherStones: data.otherStones ? parseFloat(data.otherStones) : null,
-      notes: data.notes,
-      finalEstimatedPrice: finalPrice
+      gstAmount: parseFloat(data.gstAmount),
+      discountAmount: parseFloat(data.discountAmount),
+      totalAmount: parseFloat(data.totalAmount),
+      finalEstimatedPrice: parseFloat(data.finalEstimatedPrice),
+      notes: data.notes
     }
   });
 

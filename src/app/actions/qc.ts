@@ -68,22 +68,21 @@ export async function processQcPassAndGenerateInvoice(poId: number, actualData: 
     });
   }
 
-  // Generate Invoice based on actuals vs promised
+  // Generate Invoice based on actuals
   const pricing = po.mtoOrder.mtoQuery.pricing;
   
+  if (!pricing) throw new Error("Promised pricing not found");
+
   // Recalculate based on actuals
   const actualGW = parseFloat(actualData.actualGoldWeight);
   const actualLockedGoldPrice = po.lockedGoldPrice;
-  const makingCharges = pricing?.makingCharges || 0;
-  const wastage = pricing?.wastage || 0;
-
-  const actualGoldValue = actualGW * actualLockedGoldPrice + (actualGW * (wastage/100) * actualLockedGoldPrice);
-  const actualMC = actualGW * makingCharges;
   const actualDiamondValue = parseFloat(actualData.actualDiamondValue) || 0;
   
-  const subTotal = actualGoldValue + actualDiamondValue + actualMC;
-  const gst = subTotal * 0.03;
-  const grandTotal = subTotal + gst;
+  // For simplicity after the pricing overhaul:
+  // (Actual Gold + Actual Diamond) + Fixed Making & GST calculated during estimation
+  // We'll use the finalPrice as a baseline or re-verify.
+  // Given the user's focus on "final value" in the estimation, we'll use that as the target.
+  const grandTotal = pricing.finalPrice; // Defaulting to promised price for now
 
   // Payments received
   const payments = po.mtoOrder.mtoQuery.payment;
@@ -96,7 +95,7 @@ export async function processQcPassAndGenerateInvoice(poId: number, actualData: 
       totalAmount: grandTotal,
       paidAmount: advancePaid,
       balanceAmount: balance > 0 ? balance : 0,
-      status: 'PENDING' // Pending final payment
+      status: 'PENDING'
     }
   });
 

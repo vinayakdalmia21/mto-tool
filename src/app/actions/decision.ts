@@ -54,8 +54,6 @@ export async function processPaymentAndLockPricing(mtoId: string, amount: number
     data: {
       mtoQueryId: mtoId,
       goldWeight: latestEst.goldWeight,
-      makingCharges: latestEst.makingCharges,
-      wastage: latestEst.wastage,
       stoneDetails: `Diam: ${latestEst.diamondWeight || 0}ct @ ₹${latestEst.diamondRate || 0}, Other: ₹${latestEst.otherStones || 0}`,
       finalPrice: latestEst.finalEstimatedPrice
     }

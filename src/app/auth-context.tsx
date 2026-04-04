@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-export type Role = "SALES" | "MANAGER" | "OPERATIONS" | "FINANCE";
+export type Role = "SALES" | "MANAGER" | "OPERATIONS";
 
 interface AuthContextType {
   role: Role;
@@ -17,8 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const userName = 
     role === "SALES" ? "Sarah (Sales)" :
-    role === "MANAGER" ? "Michael (Manager)" :
-    role === "OPERATIONS" ? "Olivia (Ops)" : "Frank (Finance)";
+    role === "MANAGER" ? "Michael (Manager)" : "Olivia (Ops)";
 
   return (
     <AuthContext.Provider value={{ role, setRole, userName }}>

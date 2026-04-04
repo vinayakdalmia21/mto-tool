@@ -79,12 +79,12 @@ export default async function MtoDetailsPage({ params }: { params: Promise<{ id:
                  </div>
                </div>
 
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', margin: '2rem 0', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
-                 <div><span style={{ color: 'var(--text-muted)' }}>Gold Wt:</span> {latestEst.goldWeight}g</div>
-                 <div><span style={{ color: 'var(--text-muted)' }}>Making Charges:</span> ₹{latestEst.makingCharges}/g</div>
-                 <div><span style={{ color: 'var(--text-muted)' }}>Wastage:</span> {latestEst.wastage}%</div>
-                 {mto.isStudded && <div><span style={{ color: 'var(--text-muted)' }}>Diamonds:</span> {latestEst.diamondWeight}ct</div>}
-               </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', margin: '2rem 0', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+                  <div><span style={{ color: 'var(--text-muted)' }}>Gold Wt:</span> {latestEst.goldWeight}g</div>
+                  <div><span style={{ color: 'var(--text-muted)' }}>Making Charge:</span> {latestEst.makingPercent}%</div>
+                  {latestEst.discountPercent > 0 && <div><span style={{ color: 'var(--text-muted)' }}>Discount (on MC):</span> {latestEst.discountPercent}%</div>}
+                  {mto.isStudded && <div><span style={{ color: 'var(--text-muted)' }}>Diamonds:</span> {latestEst.diamondWeight}ct</div>}
+                </div>
 
                {/* DECISION BUTTONS CLIENT COMPONENT */}
                <DecisionButtons 

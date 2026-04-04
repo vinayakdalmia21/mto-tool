@@ -28,14 +28,13 @@ export default function Sidebar() {
   };
 
   const menuItems = [
-    { label: 'Dashboard', icon: <LayoutDashboard size={20} />, href: '/', roles: ['SALES', 'MANAGER', 'OPERATIONS', 'FINANCE'] },
+    { label: 'Dashboard', icon: <LayoutDashboard size={20} />, href: '/', roles: ['SALES', 'MANAGER', 'OPERATIONS'] },
     { label: 'CRM & MTOs', icon: <Briefcase size={20} />, href: '/mtos', roles: ['SALES', 'MANAGER'] },
     { label: 'Estimations', icon: <Calculator size={20} />, href: '/estimations', roles: ['SALES', 'MANAGER'] },
     { label: 'Vendor Estimates', icon: <Calculator size={20} />, href: '/vendor-estimations', roles: ['OPERATIONS', 'MANAGER'] },
     { label: 'Pricing Hub', icon: <TrendingUp size={20} />, href: '/pricing', roles: ['OPERATIONS', 'MANAGER'] },
     { label: 'Purchase Orders', icon: <Building2 size={20} />, href: '/orders', roles: ['OPERATIONS', 'MANAGER'] },
     { label: 'Production & QC', icon: <ClipboardCheck size={20} />, href: '/qc', roles: ['OPERATIONS', 'MANAGER'] },
-    { label: 'Invoices & Billing', icon: <FileText size={20} />, href: '/billing', roles: ['FINANCE', 'MANAGER'] },
   ];
 
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
@@ -53,7 +52,6 @@ export default function Sidebar() {
           <option value="SALES">Sales Staff</option>
           <option value="MANAGER">Store Manager</option>
           <option value="OPERATIONS">Operations</option>
-          <option value="FINANCE">Finance</option>
         </select>
       </div>
 

@@ -13,8 +13,12 @@ export default async function EstimationDetailPage({ params }: { params: Promise
     notFound();
   }
 
-  const acceptedVendorEst = mto.vendorEstimations && mto.vendorEstimations.length > 0 
-    ? mto.vendorEstimations[0] 
+  // Find the latest accepted vendor estimate for auto-fills
+  const acceptedVendorEst = mto.vendorEstimations?.find(v => v.isAccepted);
+  
+  // Find the most recent overall vendor feedback for context
+  const latestVendorFeedback = mto.vendorEstimations && mto.vendorEstimations.length > 0
+    ? mto.vendorEstimations[0]
     : null;
 
   return (
@@ -48,7 +52,24 @@ export default async function EstimationDetailPage({ params }: { params: Promise
             </div>
           </div>
 
-          {/* VENDOR ESTIMATE INJECTION */}
+          {/* VENDOR REJECTION ALERT */}
+          {latestVendorFeedback && !latestVendorFeedback.isAccepted && (
+            <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid var(--danger)', background: 'rgba(255, 0, 0, 0.05)' }}>
+               <h3 style={{ marginBottom: '1rem', color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                 ⚠️ Vendor Refused Query
+               </h3>
+               <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                 <strong>{latestVendorFeedback.vendorName}</strong> did not accept this MTO.
+               </p>
+               {latestVendorFeedback.remarks && (
+                 <div style={{ padding: '0.8rem', background: 'rgba(0,0,0,0.2)', borderRadius: '4px', fontStyle: 'italic', fontSize: '0.85rem' }}>
+                   "{latestVendorFeedback.remarks}"
+                 </div>
+               )}
+            </div>
+          )}
+
+          {/* VENDOR ACCEPTANCE LIMITS */}
           {acceptedVendorEst && (
              <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid var(--info)' }}>
                <h3 style={{ marginBottom: '1rem', color: 'var(--info)' }}>Operations Vendor Limits</h3>
@@ -68,7 +89,7 @@ export default async function EstimationDetailPage({ params }: { params: Promise
                    </div>
                  )}
                  {acceptedVendorEst.remarks && (
-                   <div style={{ marginTop: '0.5rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                   <div style={{ marginTop: '0.5rem', color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.85rem' }}>
                      "{acceptedVendorEst.remarks}"
                    </div>
                  )}
@@ -88,7 +109,7 @@ export default async function EstimationDetailPage({ params }: { params: Promise
                       <span style={{ fontWeight: 600 }}>₹{est.finalEstimatedPrice.toLocaleString()}</span>
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      Gold: {est.goldWeight} | MC: {est.makingCharges}
+                      Gold: {est.goldWeight} | MC: {est.makingPercent}% | Final: ₹{est.finalEstimatedPrice.toLocaleString()}
                     </div>
                   </div>
                 ))}

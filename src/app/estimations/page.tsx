@@ -45,7 +45,7 @@ export default async function EstimationsPage() {
                 </td>
                 <td style={{ padding: '1rem' }}>
                    <Link href={`/estimations/${mto.id}`} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-                     Provide Estimate
+                     View Estimate
                    </Link>
                 </td>
               </tr>

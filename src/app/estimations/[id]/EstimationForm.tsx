@@ -17,6 +17,7 @@ export default function EstimationForm({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [savedId, setSavedId] = useState<number | null>(null);
   
   // Dynamic Pricing Extraction
   const karr = mto.goldKaratage || '18K';
@@ -29,43 +30,35 @@ export default function EstimationForm({
   };
   const baseGoldRate = pricingMap[karr] || globalPricing.rate18k || 0;
   
-  // Extract number strings from vendor limits gracefully
   const extractNum = (str: string | null | undefined) => {
     if (!str) return '';
     const match = str.match(/\d+(?:\.\d+)?/);
     return match ? match[0] : '';
   };
 
-  const isStudded = mto.isStudded;
-
-  const [goldWeight, setGoldWeight] = useState(extractNum(vendorLimit?.goldWeight) || '10');
-  const [goldRate, setGoldRate] = useState(baseGoldRate.toString()); // per gram dynamically configured
-  const [wastage, setWastage] = useState('12'); // %
-  const [makingCharges, setMakingCharges] = useState('800'); // flat per gram
-  
+  // Inputs
+  const [goldWeight, setGoldWeight] = useState(extractNum(vendorLimit?.goldWeight) || '0');
+  const [goldRate, setGoldRate] = useState(baseGoldRate.toString());
   const [diamondWeight, setDiamondWeight] = useState(extractNum(vendorLimit?.diamondWeight) || '0');
-  const [diamondRate, setDiamondRate] = useState((globalPricing.diamondRate || 0).toString()); // per carat
-  
+  const [diamondRate, setDiamondRate] = useState((globalPricing.diamondRate || 0).toString());
+  const [makingPercent, setMakingPercent] = useState('10');
+  const [otherStones, setOtherStones] = useState('0');
+  const [discountPercent, setDiscountPercent] = useState('25');
+  const [notes, setNotes] = useState('');
+
   // Calculations
-  const calculatedGoldValue = useMemo(() => {
-    const gw = parseFloat(goldWeight) || 0;
-    const gr = parseFloat(goldRate) || 0;
-    const w = parseFloat(wastage) || 0;
-    // value = weight * rate + (weight * wastage%) * rate
-    return (gw * gr) + (gw * (w / 100) * gr);
-  }, [goldWeight, goldRate, wastage]);
-
-  const calculatedDiamondValue = useMemo(() => {
-    return (parseFloat(diamondWeight) || 0) * (parseFloat(diamondRate) || 0);
-  }, [diamondWeight, diamondRate]);
-
-  const calculatedMC = useMemo(() => {
-    return (parseFloat(goldWeight) || 0) * (parseFloat(makingCharges) || 0);
-  }, [goldWeight, makingCharges]);
-
-  const subTotal = calculatedGoldValue + calculatedDiamondValue + calculatedMC;
-  const gst = subTotal * 0.03;
-  const grandTotal = subTotal + gst;
+  const goldAmount = (parseFloat(goldWeight) || 0) * (parseFloat(goldRate) || 0);
+  const diamondAmount = (parseFloat(diamondWeight) || 0) * (parseFloat(diamondRate) || 0);
+  const subtotal1 = goldAmount + diamondAmount;
+  const makingAmount = subtotal1 * (parseFloat(makingPercent) / 100);
+  const otherAmount = parseFloat(otherStones) || 0;
+  
+  const subtotal2 = subtotal1 + makingAmount + otherAmount;
+  const gstAmount = subtotal2 * 0.03;
+  const totalWithGst = subtotal2 + gstAmount;
+  
+  const discountAmount = makingAmount * (parseFloat(discountPercent) / 100);
+  const finalValue = totalWithGst - discountAmount;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -75,105 +68,155 @@ export default function EstimationForm({
       goldRate,
       diamondWeight,
       diamondRate,
-      makingCharges,
-      wastage,
-      finalEstimatedPrice: grandTotal.toFixed(2)
+      makingPercent,
+      discountPercent,
+      otherStones,
+      gstAmount: gstAmount.toFixed(2),
+      discountAmount: discountAmount.toFixed(2),
+      totalAmount: totalWithGst.toFixed(2),
+      finalEstimatedPrice: finalValue.toFixed(2),
+      notes
     });
     setLoading(false);
     if(res.success) {
-       router.push('/mtos'); // redirect back to CRM
+       setSavedId(res.estimationId);
+       router.refresh();
     }
   }
 
+  const handleShare = () => {
+    const origin = window.location.origin;
+    const shareUrl = `${origin}/share/estimate/${mtoId}`;
+    navigator.clipboard.writeText(shareUrl);
+    alert('Estimation Share Link copied to clipboard!');
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-        
-        {/* GOLD SPECS */}
-        <div style={{ padding: '1rem', border: '1px solid var(--surface-border)', borderRadius: '8px' }}>
-          <h4 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>Gold Details</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Approx Gold Weight (grams)</label>
-              <input type="number" step="0.01" value={goldWeight} onChange={e => setGoldWeight(e.target.value)} required />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Gold Rate (/gram)</label>
-              <input type="number" value={goldRate} onChange={e => setGoldRate(e.target.value)} required />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Wastage (%)</label>
-              <input type="number" step="0.1" value={wastage} onChange={e => setWastage(e.target.value)} required />
-            </div>
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <form onSubmit={handleSubmit}>
+        <div style={{ overflowX: 'auto', marginBottom: '1.5rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--surface-border)' }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'left' }}>Item</th>
+                <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}>Weight (gms/ct)</th>
+                <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}>Rate</th>
+                <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* GOLD ROW */}
+              <tr>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>Gold ({karr})</td>
+                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                  <input type="number" step="0.001" value={goldWeight} onChange={e => setGoldWeight(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
+                </td>
+                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                  <input type="number" value={goldRate} onChange={e => setGoldRate(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
+                </td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                  ₹{goldAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                </td>
+              </tr>
+              {/* DIAMOND ROW */}
+              <tr>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>Diamond</td>
+                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                  <input type="number" step="0.001" value={diamondWeight} onChange={e => setDiamondWeight(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
+                </td>
+                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                  <input type="number" value={diamondRate} onChange={e => setDiamondRate(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
+                </td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                  ₹{diamondAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                </td>
+              </tr>
+              {/* OTHER STONES */}
+              <tr>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>Other Stones</td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                  <input type="number" value={otherStones} onChange={e => setOtherStones(e.target.value)} style={{ padding: '0.4rem', width: '80px', textAlign: 'right' }} />
+                </td>
+              </tr>
+              {/* MAKING CHARGES */}
+              <tr>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>
+                  Making ({makingPercent}%)
+                </td>
+                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                  <input type="number" value={makingPercent} onChange={e => setMakingPercent(e.target.value)} placeholder="%" style={{ padding: '0.4rem', width: '100%' }} />
+                </td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                  ₹{makingAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                </td>
+              </tr>
+              {/* GST ROW */}
+              <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>GST (3%)</td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                  ₹{gstAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                </td>
+              </tr>
+              {/* TOTAL ROW */}
+              <tr style={{ background: 'rgba(255,255,255,0.05)', fontWeight: 700 }}>
+                <td colSpan={3} style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Total Amount</td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                  ₹{totalWithGst.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                </td>
+              </tr>
+              {/* DISCOUNT ROW */}
+              <tr>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600, color: 'var(--success)' }}>
+                  Discount on Making ({discountPercent}%)
+                </td>
+                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                  <input type="number" value={discountPercent} onChange={e => setDiscountPercent(e.target.value)} placeholder="%" style={{ padding: '0.4rem', width: '100%' }} />
+                </td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right', color: 'var(--success)' }}>
+                  - ₹{discountAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                </td>
+              </tr>
+              {/* FINAL VALUE */}
+              <tr style={{ background: 'var(--surface-light)', fontWeight: 800, fontSize: '1.2rem' }}>
+                <td colSpan={3} style={{ padding: '1rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Final Value</td>
+                <td style={{ padding: '1rem', border: '1px solid var(--surface-border)', textAlign: 'right', color: 'var(--primary)' }}>
+                  ₹{finalValue.toLocaleString()}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        {/* DIAMOND SPECS */}
-        <div style={{ padding: '1rem', border: '1px solid var(--surface-border)', borderRadius: '8px', opacity: isStudded ? 1 : 0.5 }}>
-          <h4 style={{ color: 'var(--info)', marginBottom: '1rem' }}>Diamond Details</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Diamond Weight (Ct)</label>
-              <input type="number" step="0.01" value={diamondWeight} onChange={e => setDiamondWeight(e.target.value)} disabled={!isStudded} />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Diamond Rate (/Ct)</label>
-              <input type="number" value={diamondRate} onChange={e => setDiamondRate(e.target.value)} disabled={!isStudded} />
-            </div>
-          </div>
+        <div style={{ marginBottom: '1.5rem' }}>
+           <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Additional Notes (Customer Facing)</label>
+           <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} style={{ width: '100%', padding: '0.8rem' }} placeholder="Terms, delivery time, etc."></textarea>
         </div>
 
-        {/* MAKING CHARGES */}
-        <div style={{ gridColumn: '1 / -1', padding: '1rem', border: '1px solid var(--surface-border)', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+          <button type="submit" className="btn btn-primary" disabled={loading} style={{ padding: '0.8rem 2rem' }}>
+            {loading ? 'Saving...' : 'Save Estimation'}
+          </button>
+        </div>
+      </form>
+
+      {savedId && (
+        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--success)' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Making Charges (/gram)</label>
-            <input type="number" value={makingCharges} onChange={e => setMakingCharges(e.target.value)} required />
+            <h4 style={{ color: 'var(--success)', marginBottom: '0.2rem' }}>Estimation Saved Successfully!</h4>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>You can now share this formal quote with the customer.</p>
           </div>
+          <button onClick={handleShare} className="btn" style={{ background: 'var(--success)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             Generate Share Link
+          </button>
         </div>
-
-      </div>
-
-      {/* LIVE BREAKDOWN */}
-      <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem' }}>
-        <h4 style={{ marginBottom: '1rem', color: 'var(--text-main)' }}>Live Cost Breakdown</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.95rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--text-muted)' }}>Gold Value (incl. {wastage}% wastage)</span>
-            <span>₹{calculatedGoldValue.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-          </div>
-          {isStudded && (
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--text-muted)' }}>Diamond Value</span>
-              <span>₹{calculatedDiamondValue.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-            </div>
-          )}
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--text-muted)' }}>Making Charges</span>
-            <span>₹{calculatedMC.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-          </div>
-          <div style={{ height: '1px', background: 'var(--surface-border)', margin: '0.5rem 0' }}></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--text-muted)' }}>Subtotal</span>
-            <span>₹{subTotal.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--text-muted)' }}>GST (3%)</span>
-            <span>₹{gst.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-          </div>
-          
-          <div style={{ height: '1px', background: 'var(--surface-border)', margin: '0.5rem 0' }}></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 700, color: 'var(--success)' }}>
-            <span>Final Estimated Amount</span>
-            <span>₹{grandTotal.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Saving...' : 'Save & Send Estimate'}
-        </button>
-      </div>
-    </form>
-  )
+      )}
+    </div>
+  );
 }
+

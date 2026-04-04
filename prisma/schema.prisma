@@ -78,9 +78,12 @@ model Estimation {
   goldRate            Float
   diamondWeight       Float?
   diamondRate         Float?
-  makingCharges       Float // Using Float to support decimals if needed
-  wastage             Float
+  makingPercent       Float    @default(0)
+  discountPercent     Float    @default(0)
   otherStones         Float?
+  gstAmount           Float    @default(0)
+  discountAmount      Float    @default(0)
+  totalAmount         Float    @default(0) // Subtotal + GST
   finalEstimatedPrice Float
   notes               String?
   mtoQuery            MtoQuery @relation(fields: [mtoQueryId], references: [id])
@@ -92,8 +95,6 @@ model PromisedPricing {
   id            Int      @id @default(autoincrement())
   mtoQueryId    String   @unique
   goldWeight    String
-  makingCharges Float
-  wastage       Float
   stoneDetails  String
   finalPrice    Float
   lockedAt      DateTime @default(now())
