@@ -10,8 +10,8 @@ export default async function SalesOrdersPage() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>My Orders</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Manage orders with locked prices. Enter Order ID, collect advance, and move to operations.</p>
+        <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>MTO & Advance</h1>
+        <p style={{ color: 'var(--text-muted)' }}>Sales Dashboard: Submit advance payments and confirm final orders.</p>
       </header>
       <OrdersClient queries={queries} />
     </div>

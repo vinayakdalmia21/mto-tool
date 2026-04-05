@@ -234,7 +234,7 @@ export default function EstimationForm({
           </div>
           {priceLocked && (
             <p style={{ fontSize: '0.85rem', color: 'var(--success)', margin: 0 }}>
-              Price locked at ₹{finalValue.toLocaleString()}. Go to <strong>My Orders</strong> to enter Order ID and advance payment.
+              Price locked at ₹{finalValue.toLocaleString()}. Go to <strong>MTO & Advance</strong> to enter advance payment.
             </p>
           )}
         </div>
