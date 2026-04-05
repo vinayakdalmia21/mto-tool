@@ -40,7 +40,7 @@ export async function processCustomerDecision(mtoId: string, decision: 'ACCEPT' 
   return { success: true };
 }
 
-export async function processPaymentAndLockPricing(mtoId: string, amount: number) {
+export async function processPaymentAndLockPricing(mtoId: string, amount: number, staffMtoId: string) {
   // Get latest estimation
   const latestEst = await prisma.estimation.findFirst({
     where: { mtoQueryId: mtoId },
@@ -68,12 +68,11 @@ export async function processPaymentAndLockPricing(mtoId: string, amount: number
     }
   });
 
-  // 3. Create MTO Order ID mapped internally
-  const pseudoRef = `POS-${Math.floor(Math.random()*100000)}`;
+  // 3. Create MTO Order ID
   await prisma.mtoOrder.create({
     data: {
       mtoQueryId: mtoId,
-      posRefId: pseudoRef
+      staffMtoId: staffMtoId
     }
   });
 

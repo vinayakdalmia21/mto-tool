@@ -113,21 +113,41 @@ export default function VendorEstimationsClient({ pendingQueries, history }: { p
               </div>
 
               {isAccepted === 'true' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Weight *</label>
-                    <input name="goldWeight" required defaultValue={editingEst?.goldWeight} placeholder="e.g. 12g" />
+                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
+                  <div style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--surface-border)', fontSize: '0.85rem' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>MTO Requested Karatage:</span> <strong style={{ color: 'var(--primary)', marginLeft: '0.5rem' }}>{selectedQuery?.goldKaratage || 'Standard (As per design)'}</strong>
                   </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Diamond Ct</label>
-                    <input name="diamondWeight" defaultValue={editingEst?.diamondWeight} placeholder="e.g. 1.2ct" />
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Weight *</label>
+                      <input name="goldWeight" required defaultValue={editingEst?.goldWeight} placeholder="e.g. 12g" />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Diamond Ct</label>
+                      <input name="diamondWeight" defaultValue={editingEst?.diamondWeight} placeholder="e.g. 1.2ct" />
+                    </div>
                   </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Labour/Making Charges (₹)</label>
+                      <input type="number" step="0.01" name="labourCharges" defaultValue={editingEst?.labourCharges} placeholder="e.g. 5000" />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Rate (₹ per g)</label>
+                      <input type="number" step="0.01" name="goldRate" defaultValue={editingEst?.goldRate} placeholder="e.g. 7200" />
+                    </div>
+                  </div>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
+                    Provide rates specific to the <strong>{selectedQuery?.goldKaratage || 'requested'}</strong> karatage.
+                  </p>
                 </div>
               )}
 
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Vendor Remarks</label>
-                <textarea name="remarks" rows={3} defaultValue={editingEst?.remarks} placeholder="Vendor quoted making charges, delivery dates, etc."></textarea>
+                <textarea name="remarks" rows={3} defaultValue={editingEst?.remarks} placeholder="Vendor quoted delivery dates, stone quality, etc."></textarea>
               </div>
 
               <div>
@@ -182,8 +202,13 @@ export default function VendorEstimationsClient({ pendingQueries, history }: { p
                    <tr key={est.id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
                      <td style={{ padding: '1rem', fontWeight: 600 }}>MTO-{queryNo}</td>
                      <td style={{ padding: '1rem' }}>{est.vendorName}</td>
-                     <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>
-                       {est.goldWeight} | {est.diamondWeight || 'N/A'}
+                     <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                       <div>{est.goldWeight} | {est.diamondWeight || 'N/A'}</div>
+                       {(est.goldRate || est.labourCharges) && (
+                         <div style={{ marginTop: '0.2rem', color: 'var(--primary)' }}>
+                           Rate: ₹{est.goldRate || 0} | Lab: ₹{est.labourCharges || 0}
+                         </div>
+                       )}
                      </td>
                      <td style={{ padding: '1rem' }}>
                        <span className={`badge ${est.isAccepted ? 'badge-success' : 'badge-warning'}`}>

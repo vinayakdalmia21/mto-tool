@@ -35,7 +35,7 @@ model MtoQuery {
   metalType       String // GOLD, SILVER
   isStudded       Boolean
   diamondCaratage String? // Optional caratage
-  weightRange     String
+  weightRange     String?
   goldKaratage    String? // Optional 9K, 14K, 18K etc
   metalColor      String? // Yellow Gold, White Gold, Rose Gold
   goldWeight      String? // Exact or estimated gold weight
@@ -76,6 +76,8 @@ model VendorEstimation {
   remarks       String?
   images        String?
   isAccepted    Boolean  @default(false)
+  labourCharges Float?   // New field for vendor labour quote
+  goldRate      Float?   // New field for vendor gold rate quote
   createdAt     DateTime @default(now())
 
   mtoQuery MtoQuery @relation(fields: [mtoQueryId], references: [id])
@@ -125,6 +127,7 @@ model Payment {
 model MtoOrder {
   id              Int            @id @default(autoincrement())
   mtoQueryId      String         @unique
+  staffMtoId      String?        @unique // Unique MTO ID provided by staff
   posRefId        String?        // POS reference entered by staff
   orderRefId      String?        // Manual Order ID entered by staff
   advanceAmount   Float          @default(0)

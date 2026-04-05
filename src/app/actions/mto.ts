@@ -91,7 +91,8 @@ export async function getMtos() {
   return await prisma.mtoQuery.findMany({
     include: {
       customer: true,
-      staff: true
+      staff: true,
+      order: true
     },
     orderBy: { createdAt: 'desc' }
   });

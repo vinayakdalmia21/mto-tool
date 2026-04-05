@@ -14,7 +14,8 @@ export async function getPendingVendorQueries() {
       }
     },
     include: {
-      customer: true
+      customer: true,
+      // Need goldKaratage for the vendor form
     },
     orderBy: { createdAt: 'desc' }
   });
@@ -26,6 +27,8 @@ export async function submitVendorEstimation(formData: FormData) {
     const vendorName = formData.get('vendorName') as string;
     const goldWeight = formData.get('goldWeight') as string;
     const diamondWeight = formData.get('diamondWeight') as string;
+    const labourCharges = formData.get('labourCharges') ? parseFloat(formData.get('labourCharges') as string) : null;
+    const goldRate = formData.get('goldRate') ? parseFloat(formData.get('goldRate') as string) : null;
     const remarks = formData.get('remarks') as string;
     const isAccepted = formData.get('isAccepted') === 'true';
 
@@ -44,6 +47,8 @@ export async function submitVendorEstimation(formData: FormData) {
         vendorName,
         goldWeight,
         diamondWeight,
+        labourCharges,
+        goldRate,
         remarks,
         images: base64Image,
         isAccepted
@@ -80,6 +85,8 @@ export async function updateVendorEstimation(id: number, formData: FormData) {
     const vendorName = formData.get('vendorName') as string;
     const goldWeight = formData.get('goldWeight') as string || null;
     const diamondWeight = formData.get('diamondWeight') as string || null;
+    const labourCharges = formData.get('labourCharges') ? parseFloat(formData.get('labourCharges') as string) : null;
+    const goldRate = formData.get('goldRate') ? parseFloat(formData.get('goldRate') as string) : null;
     const remarks = formData.get('remarks') as string;
     const isAccepted = formData.get('isAccepted') === 'true';
 
@@ -95,6 +102,8 @@ export async function updateVendorEstimation(id: number, formData: FormData) {
       vendorName,
       goldWeight,
       diamondWeight,
+      labourCharges,
+      goldRate,
       remarks,
       isAccepted
     };

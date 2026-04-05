@@ -11,6 +11,7 @@ export default function DecisionButtons({ mtoId, currentStatus, estAmount }: { m
   const [rejectReason, setRejectReason] = useState("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [advanceAmount, setAdvanceAmount] = useState<number>(estAmount * 0.5); // Default 50%
+  const [staffMtoId, setStaffMtoId] = useState("");
 
   // Normal flow: Estimating -> AWAITING_RESPONSE -> PAYMENT_PENDING -> ACCEPTED -> ...
 
@@ -31,13 +32,22 @@ export default function DecisionButtons({ mtoId, currentStatus, estAmount }: { m
   }
 
   async function handlePayment() {
+    if (!staffMtoId) {
+      alert("Please enter a unique MTO ID to confirm the order.");
+      return;
+    }
     setLoading(true);
     // Simulating mock payment processing latency
     setTimeout(async () => {
-      await processPaymentAndLockPricing(mtoId, advanceAmount);
-      setLoading(false);
-      setShowPaymentModal(false);
-      router.refresh();
+      try {
+        await processPaymentAndLockPricing(mtoId, advanceAmount, staffMtoId);
+        setLoading(false);
+        setShowPaymentModal(false);
+        router.refresh();
+      } catch (err: any) {
+        setLoading(false);
+        alert(err.message || "Failed to confirm order. The MTO ID might already be in use.");
+      }
     }, 1500);
   }
 
@@ -62,22 +72,36 @@ export default function DecisionButtons({ mtoId, currentStatus, estAmount }: { m
   if (showPaymentModal) {
     return (
       <div style={{ border: '1px solid var(--primary)', padding: '1.5rem', borderRadius: '8px', background: 'rgba(139, 92, 246, 0.05)' }}>
-        <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Secure Advance Payment</h3>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-          Payment logic confirms the order and permanently locks the Promised Pricing.
+        <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Secure Advance Payment & Confirm Order</h3>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+          Assign a unique MTO ID and record the advance payment to lock the pricing permanently.
         </p>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Advance Payment Amount (₹)</label>
-          <input 
-            type="number" 
-            value={advanceAmount} 
-            onChange={(e) => setAdvanceAmount(Number(e.target.value))} 
-            style={{ width: '100%', maxWidth: '200px' }}
-          />
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Assign Unique MTO ID</label>
+            <input 
+              type="text" 
+              placeholder="e.g., MTO-2024-001"
+              value={staffMtoId} 
+              onChange={(e) => setStaffMtoId(e.target.value)} 
+              style={{ width: '100%' }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Advance Payment (₹)</label>
+            <input 
+              type="number" 
+              value={advanceAmount} 
+              onChange={(e) => setAdvanceAmount(Number(e.target.value))} 
+              style={{ width: '100%' }}
+            />
+          </div>
         </div>
+
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn btn-primary" onClick={handlePayment} disabled={loading}>
-            {loading ? 'Processing...' : `Mock Pay ₹${advanceAmount.toLocaleString()}`}
+          <button className="btn btn-primary" onClick={handlePayment} disabled={loading || !staffMtoId}>
+            {loading ? 'Confirming...' : `Confirm & Pay ₹${advanceAmount.toLocaleString()}`}
           </button>
           <button className="btn" onClick={() => setShowPaymentModal(false)} style={{ background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-main)' }}>
             Cancel

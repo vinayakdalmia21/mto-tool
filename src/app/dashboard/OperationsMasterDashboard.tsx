@@ -171,7 +171,7 @@ export default function OperationsMasterDashboard({
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>ID</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Tracking ID</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Customer</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Staff & Lead</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Status</th>
@@ -185,7 +185,13 @@ export default function OperationsMasterDashboard({
                   )}
                   {filteredQueries.map(q => (
                     <tr key={q.id} style={{ borderBottom: '1px solid var(--surface-border)', background: q.isInactive ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
-                      <td style={{ padding: '1rem', fontWeight: 600 }}>MTO-{String(q.queryNo || 0).padStart(4, '0')}</td>
+                      <td style={{ padding: '1rem', fontWeight: 600 }}>
+                        {q.staffMtoId ? (
+                          <div style={{ color: 'var(--success)' }}>{q.staffMtoId}</div>
+                        ) : (
+                          <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Q-{String(q.queryNo || 0).padStart(4, '0')}</div>
+                        )}
+                      </td>
                       <td style={{ padding: '1rem' }}>{q.customerName}</td>
                       <td style={{ padding: '1rem' }}>
                         <div>{q.staffName}</div>

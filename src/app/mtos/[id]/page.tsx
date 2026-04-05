@@ -23,7 +23,13 @@ export default async function MtoDetailsPage({ params }: { params: Promise<{ id:
       <header style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link href="/mtos" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Pipeline</Link>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>MTO Query: MTO-{mto.queryNo.toString().padStart(4, '0')}</h1>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>
+            {mto.order?.staffMtoId ? (
+              <span>Order: {mto.order.staffMtoId}</span>
+            ) : (
+              <span>Query: Q-{mto.queryNo.toString().padStart(4, '0')}</span>
+            )}
+          </h1>
           <span className={`badge ${mto.status === 'ACCEPTED' ? 'badge-success' : 'badge-primary'}`} style={{ border: '1px solid currentColor' }}>
             {mto.status}
           </span>

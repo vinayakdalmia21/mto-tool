@@ -55,7 +55,13 @@ export default async function MtosPage() {
                     {mto.leadType}
                   </span>
                 </td>
-                <td style={{ padding: '0.75rem', fontWeight: 600 }}>MTO-{mto.queryNo.toString().padStart(4, '0')}</td>
+                <td style={{ padding: '0.75rem', fontWeight: 600 }}>
+                  {mto.order?.staffMtoId ? (
+                    <span style={{ color: 'var(--success)' }}>{mto.order.staffMtoId}</span>
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)' }}>Q-{mto.queryNo.toString().padStart(4, '0')}</span>
+                  )}
+                </td>
                 <td style={{ padding: '0.75rem' }}>{mto.mtoType}</td>
                 <td style={{ padding: '0.75rem' }}>
                   {mto.referenceImages ? <span style={{ color: 'var(--primary)' }}>Yes</span> : <span style={{ color: 'var(--text-muted)' }}>No</span>}

@@ -123,7 +123,7 @@ export default function DashboardClient({
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>MTO ID</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Tracking ID</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Customer</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Status</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Action Required By</th>
@@ -144,7 +144,13 @@ export default function DashboardClient({
                         const { team, action } = getActionRequired(q.status);
                         return (
                           <tr key={q.id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                            <td style={{ padding: '1rem', fontWeight: 600 }}>MTO-{String(q.queryNo || 0).padStart(4, '0')}</td>
+                            <td style={{ padding: '1rem', fontWeight: 600 }}>
+                              {q.order?.staffMtoId ? (
+                                <div style={{ color: 'var(--success)' }}>{q.order.staffMtoId}</div>
+                              ) : (
+                                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Q-{String(q.queryNo || 0).padStart(4, '0')}</div>
+                              )}
+                            </td>
                             <td style={{ padding: '1rem' }}>{q.customer?.name}</td>
                             <td style={{ padding: '1rem' }}>
                               <span className="badge badge-info" style={{ textTransform: 'capitalize' }}>

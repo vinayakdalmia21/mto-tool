@@ -30,9 +30,9 @@ export async function getMasterTrackingStats() {
   // 2. Stage-wise Funnel
   const funnelRaw = await prisma.mtoQuery.groupBy({
     by: ['status'],
-    _count: { id: true }
+    _count: { _all: true }
   });
-  const funnel = funnelRaw.map(f => ({ name: f.status, value: f._count.id }));
+  const funnel = funnelRaw.map(f => ({ name: f.status, value: f._count._all }));
 
   // 3. Staff Performance
   const staffQueries = await prisma.mtoQuery.findMany({
@@ -62,9 +62,9 @@ export async function getMasterTrackingStats() {
   const dropReasonsRaw = await prisma.mtoQuery.groupBy({
     by: ['dropReason'],
     where: { status: 'DROPPED', dropReason: { not: null } },
-    _count: { id: true }
+    _count: { _all: true }
   });
-  const dropReasons = dropReasonsRaw.map(d => ({ name: d.dropReason || 'Unknown', value: d._count.id }));
+  const dropReasons = dropReasonsRaw.map(d => ({ name: d.dropReason || 'Unknown', value: d._count._all }));
 
   // 5. Revenue Metrics (Pipeline vs Realized)
   const allPricings = await prisma.promisedPricing.findMany({
@@ -133,7 +133,8 @@ export async function getMasterTableQueries() {
       estimatedValue: q.pricing?.finalPrice || null,
       daysInPipeline,
       lastActivity: q.updatedAt,
-      isInactive
+      isInactive,
+      staffMtoId: q.order?.staffMtoId || null
     };
   });
 }
