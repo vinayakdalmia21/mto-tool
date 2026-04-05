@@ -27,7 +27,7 @@ export default async function VendorEstimateSharePage(props: { params: Promise<{
             Vendor Requirement Specification
           </h1>
           <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            Reference: MTO-{queryNo}
+            Reference: Q-{queryNo}
           </div>
         </header>
 

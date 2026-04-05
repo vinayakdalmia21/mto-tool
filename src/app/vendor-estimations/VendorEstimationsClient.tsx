@@ -103,22 +103,22 @@ export default function VendorEstimationsClient({ pendingQueries, history, globa
           </h2>
           
           <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Target MTO Query *</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Target Query *</label>
             {editEstId ? (
                <div style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--surface-border)', background: 'rgba(255,255,255,0.03)' }}>
-                 MTO-{String(editingEst.mtoQuery?.queryNo).padStart(4, '0')} | {editingEst.mtoQuery?.category}
+                 Q-{String(editingEst.mtoQuery?.queryNo).padStart(4, '0')} | {editingEst.mtoQuery?.category}
                </div>
             ) : (
                <>
                  <select 
                    value={selectedQueryId}
                    onChange={(e) => setSelectedQueryId(e.target.value)}
-                   style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--surface-border)', background: 'rgba(255,255,255,0.03)', color: 'var(--text-main)' }}
+                   style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--surface-border)', background: 'rgba(255,155,255,0.03)', color: 'var(--text-main)' }}
                  >
-                   <option value="">-- Select Pending MTO --</option>
+                   <option value="">-- Select Pending Query --</option>
                    {pendingQueries.map(q => (
                      <option key={q.id} value={q.id}>
-                       MTO-{String(q.queryNo).padStart(4, '0')} | {q.category} ({q.mtoType})
+                       Q-{String(q.queryNo).padStart(4, '0')} | {q.category} ({q.mtoType})
                      </option>
                    ))}
                  </select>
@@ -221,7 +221,7 @@ export default function VendorEstimationsClient({ pendingQueries, history, globa
                         onClick={() => setExpandedQueries(prev => ({ ...prev, [queryId]: !isExpanded }))}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                          <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>MTO-{queryNo}</span>
+                          <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Q-{queryNo}</span>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <span style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '0.85rem' }}>{estimates.length} Version{estimates.length > 1 ? 's' : ''} Logged</span>
                             <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Latest: {finalEst.vendorName}</span>

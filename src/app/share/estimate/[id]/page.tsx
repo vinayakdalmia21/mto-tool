@@ -38,7 +38,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
           Quotation
         </h1>
         <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontSize: '1.1rem' }}>
-          Ref: MTO-{queryNoStr} | {mto.customer.name}
+          Ref: Q-{queryNoStr} | {mto.customer.name}
         </p>
       </header>
 
