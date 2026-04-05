@@ -60,7 +60,7 @@ export async function getLockedPriceQueries() {
 }
 
 // Place order with Advance
-export async function placeOrder(mtoId: string, advanceAmount: number) {
+export async function placeOrder(mtoId: string, advanceAmount: number, staffMtoId?: string) {
   const pricing = await prisma.promisedPricing.findUnique({
     where: { mtoQueryId: mtoId }
   });
@@ -74,12 +74,14 @@ export async function placeOrder(mtoId: string, advanceAmount: number) {
     update: {
       advanceAmount,
       remainingAmount: remaining > 0 ? remaining : 0,
+      ...(staffMtoId && { staffMtoId }),
     },
     create: {
       mtoQueryId: mtoId,
       advanceAmount,
       remainingAmount: remaining > 0 ? remaining : 0,
       status: 'PENDING',
+      staffMtoId: staffMtoId || null,
     }
   });
 

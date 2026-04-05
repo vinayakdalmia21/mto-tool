@@ -31,6 +31,7 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
   const isMovedToOps = existingOrder?.orderStatus === 'MOVED_TO_OPS' || query.status === 'ORDER_PLACED';
 
   const [advance, setAdvance] = useState(existingOrder?.advanceAmount?.toString() || '');
+  const [mtoIdValue, setMtoIdValue] = useState(existingOrder?.staffMtoId || '');
   const [saving, setSaving] = useState(false);
   const [moving, setMoving] = useState(false);
 
@@ -39,9 +40,10 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
 
   const handleSave = async () => {
     if (advanceNum <= 0) { alert('Please enter advance amount'); return; }
+    if (!mtoIdValue.trim()) { alert('Please enter the core MTO ID to link this payment.'); return; }
     setSaving(true);
     try {
-      await placeOrder(query.id, advanceNum);
+      await placeOrder(query.id, advanceNum, mtoIdValue);
       onRefresh();
     } catch (err: any) {
       alert('Error: ' + err.message);
@@ -50,9 +52,10 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
   };
 
   const handleMoveToOps = async () => {
+    if (!mtoIdValue.trim()) { alert('Please enter the core MTO ID to link this payment before mapping to Operations.'); return; }
     setMoving(true);
     try {
-      await placeOrder(query.id, advanceNum);
+      await placeOrder(query.id, advanceNum, mtoIdValue);
       await moveToOperations(query.id);
       onRefresh();
     } catch (err: any) {
@@ -83,9 +86,13 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
           <span style={{ color: 'var(--text-muted)', marginLeft: 'auto' }}>MTO ID: {existingOrder?.staffMtoId}</span>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'end' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 1fr) minmax(120px, 1fr) minmax(120px, 1fr)', gap: '1rem', alignItems: 'end' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Advance Amount (₹)</label>
+            <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>MTO ID *</label>
+            <input type="text" value={mtoIdValue} onChange={e => setMtoIdValue(e.target.value)} placeholder="e.g. VEDA-MTO-89" style={{ width: '100%', padding: '0.6rem' }} />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Advance Amount (₹) *</label>
             <input type="number" value={advance} onChange={e => setAdvance(e.target.value)} placeholder="Enter advance" style={{ width: '100%', padding: '0.6rem' }} />
           </div>
           <div>
