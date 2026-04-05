@@ -40,6 +40,10 @@ export async function submitVendorEstimation(formData: FormData) {
       base64Image = `data:${rawImage.type};base64,${base64Str}`;
     }
 
+    // Calculate version
+    const count = await prisma.vendorEstimation.count({ where: { mtoQueryId } });
+    const version = count + 1;
+
     const estimation = await prisma.vendorEstimation.create({
       data: {
         mtoQueryId,
@@ -50,7 +54,8 @@ export async function submitVendorEstimation(formData: FormData) {
         goldRate,
         remarks,
         images: base64Image,
-        isAccepted: false
+        isAccepted: false,
+        version
       }
     });
 
@@ -104,6 +109,13 @@ export async function acceptVendorEstimate(id: number) {
 
 export async function updateVendorEstimation(id: number, formData: FormData) {
   try {
+    const existing = await prisma.vendorEstimation.findUnique({
+      where: { id },
+      select: { mtoQueryId: true, images: true }
+    });
+    if (!existing) throw new Error("Estimation not found");
+
+    const mtoQueryId = existing.mtoQueryId;
     const vendorName = formData.get('vendorName') as string;
     const goldWeight = formData.get('goldWeight') as string || null;
     const diamondWeight = formData.get('diamondWeight') as string || null;
@@ -112,28 +124,36 @@ export async function updateVendorEstimation(id: number, formData: FormData) {
     const remarks = formData.get('remarks') as string;
 
     const rawImage = formData.get('image');
-    let base64Image: string | undefined = undefined;
+    let base64Image: string | null = null;
     if (rawImage instanceof File && rawImage.size > 0) {
       const arrayBuffer = await rawImage.arrayBuffer();
       const base64Str = Buffer.from(arrayBuffer).toString('base64');
       base64Image = `data:${rawImage.type};base64,${base64Str}`;
+    } else {
+       // Keep existing image if not uploading a new one, since this is a "save as new version"
+       base64Image = existing.images;
     }
 
-    const updated = await prisma.vendorEstimation.update({
-      where: { id },
+    const count = await prisma.vendorEstimation.count({ where: { mtoQueryId } });
+    const version = count + 1;
+
+    const newVersion = await prisma.vendorEstimation.create({
       data: {
+        mtoQueryId,
         vendorName,
         goldWeight,
         diamondWeight,
         labourCharges,
         goldRate,
         remarks,
-        ...(base64Image !== undefined && { images: base64Image })
+        images: base64Image,
+        isAccepted: false,
+        version
       }
     });
 
     revalidatePath('/vendor-estimations');
-    return { success: true, estimation: updated };
+    return { success: true, estimation: newVersion };
   } catch (error: any) {
     return { success: false, error: error.message };
   }

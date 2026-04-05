@@ -223,7 +223,7 @@ export default function VendorEstimationsClient({ pendingQueries, history, globa
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                           <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Q-{queryNo}</span>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '0.85rem' }}>{estimates.length} Version{estimates.length > 1 ? 's' : ''} Logged</span>
+                            <span style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '0.85rem' }}>v{finalEst.version} • {estimates.length} Version{estimates.length > 1 ? 's' : ''} Logged</span>
                             <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Latest: {finalEst.vendorName}</span>
                           </div>
                         </div>
@@ -248,7 +248,7 @@ export default function VendorEstimationsClient({ pendingQueries, history, globa
                                   
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                      <span className="badge" style={{ background: 'var(--surface-border)' }}>v{versionNum}</span>
+                                      <span className="badge" style={{ background: 'var(--surface-border)' }}>v{est.version}</span>
                                       <strong style={{ fontSize: '1rem' }}>{est.vendorName}</strong>
                                       {est.isAccepted && <span style={{ color: 'var(--success)', fontSize: '0.8rem', marginLeft: '0.5rem' }}>✓ Customer Selected</span>}
                                     </div>

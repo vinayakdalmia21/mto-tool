@@ -78,6 +78,7 @@ model VendorEstimation {
   isAccepted    Boolean  @default(false)
   labourCharges Float?   // New field for vendor labour quote
   goldRate      Float?   // New field for vendor gold rate quote
+  version       Int      @default(1)
   createdAt     DateTime @default(now())
 
   mtoQuery MtoQuery @relation(fields: [mtoQueryId], references: [id])
