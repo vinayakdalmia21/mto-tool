@@ -54,6 +54,7 @@ export async function createMtoQuery(formData: FormData) {
   const diamondCaratage = formData.get('diamondCaratage') as string;
   const goldWeight = formData.get('goldWeight') as string;
   const size = formData.get('size') as string;
+  const priceSensitivity = formData.get('priceSensitivity') as string | null;
 
   // 3. Create MTO
   const mto = await prisma.mtoQuery.create({
@@ -64,6 +65,7 @@ export async function createMtoQuery(formData: FormData) {
       mtoType,
       catalogueSku: catalogueSku || null,
       category,
+      priceSensitivity: priceSensitivity || null,
       metalType,
       isStudded,
       diamondCaratage: diamondCaratage || null,

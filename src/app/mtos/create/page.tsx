@@ -55,13 +55,21 @@ export default function CreateMtoPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Lead Priority</label>
               <select name="leadType">
-                <option value="HIGH">High (Hot Lead)</option>
+                <option value="HIGH">High</option>
                 <option value="MEDIUM">Medium</option>
                 <option value="LOW">Low</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Price Sensitivity</label>
+              <select name="priceSensitivity">
+                <option value="">Select...</option>
+                <option value="FLEXIBLE">Flexible</option>
+                <option value="NON_FLEXIBLE">Non-Flexible</option>
               </select>
             </div>
             <div>
@@ -130,7 +138,7 @@ export default function CreateMtoPage() {
             </div>
             {isStudded === 'true' && (
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Diamond Caratage</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Approx Diamond Caratage</label>
                 <input name="diamondCaratage" placeholder="e.g. 1.5 Ct" />
               </div>
             )}
