@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
-export default async function VendorEstimateSharePage({ params }: { params: { id: string } }) {
+export default async function VendorEstimateSharePage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const estId = parseInt(params.id, 10);
   if (isNaN(estId)) return notFound();
 
