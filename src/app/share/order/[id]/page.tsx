@@ -9,18 +9,18 @@ export default async function SharedOrderPage({ params }: { params: Promise<{ id
     where: { id },
     include: {
       customer: true,
-      order: true,
+      orders: { take: 1, orderBy: { version: 'desc' } },
       estimations: { orderBy: { version: 'desc' }, take: 1 },
       vendorEstimations: { where: { isAccepted: true }, take: 1 },
       pricing: true,
     }
   });
 
-  if (!mto || !mto.order) {
+  if (!mto || !mto.orders?.length) {
     notFound();
   }
 
-  const order = mto.order;
+  const order = mto.orders[0];
   const est = mto.estimations[0];
   const vendorEst = mto.vendorEstimations[0];
   const cadDesigns: string[] = order.cadDesigns ? JSON.parse(order.cadDesigns) : [];

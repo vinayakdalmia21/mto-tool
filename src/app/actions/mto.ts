@@ -94,7 +94,7 @@ export async function getMtos() {
     include: {
       customer: true,
       staff: true,
-      order: true
+      orders: { orderBy: { version: 'desc' } }
     },
     orderBy: { createdAt: 'desc' }
   });
@@ -105,20 +105,21 @@ export async function deleteMtoQuery(id: string) {
   try {
     // We must delete dependent records in a transaction to avoid foreign key errors
     await prisma.$transaction(async (tx) => {
-      // 1. If it has an order, let's cascade delete the order's dependents
-      const order = await tx.mtoOrder.findUnique({ 
+      // Delete all orders and their dependents
+      const orders = await tx.mtoOrder.findMany({ 
         where: { mtoQueryId: id },
         include: { purchaseOrder: true } 
       });
-      if (order) {
+
+      for (const order of orders) {
          if (order.purchaseOrder) {
            await tx.qcRecord.deleteMany({ where: { purchaseOrderId: order.purchaseOrder.id } });
+           await tx.purchaseOrder.delete({ where: { id: order.purchaseOrder.id } });
          }
-         await tx.purchaseOrder.deleteMany({ where: { mtoOrderId: order.id } });
          await tx.invoice.deleteMany({ where: { mtoOrderId: order.id } });
-         await tx.mtoOrder.delete({ where: { mtoQueryId: id } });
       }
 
+      await tx.mtoOrder.deleteMany({ where: { mtoQueryId: id } });
       await tx.payment.deleteMany({ where: { mtoQueryId: id } });
       await tx.promisedPricing.deleteMany({ where: { mtoQueryId: id } });
       await tx.estimation.deleteMany({ where: { mtoQueryId: id } });

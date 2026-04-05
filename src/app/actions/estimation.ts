@@ -20,7 +20,7 @@ export async function getMtoQueryDetails(mtoId: string) {
     where: { id: mtoId },
     include: {
       customer: true,
-      order: true,
+      orders: true,
       vendorEstimations: {
         orderBy: { createdAt: 'desc' }
       },

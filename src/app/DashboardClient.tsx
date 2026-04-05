@@ -145,8 +145,8 @@ export default function DashboardClient({
                         return (
                           <tr key={q.id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
                             <td style={{ padding: '1rem', fontWeight: 600 }}>
-                              {q.order?.staffMtoId ? (
-                                <div style={{ color: 'var(--success)' }}>{q.order.staffMtoId}</div>
+                              {q.orders?.[0]?.staffMtoId ? (
+                                <span style={{ color: 'var(--success)' }}>{q.orders[0].staffMtoId}</span>
                               ) : (
                                 <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Q-{String(q.queryNo || 0).padStart(4, '0')}</div>
                               )}

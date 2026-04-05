@@ -200,7 +200,11 @@ export async function getMasterTableQueries() {
       customer: true,
       staff: true,
       pricing: true,
-      order: { include: { purchaseOrder: true } }
+      orders: { 
+        include: { purchaseOrder: true },
+        orderBy: { version: 'desc' },
+        take: 1
+      }
     },
     orderBy: { updatedAt: 'desc' }
   });
@@ -216,12 +220,12 @@ export async function getMasterTableQueries() {
       staffName: q.staff?.name || 'N/A',
       status: q.status,
       leadType: q.leadType,
-      vendor: q.order?.purchaseOrder?.vendorName || 'Not Assigned',
+      vendor: q.orders[0]?.purchaseOrder?.vendorName || 'Not Assigned',
       estimatedValue: q.pricing?.finalPrice || null,
       daysInPipeline,
       lastActivity: q.updatedAt,
       isInactive,
-      staffMtoId: q.order?.staffMtoId || null
+      staffMtoId: q.orders[0]?.staffMtoId || null
     };
   });
 }

@@ -51,7 +51,7 @@ export async function getLockedPriceQueries() {
     include: {
       customer: true,
       pricing: true,
-      order: true,
+      orders: true,
       estimations: { orderBy: { version: 'desc' }, take: 1 },
       payment: true,
     },
@@ -75,7 +75,15 @@ export async function placeOrder(mtoId: string, advanceAmount: number, staffMtoI
   });
   const nextVersion = (lastOrder?.version || 0) + 1;
 
-  // Create new MTO Order Version
+  // Get latest estimation to snapshot specs
+  const latestEst = await prisma.estimation.findFirst({
+    where: { mtoQueryId: mtoId },
+    orderBy: { version: 'desc' }
+  });
+
+  if (!latestEst) throw new Error("No estimation found to place order");
+
+  // Create new MTO Order Version with snapshots
   await prisma.mtoOrder.create({
     data: {
       mtoQueryId: mtoId,
@@ -83,7 +91,18 @@ export async function placeOrder(mtoId: string, advanceAmount: number, staffMtoI
       remainingAmount: remaining > 0 ? remaining : 0,
       status: 'PENDING',
       staffMtoId: staffMtoId || null,
-      version: nextVersion
+      version: nextVersion,
+      // Pricing Snapshot
+      goldWeight: latestEst.goldWeight,
+      goldRate: latestEst.goldRate,
+      diamondWeight: latestEst.diamondWeight,
+      diamondRate: latestEst.diamondRate,
+      makingPercent: latestEst.makingPercent,
+      discountPercent: latestEst.discountPercent,
+      otherStones: latestEst.otherStones,
+      gstAmount: latestEst.gstAmount,
+      discountAmount: latestEst.discountAmount,
+      totalAmount: latestEst.totalAmount
     }
   });
 
@@ -193,7 +212,9 @@ export async function moveToPurchaseOrder(mtoQueryId: string) {
     where: { id: mtoQueryId },
     data: { 
       status: 'PO_PENDING',
-      statusHistory: { create: { status: 'PO_PENDING' } }
+      statusHistory: {
+        create: { status: 'PO_PENDING' }
+      }
     }
   });
 
@@ -208,7 +229,7 @@ export async function getOrderForShare(mtoQueryId: string) {
     where: { id: mtoQueryId },
     include: {
       customer: true,
-      order: true,
+      orders: { orderBy: { version: 'desc' }, take: 1 },
       estimations: { orderBy: { version: 'desc' }, take: 1 },
       vendorEstimations: { where: { isAccepted: true }, take: 1 },
       pricing: true,

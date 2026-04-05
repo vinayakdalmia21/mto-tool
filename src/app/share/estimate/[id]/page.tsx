@@ -9,27 +9,37 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
     where: { id },
     include: {
       customer: true,
-      estimations: {
-        orderBy: { version: 'desc' },
-        take: 1
-      }
+      orders: { take: 1, orderBy: { version: 'desc' } },
+      estimations: { orderBy: { version: 'desc' }, take: 1 },
+      vendorEstimations: { where: { isAccepted: true }, take: 1 },
+      pricing: true,
     }
   });
 
-  if (!mto || !mto.estimations.length) {
+  if (!mto || !mto.orders?.length) {
     notFound();
   }
 
+  const order = mto.orders[0];
   const est = mto.estimations[0];
-  const queryNoStr = String(mto.queryNo).padStart(4, '0');
+  const queryNoStr = String(mto.queryNo || 0).padStart(4, '0');
 
-  // Logic values for the table
-  const goldTotal = (parseFloat(est.goldWeight) || 0) * est.goldRate;
-  const diamondTotal = (est.diamondWeight || 0) * (est.diamondRate || 0);
-  const makingCharge = goldTotal * (est.makingPercent / 100);
+  // Logic values for the table - Prefer Order Snapshots, Fallback to Estimation
+  const weight = order?.goldWeight || est?.goldWeight || '0';
+  const rate = order?.goldRate || est?.goldRate || 0;
+  const goldTotal = (parseFloat(weight) || 0) * (rate || 0);
+  
+  const dWeight = order?.diamondWeight ?? est?.diamondWeight ?? 0;
+  const dRate = order?.diamondRate ?? est?.diamondRate ?? 0;
+  const diamondTotal = (dWeight || 0) * (dRate || 0);
+  
+  const mPercent = order?.makingPercent ?? est?.makingPercent ?? 0;
+  const makingCharge = goldTotal * (mPercent / 100);
+  
   const hasDiamond = diamondTotal > 0;
-  const hasOtherStones = est.otherStones != null && est.otherStones > 0;
-  const hasDiscount = est.discountAmount > 0;
+  const oStones = order?.otherStones ?? est?.otherStones ?? 0;
+  const hasOtherStones = oStones > 0;
+  const hasDiscount = (order?.discountAmount || est?.discountAmount || 0) > 0;
 
   return (
     <div style={{ maxWidth: 800, margin: '2rem auto', padding: '0 1.5rem', fontFamily: 'Inter, sans-serif' }}>
@@ -114,7 +124,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', gap: '2rem', fontSize: '0.95rem' }}>
             <span style={{ color: 'var(--text-muted)' }}>GST (3%)</span>
-            <span style={{ fontWeight: 600, width: '100px', textAlign: 'right' }}>₹{est.gstAmount.toLocaleString()}</span>
+            <span style={{ fontWeight: 600, width: '100px', textAlign: 'right' }}>₹{(order.gstAmount || 0).toLocaleString()}</span>
           </div>
           
           {hasDiscount ? (
@@ -126,7 +136,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
 
           <div style={{ marginTop: '1rem', paddingTop: '1.5rem', borderTop: '2px solid var(--surface-border)', display: 'flex', gap: '2rem', fontSize: '1.5rem', fontWeight: 800 }}>
              <span style={{ color: 'var(--text-main)' }}>Total Value</span>
-             <span style={{ color: 'var(--primary)', width: '150px', textAlign: 'right' }}>₹{est.finalEstimatedPrice.toLocaleString()}</span>
+             <span style={{ color: 'var(--primary)', width: '150px', textAlign: 'right' }}>₹{(order.advanceAmount + order.remainingAmount).toLocaleString()}</span>
           </div>
         </div>
 

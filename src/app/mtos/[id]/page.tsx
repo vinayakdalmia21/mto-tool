@@ -26,10 +26,10 @@ export default async function MtoDetailsPage({ params }: { params: Promise<{ id:
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link href="/mtos" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Pipeline</Link>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-            {mto.order?.staffMtoId ? (
-              <span>Order: {mto.order.staffMtoId}</span>
+            {mto.orders?.[0]?.staffMtoId ? (
+              <span>Order: {mto.orders[0].staffMtoId}</span>
             ) : (
-              <span>Query: Q-{mto.queryNo.toString().padStart(4, '0')}</span>
+              <span>Query: Q-{ (mto.queryNo || 0).toString().padStart(4, '0')}</span>
             )}
           </h1>
           <span className={`badge ${mto.status === 'ACCEPTED' ? 'badge-success' : 'badge-primary'}`} style={{ border: '1px solid currentColor' }}>

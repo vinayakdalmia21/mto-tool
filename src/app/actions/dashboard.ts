@@ -39,7 +39,10 @@ export async function getAllQueriesForDashboard() {
   return await prisma.mtoQuery.findMany({
     include: {
       customer: true,
-      order: true,
+      orders: { 
+        take: 1, 
+        orderBy: { version: 'desc' } 
+      },
       pricing: true,
       vendorEstimations: { 
         where: { isAccepted: true },

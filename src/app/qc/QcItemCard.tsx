@@ -10,19 +10,20 @@ export default function QcItemCard({ po }: { po: any }) {
   const [passMode, setPassMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Promised Data (from Pricing/Vendor Est)
-  const promised = po.mtoOrder.mtoQuery.pricing;
-  const vendorEst = po.mtoOrder.mtoQuery.vendorEstimations[0];
+  // Promised Data (from the Order Snapshot)
+  const promised = po.mtoOrder;
+  const queryPricing = po.mtoOrder.mtoQuery?.pricing;
+  const vendorEst = po.mtoOrder.mtoQuery?.vendorEstimations?.[0];
 
   // Actuals State (Detailed Pricing Table)
   const [actuals, setActuals] = useState({
-    goldWeight: promised?.goldWeight || vendorEst?.goldWeight || 0,
-    goldRate: promised?.goldRate || 0,
-    diamondWeight: promised?.diamondWeight || vendorEst?.diamondWeight || 0,
-    diamondRate: promised?.diamondRate || vendorEst?.diamondRate || 0,
-    makingPercent: promised?.makingPercent || 0,
-    otherStones: promised?.otherStones || 0,
-    discountPercent: promised?.discountPercent || 0,
+    goldWeight: promised?.goldWeight || queryPricing?.goldWeight || vendorEst?.goldWeight || 0,
+    goldRate: promised?.goldRate || queryPricing?.goldRate || 0,
+    diamondWeight: promised?.diamondWeight || queryPricing?.diamondWeight || vendorEst?.diamondWeight || 0,
+    diamondRate: promised?.diamondRate || queryPricing?.diamondRate || vendorEst?.diamondRate || 0,
+    makingPercent: promised?.makingPercent || queryPricing?.makingPercent || 0,
+    otherStones: promised?.otherStones || queryPricing?.otherStones || 0,
+    discountPercent: promised?.discountPercent || queryPricing?.discountPercent || 0,
     gstPercent: 3,
     notes: ""
   });
@@ -40,7 +41,7 @@ export default function QcItemCard({ po }: { po: any }) {
   const taxableTotal = subtotal - discountAmount;
   const gstAmount = taxableTotal * (Number(actuals.gstPercent) / 100);
   const actualTotal = taxableTotal + gstAmount;
-  const difference = actualTotal - (promised?.finalPrice || 0);
+  const difference = actualTotal - (promised?.totalAmount || queryPricing?.finalPrice || 0);
 
   async function handleSaveActuals(status: string) {
     setLoading(true);
@@ -83,7 +84,7 @@ export default function QcItemCard({ po }: { po: any }) {
         <div>
           <h3 style={{ margin: 0 }}>PO #{String(po.id).padStart(4, '0')}</h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-            Vendor: <strong>{po.vendorName}</strong> | {po.mtoOrder.mtoQuery.customer.name}
+            Vendor: <strong>{po.vendorName}</strong> | {po.mtoOrder.mtoQuery?.customer?.name || 'Unknown'}
           </p>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -241,7 +242,7 @@ export default function QcItemCard({ po }: { po: any }) {
               {/* Grand Total Comparison */}
               <tr style={{ fontWeight: 700, background: 'rgba(255,255,255,0.05)', fontSize: '0.9rem' }}>
                 <td style={{ padding: '0.8rem 0.5rem' }}>TOTAL</td>
-                <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem' }}>₹{promised?.finalPrice?.toLocaleString()}</td>
+                <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem' }}>₹{(promised?.totalAmount || queryPricing?.finalPrice || 0).toLocaleString()}</td>
                 <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem', color: 'var(--primary)' }}>₹{actualTotal.toLocaleString()}</td>
                 <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem', color: difference > 0 ? 'var(--error)' : 'var(--success)' }}>
                   ₹{difference.toLocaleString()}

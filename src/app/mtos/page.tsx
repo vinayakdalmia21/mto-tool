@@ -58,8 +58,8 @@ export default async function MtosPage() {
                   </span>
                 </td>
                 <td style={{ padding: '0.75rem', fontWeight: 600 }}>
-                  {mto.order?.staffMtoId ? (
-                    <span style={{ color: 'var(--success)' }}>{mto.order.staffMtoId}</span>
+                  {mto.orders?.[0]?.staffMtoId ? (
+                    <span style={{ color: 'var(--success)' }}>{mto.orders[0].staffMtoId}</span>
                   ) : (
                     <span style={{ color: 'var(--text-muted)' }}>Q-{mto.queryNo.toString().padStart(4, '0')}</span>
                   )}
