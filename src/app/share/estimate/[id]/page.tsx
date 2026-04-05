@@ -26,8 +26,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
   // Logic values for the table
   const goldTotal = (parseFloat(est.goldWeight) || 0) * est.goldRate;
   const diamondTotal = (est.diamondWeight || 0) * (est.diamondRate || 0);
-  const subtotal1 = goldTotal + diamondTotal;
-  const makingCharge = subtotal1 * (est.makingPercent / 100);
+  const makingCharge = goldTotal * (est.makingPercent / 100);
   const hasDiamond = diamondTotal > 0;
   const hasOtherStones = est.otherStones != null && est.otherStones > 0;
   const hasDiscount = est.discountAmount > 0;

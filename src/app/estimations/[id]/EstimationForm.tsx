@@ -52,16 +52,14 @@ export default function EstimationForm({
   // Calculations
   const goldAmount = (parseFloat(goldWeight) || 0) * (parseFloat(goldRate) || 0);
   const diamondAmount = (parseFloat(diamondWeight) || 0) * (parseFloat(diamondRate) || 0);
-  const subtotal1 = goldAmount + diamondAmount;
-  const makingAmount = subtotal1 * (parseFloat(makingPercent) / 100);
+  const makingAmount = goldAmount * (parseFloat(makingPercent) / 100);
   const otherAmount = parseFloat(otherStones) || 0;
   
-  const subtotal2 = subtotal1 + makingAmount + otherAmount;
-  const gstAmount = subtotal2 * 0.03;
-  const totalWithGst = subtotal2 + gstAmount;
-  
   const discountAmount = makingAmount * (parseFloat(discountPercent) / 100);
-  const finalValue = totalWithGst - discountAmount;
+  const taxableSubtotal = goldAmount + diamondAmount + otherAmount + makingAmount - discountAmount;
+  
+  const gstAmount = taxableSubtotal * 0.03;
+  const finalValue = taxableSubtotal + gstAmount;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -76,7 +74,7 @@ export default function EstimationForm({
       otherStones,
       gstAmount: gstAmount.toFixed(2),
       discountAmount: discountAmount.toFixed(2),
-      totalAmount: totalWithGst.toFixed(2),
+      totalAmount: taxableSubtotal.toFixed(2),
       finalEstimatedPrice: finalValue.toFixed(2),
       notes
     });
@@ -168,22 +166,6 @@ export default function EstimationForm({
                   ₹{makingAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </td>
               </tr>
-              {/* GST ROW */}
-              <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>GST (3%)</td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
-                  ₹{gstAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                </td>
-              </tr>
-              {/* TOTAL ROW */}
-              <tr style={{ background: 'rgba(255,255,255,0.05)', fontWeight: 700 }}>
-                <td colSpan={3} style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Total Amount</td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
-                  ₹{totalWithGst.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                </td>
-              </tr>
               {/* DISCOUNT ROW */}
               <tr>
                 <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600, color: 'var(--success)' }}>
@@ -195,6 +177,22 @@ export default function EstimationForm({
                 <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
                 <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right', color: 'var(--success)' }}>
                   - ₹{discountAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                </td>
+              </tr>
+              {/* SUBTOTAL ROW */}
+              <tr style={{ background: 'rgba(255,255,255,0.05)', fontWeight: 700 }}>
+                <td colSpan={3} style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Taxable Subtotal</td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                  ₹{taxableSubtotal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                </td>
+              </tr>
+              {/* GST ROW */}
+              <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>GST (3%)</td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                  ₹{gstAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </td>
               </tr>
               {/* FINAL VALUE */}
