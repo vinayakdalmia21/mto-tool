@@ -70,7 +70,7 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
         <div>
           <h3 style={{ marginBottom: '0.3rem' }}>{query.customer?.name}</h3>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            {query.category} • {query.metalType} {query.goldKaratage || ''} • MTO-{String(query.queryNo).padStart(4, '0')}
+            {query.category} • {query.metalType} {query.goldKaratage || ''} • QRY-{String(query.queryNo).padStart(4, '0')}
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
