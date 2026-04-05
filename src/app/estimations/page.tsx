@@ -6,11 +6,14 @@ export const dynamic = "force-dynamic";
 export default async function EstimationsPage() {
   const mtos = await getOpenMtosForEstimation();
 
-  // Sort: OPEN > ESTIMATING > NEGOTIATION > Others
+  // Sort: Active Action Needed First
+  const activeStatus = ['ESTIMATING', 'AWAITING_RESPONSE', 'NEGOTIATION'];
   const sortedMtos = [...mtos].sort((a, b) => {
-    if (a.status === 'OPEN' && b.status !== 'OPEN') return -1;
-    if (a.status !== 'OPEN' && b.status === 'OPEN') return 1;
-    return 0;
+    const aActive = activeStatus.includes(a.status);
+    const bActive = activeStatus.includes(b.status);
+    if (aActive && !bActive) return -1;
+    if (!aActive && bActive) return 1;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   return (
@@ -24,7 +27,7 @@ export default async function EstimationsPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
-              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>MTO ID</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Query ID</th>
               <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Customer</th>
               <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Status</th>
               <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Specs</th>
@@ -38,12 +41,12 @@ export default async function EstimationsPage() {
             ) : null}
             {sortedMtos.map((mto: any) => (
               <tr key={mto.id} style={{ borderBottom: '1px solid var(--surface-border)' }} className="glass-panel-interactive">
-                <td style={{ padding: '1rem', fontWeight: 500 }}>MTO-{String(mto.queryNo || 0).padStart(4, '0')}</td>
+                <td style={{ padding: '1rem', fontWeight: 500 }}>QRY-{String(mto.queryNo || 0).padStart(4, '0')}</td>
                 <td style={{ padding: '1rem' }}>
                   <div style={{ fontWeight: 600 }}>{mto.customer?.name}</div>
                 </td>
                 <td style={{ padding: '1rem' }}>
-                  <span className={`badge ${mto.status === 'OPEN' ? 'badge-primary' : 'badge-info'}`}>
+                  <span className={`badge ${activeStatus.includes(mto.status) ? 'badge-primary' : mto.status === 'DROPPED' ? 'badge-danger' : 'badge-success'}`}>
                     {mto.status.replace(/_/g, ' ')}
                   </span>
                 </td>
