@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { submitVendorEstimation, updateVendorEstimation, acceptVendorEstimate } from '../actions/vendor';
+import { formatIST } from '@/lib/date-utils';
 
 export default function VendorEstimationsClient({ pendingQueries, history, globalPricing }: { pendingQueries: any[], history: any[], globalPricing: any }) {
   const [selectedQueryId, setSelectedQueryId] = useState('');
@@ -242,7 +243,7 @@ export default function VendorEstimationsClient({ pendingQueries, history, globa
                         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {estimates.map((est: any, idx: number) => {
-                              const versionNum = estimates.length - idx; // ascending version tags conceptually
+                              const anyAccepted = estimates.some((e: any) => e.isAccepted);
                               return (
                                 <div key={est.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: est.isAccepted ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.02)', borderRadius: '8px', border: est.isAccepted ? '1px solid var(--success)' : '1px solid var(--surface-border)' }}>
                                   
@@ -261,7 +262,7 @@ export default function VendorEstimationsClient({ pendingQueries, history, globa
                                   </div>
 
                                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
-                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(est.createdAt).toLocaleDateString()}</span>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{formatIST(est.createdAt)}</span>
                                     
                                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem' }}>
                                       <button onClick={() => handleEditClick(est)} className="btn" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', background: 'transparent', border: '1px solid var(--surface-border)' }}>
@@ -270,7 +271,7 @@ export default function VendorEstimationsClient({ pendingQueries, history, globa
                                       <button onClick={() => handleCopyLink(est.id)} className="btn" title="Copy Shareable Link" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)' }}>
                                         🔗 Share Link
                                       </button>
-                                      {!est.isAccepted && (
+                                      {!anyAccepted && (
                                         <button onClick={() => handleAccept(est.id)} className="btn btn-primary" title="Select this vendor & move to Estimations" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>
                                           ✓ Move to Estimations
                                         </button>

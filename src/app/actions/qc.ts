@@ -28,10 +28,15 @@ export async function getReceivedPos() {
 
 export async function recordQcActuals(poId: number, data: {
   actualGoldWeight: number;
-  actualMakingCharges: number;
-  actualStoneWeight: number;
-  actualStoneValue: number;
-  actualOtherCharges: number;
+  actualGoldRate: number;
+  actualDiamondWeight: number;
+  actualDiamondRate: number;
+  actualMakingPercent: number;
+  actualOtherStones: number;
+  actualDiscountPercent: number;
+  actualTaxableTotal: number;
+  actualGstAmount: number;
+  actualFinalValue: number;
   notes?: string;
   status: string;
 }) {
@@ -41,10 +46,15 @@ export async function recordQcActuals(poId: number, data: {
     where: { purchaseOrderId: poId },
     update: {
       actualGoldWeight: data.actualGoldWeight,
-      actualMakingCharges: data.actualMakingCharges,
-      actualStoneWeight: data.actualStoneWeight,
-      actualStoneValue: data.actualStoneValue,
-      actualOtherCharges: data.actualOtherCharges,
+      actualGoldRate: data.actualGoldRate,
+      actualDiamondWeight: data.actualDiamondWeight,
+      actualDiamondRate: data.actualDiamondRate,
+      actualMakingPercent: data.actualMakingPercent,
+      actualOtherStones: data.actualOtherStones,
+      actualDiscountPercent: data.actualDiscountPercent,
+      actualTaxableTotal: data.actualTaxableTotal,
+      actualGstAmount: data.actualGstAmount,
+      actualFinalValue: data.actualFinalValue,
       notes: data.notes,
       status: data.status,
       iterations: data.status === 'REJECT' ? (existing?.iterations || 0) + 1 : (existing?.iterations || 0)
@@ -52,10 +62,15 @@ export async function recordQcActuals(poId: number, data: {
     create: {
       purchaseOrderId: poId,
       actualGoldWeight: data.actualGoldWeight,
-      actualMakingCharges: data.actualMakingCharges,
-      actualStoneWeight: data.actualStoneWeight,
-      actualStoneValue: data.actualStoneValue,
-      actualOtherCharges: data.actualOtherCharges,
+      actualGoldRate: data.actualGoldRate,
+      actualDiamondWeight: data.actualDiamondWeight,
+      actualDiamondRate: data.actualDiamondRate,
+      actualMakingPercent: data.actualMakingPercent,
+      actualOtherStones: data.actualOtherStones,
+      actualDiscountPercent: data.actualDiscountPercent,
+      actualTaxableTotal: data.actualTaxableTotal,
+      actualGstAmount: data.actualGstAmount,
+      actualFinalValue: data.actualFinalValue,
       notes: data.notes,
       status: data.status,
       iterations: data.status === 'REJECT' ? 1 : 0

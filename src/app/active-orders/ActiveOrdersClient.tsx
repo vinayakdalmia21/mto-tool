@@ -63,7 +63,7 @@ export default function ActiveOrdersClient({ orders }: { orders: any[] }) {
                 </td>
                 <td style={{ padding: '1rem', textAlign: 'right' }}>
                   <button className="btn" style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
-                    {expandedOrderId === order.mtoQueryId ? 'Collapse' : 'Manage CAD'}
+                    {expandedOrderId === order.mtoQueryId ? 'Collapse' : 'Open CAD Upload'}
                   </button>
                 </td>
               </tr>
@@ -93,6 +93,8 @@ function ActiveOrderCard({ order, onRefresh }: { order: any, onRefresh: () => vo
   const [cadUrl, setCadUrl] = useState('');
   const [pendingCads, setPendingCads] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [cadRequired, setCadRequired] = useState(order.cadRequired ?? true);
+  const [movingToPo, setMovingToPo] = useState(false);
 
   const handleAddPendingUrl = () => {
     if (!cadUrl.trim()) return;
@@ -137,6 +139,22 @@ function ActiveOrderCard({ order, onRefresh }: { order: any, onRefresh: () => vo
     const shareUrl = `${origin}/share/order/${mto.id}`;
     navigator.clipboard.writeText(shareUrl);
     alert('Order Share Link copied!');
+  };
+
+  const handleMoveToPo = async () => {
+    if (cadRequired && serverCads.length === 0 && pendingCads.length === 0) {
+      if (!confirm('CAD is required but no designs are uploaded. Move to PO anyway?')) return;
+    }
+    setMovingToPo(true);
+    try {
+      const { moveToPurchaseOrder } = await import('../actions/order-flow');
+      await moveToPurchaseOrder(mto.id);
+      onRefresh();
+      alert('Order moved to Purchase Order stage!');
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    }
+    setMovingToPo(false);
   };
 
   return (
@@ -187,20 +205,59 @@ function ActiveOrderCard({ order, onRefresh }: { order: any, onRefresh: () => vo
 
       {/* Upload & Pending Section */}
       <div style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px' }}>
-        <h5 style={{ marginBottom: '1rem' }}>Add New Designs</h5>
-        
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-          <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.3rem' }}>Image URL</label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <input type="text" value={cadUrl} onChange={e => setCadUrl(e.target.value)} placeholder="https://..." style={{ flex: 1, padding: '0.5rem' }} />
-              <button onClick={handleAddPendingUrl} className="btn" disabled={!cadUrl.trim()}>Add to List</button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h5 style={{ margin: 0 }}>Step 1: CAD Requirements</h5>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>CAD Required?</span>
+            <select 
+              value={cadRequired ? "yes" : "no"} 
+              onChange={e => setCadRequired(e.target.value === "yes")}
+              style={{ padding: '0.4rem', borderRadius: '4px', background: 'var(--surface-light)', border: '1px solid var(--surface-border)' }}
+            >
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+        </div>
+
+        {cadRequired && (
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem', marginTop: '1rem' }}>
+            <h5 style={{ marginBottom: '1rem' }}>Step 2: Add New Designs</h5>
+            
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.3rem' }}>Image URL</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input type="text" value={cadUrl} onChange={e => setCadUrl(e.target.value)} placeholder="https://..." style={{ flex: 1, padding: '0.5rem' }} />
+                  <button onClick={handleAddPendingUrl} className="btn" disabled={!cadUrl.trim()}>Add to List</button>
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.3rem' }}>File Upload</label>
+                <input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} style={{ padding: '0.4rem' }} />
+              </div>
             </div>
           </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.3rem' }}>File Upload</label>
-            <input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} style={{ padding: '0.4rem' }} />
-          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
+          <button 
+            onClick={handleSaveAll} 
+            className="btn" 
+            style={{ flex: 1, padding: '0.8rem', background: 'var(--info)', color: 'white' }}
+            disabled={uploading || (cadRequired && pendingCads.length === 0)}
+          >
+            {uploading ? 'Finalizing...' : '💾 Save CAD Configuration'}
+          </button>
+          <button 
+            onClick={handleMoveToPo} 
+            className="btn btn-primary" 
+            style={{ flex: 1, padding: '0.8rem' }}
+            disabled={movingToPo}
+          >
+            {movingToPo ? 'Moving...' : '🚀 Move to Purchase Order'}
+          </button>
         </div>
 
         {/* Pending Preview */}

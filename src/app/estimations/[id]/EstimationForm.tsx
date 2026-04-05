@@ -22,6 +22,8 @@ export default function EstimationForm({
   const [locking, setLocking] = useState(false);
   const [priceLocked, setPriceLocked] = useState(false);
   
+  const isLocked = ['PRICE_LOCKED', 'ORDER_PLACED', 'CAD_UPLOADED', 'COMPLETED'].includes(mto.status);
+
   // Dynamic Pricing Extraction
   const karr = mto.goldKaratage || '18K';
   const pricingMap: Record<string, number> = {
@@ -106,117 +108,129 @@ export default function EstimationForm({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <form onSubmit={handleSubmit}>
-        <div style={{ overflowX: 'auto', marginBottom: '1.5rem' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--surface-border)' }}>
-            <thead>
-              <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'left' }}>Item</th>
-                <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}>Weight (gms/ct)</th>
-                <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}>Rate</th>
-                <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* GOLD ROW */}
-              <tr>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>Gold ({karr})</td>
-                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
-                  <input type="number" step="0.001" value={goldWeight} onChange={e => setGoldWeight(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
-                </td>
-                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
-                  <input type="number" value={goldRate} onChange={e => setGoldRate(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
-                </td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
-                  ₹{goldAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                </td>
-              </tr>
-              {/* DIAMOND ROW */}
-              <tr>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>Diamond</td>
-                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
-                  <input type="number" step="0.001" value={diamondWeight} onChange={e => setDiamondWeight(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
-                </td>
-                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
-                  <input type="number" value={diamondRate} onChange={e => setDiamondRate(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
-                </td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
-                  ₹{diamondAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                </td>
-              </tr>
-              {/* OTHER STONES */}
-              <tr>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>Other Stones</td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
-                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
-                  <input type="number" value={otherStones} onChange={e => setOtherStones(e.target.value)} style={{ padding: '0.4rem', width: '80px', textAlign: 'right' }} />
-                </td>
-              </tr>
-              {/* MAKING CHARGES */}
-              <tr>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>
-                  Making ({makingPercent}%)
-                </td>
-                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
-                  <input type="number" value={makingPercent} onChange={e => setMakingPercent(e.target.value)} placeholder="%" style={{ padding: '0.4rem', width: '100%' }} />
-                </td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
-                  ₹{makingAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                </td>
-              </tr>
-              {/* DISCOUNT ROW */}
-              <tr>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600, color: 'var(--success)' }}>
-                  Discount on Making ({discountPercent}%)
-                </td>
-                <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
-                  <input type="number" value={discountPercent} onChange={e => setDiscountPercent(e.target.value)} placeholder="%" style={{ padding: '0.4rem', width: '100%' }} />
-                </td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right', color: 'var(--success)' }}>
-                  - ₹{discountAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                </td>
-              </tr>
-              {/* SUBTOTAL ROW */}
-              <tr style={{ background: 'rgba(255,255,255,0.05)', fontWeight: 700 }}>
-                <td colSpan={3} style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Taxable Subtotal</td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
-                  ₹{taxableSubtotal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                </td>
-              </tr>
-              {/* GST ROW */}
-              <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>GST (3%)</td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
-                <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
-                  ₹{gstAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                </td>
-              </tr>
-              {/* FINAL VALUE */}
-              <tr style={{ background: 'var(--surface-light)', fontWeight: 800, fontSize: '1.2rem' }}>
-                <td colSpan={3} style={{ padding: '1rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Final Value</td>
-                <td style={{ padding: '1rem', border: '1px solid var(--surface-border)', textAlign: 'right', color: 'var(--primary)' }}>
-                  ₹{finalValue.toLocaleString()}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      {!isLocked ? (
+        <form onSubmit={handleSubmit}>
+          <div style={{ overflowX: 'auto', marginBottom: '1.5rem' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--surface-border)' }}>
+              <thead>
+                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                  <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'left' }}>Item</th>
+                  <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}>Weight (gms/ct)</th>
+                  <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}>Rate</th>
+                  <th style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* GOLD ROW */}
+                <tr>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>Gold ({karr})</td>
+                  <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                    <input type="number" step="0.001" value={goldWeight} onChange={e => setGoldWeight(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
+                  </td>
+                  <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                    <input type="number" value={goldRate} onChange={e => setGoldRate(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
+                  </td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                    ₹{goldAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </td>
+                </tr>
+                {/* DIAMOND ROW */}
+                <tr>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>Diamond</td>
+                  <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                    <input type="number" step="0.001" value={diamondWeight} onChange={e => setDiamondWeight(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
+                  </td>
+                  <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                    <input type="number" value={diamondRate} onChange={e => setDiamondRate(e.target.value)} style={{ padding: '0.4rem', width: '100%' }} />
+                  </td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                    ₹{diamondAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </td>
+                </tr>
+                {/* OTHER STONES */}
+                <tr>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>Other Stones</td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                  <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                    <input type="number" value={otherStones} onChange={e => setOtherStones(e.target.value)} style={{ padding: '0.4rem', width: '80px', textAlign: 'right' }} />
+                  </td>
+                </tr>
+                {/* MAKING CHARGES */}
+                <tr>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>
+                    Making ({makingPercent}%)
+                  </td>
+                  <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                    <input type="number" value={makingPercent} onChange={e => setMakingPercent(e.target.value)} placeholder="%" style={{ padding: '0.4rem', width: '100%' }} />
+                  </td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                    ₹{makingAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </td>
+                </tr>
+                {/* DISCOUNT ROW */}
+                <tr>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600, color: 'var(--success)' }}>
+                    Discount on Making ({discountPercent}%)
+                  </td>
+                  <td style={{ padding: '0.5rem', border: '1px solid var(--surface-border)' }}>
+                    <input type="number" value={discountPercent} onChange={e => setDiscountPercent(e.target.value)} placeholder="%" style={{ padding: '0.4rem', width: '100%' }} />
+                  </td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right', color: 'var(--success)' }}>
+                    - ₹{discountAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </td>
+                </tr>
+                {/* SUBTOTAL ROW */}
+                <tr style={{ background: 'rgba(255,255,255,0.05)', fontWeight: 700 }}>
+                  <td colSpan={3} style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Taxable Subtotal</td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                    ₹{taxableSubtotal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </td>
+                </tr>
+                {/* GST ROW */}
+                <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', fontWeight: 600 }}>GST (3%)</td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)' }}></td>
+                  <td style={{ padding: '0.8rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>
+                    ₹{gstAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </td>
+                </tr>
+                {/* FINAL VALUE */}
+                <tr style={{ background: 'var(--surface-light)', fontWeight: 800, fontSize: '1.2rem' }}>
+                  <td colSpan={3} style={{ padding: '1rem', border: '1px solid var(--surface-border)', textAlign: 'right' }}>Final Value</td>
+                  <td style={{ padding: '1rem', border: '1px solid var(--surface-border)', textAlign: 'right', color: 'var(--primary)' }}>
+                    ₹{finalValue.toLocaleString()}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-        <div style={{ marginBottom: '1.5rem' }}>
-           <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Additional Notes (Customer Facing)</label>
-           <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} style={{ width: '100%', padding: '0.8rem' }} placeholder="Terms, delivery time, etc."></textarea>
-        </div>
+          <div style={{ marginBottom: '1.5rem' }}>
+             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Additional Notes (Customer Facing)</label>
+             <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} style={{ width: '100%', padding: '0.8rem' }} placeholder="Terms, delivery time, etc."></textarea>
+          </div>
 
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-          <button type="submit" className="btn btn-primary" disabled={loading} style={{ padding: '0.8rem 2rem' }}>
-            {loading ? 'Saving...' : 'Save Estimation'}
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+            <button type="submit" className="btn btn-primary" disabled={loading} style={{ padding: '0.8rem 2rem' }}>
+              {loading ? 'Saving...' : 'Save Estimation'}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', border: '1px solid var(--primary)' }}>
+          <h3 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>🔒 Price Locked</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            The price for this query has been finalized. Quotation editing is now disabled.
+          </p>
+          <div style={{ marginTop: '1.5rem', fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>
+            Final Value: ₹{mto.estimations?.[0]?.finalEstimatedPrice?.toLocaleString() || 'N/A'}
+          </div>
         </div>
-      </form>
+      )}
 
       {savedId && (
         <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid var(--success)' }}>

@@ -3,6 +3,7 @@ import { getGlobalPricing } from '../../actions/pricing';
 import EstimationForm from './EstimationForm';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { formatIST } from '@/lib/date-utils';
 
 export default async function EstimationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -139,7 +140,7 @@ export default async function EstimationDetailPage({ params }: { params: Promise
                        <span style={{ fontSize: '0.9rem' }}>₹{est.finalEstimatedPrice.toLocaleString()}</span>
                      </div>
                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                       {new Date(est.createdAt).toLocaleDateString()}
+                       {formatIST(est.createdAt)}
                      </span>
                    </div>
                  ))}

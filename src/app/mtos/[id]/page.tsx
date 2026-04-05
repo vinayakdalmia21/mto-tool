@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import DecisionButtons from './DecisionButtons';
 import ShareButton from './ShareButton';
 import DeleteMtoButton from '../components/DeleteMtoButton';
+import { formatIST } from '@/lib/date-utils';
 
 export const dynamic = "force-dynamic";
 
@@ -77,7 +78,7 @@ export default async function MtoDetailsPage({ params }: { params: Promise<{ id:
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                  <div>
                    <h2 style={{ marginBottom: '0.5rem' }}>Latest Estimation (v{latestEst.version})</h2>
-                   <p style={{ color: 'var(--text-muted)' }}>Sent on {new Date(latestEst.createdAt).toLocaleDateString()}</p>
+                   <p style={{ color: 'var(--text-muted)' }}>Sent on {formatIST(latestEst.createdAt)}</p>
                  </div>
                  <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--primary)' }}>
                    ₹{latestEst.finalEstimatedPrice.toLocaleString()}

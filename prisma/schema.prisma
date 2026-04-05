@@ -52,7 +52,7 @@ model MtoQuery {
   vendorEstimations VendorEstimation[]
   estimations       Estimation[]
   pricing           PromisedPricing?
-  order             MtoOrder?
+  orders            MtoOrder[]
   payment           Payment[]
   statusHistory     MtoStatusHistory[]
   createdAt         DateTime           @default(now())
@@ -127,13 +127,16 @@ model Payment {
 
 model MtoOrder {
   id              Int            @id @default(autoincrement())
-  mtoQueryId      String         @unique
-  staffMtoId      String?        @unique // Unique MTO ID provided by staff
+  mtoQueryId      String
+  staffMtoId      String?        // Manual MTO ID provided by staff
   posRefId        String?        // POS reference entered by staff
   orderRefId      String?        // Manual Order ID entered by staff
   advanceAmount   Float          @default(0)
   remainingAmount Float          @default(0)
   cadDesigns      String?        // JSON array of CAD URLs/paths
+  cadRequired     Boolean        @default(true)
+  version         Int            @default(1)
+  isMovedToOps    Boolean        @default(false)
   status          String         @default("PENDING") // PENDING, MOVED_TO_OPS, CAD_UPLOADED
   mtoQuery        MtoQuery       @relation(fields: [mtoQueryId], references: [id])
   purchaseOrder   PurchaseOrder?
@@ -155,19 +158,24 @@ model PurchaseOrder {
 }
 
 model QcRecord {
-  id              Int           @id @default(autoincrement())
-  purchaseOrderId Int           @unique
-  status          String // PASS, REJECT
-  iterations      Int           @default(0)
-  notes              String?
-  actualGoldWeight   Float?
-  actualMakingCharges Float?
-  actualStoneWeight  Float?
-  actualStoneValue   Float?
-  actualOtherCharges Float?
-  isBilled           Boolean @default(false)
-  purchaseOrder      PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
-  createdAt       DateTime      @default(now())
+  id                  Int           @id @default(autoincrement())
+  purchaseOrderId     Int           @unique
+  status              String        // PASS, REJECT
+  iterations          Int           @default(0)
+  notes               String?
+  actualGoldWeight    Float?
+  actualGoldRate      Float?
+  actualDiamondWeight Float?
+  actualDiamondRate   Float?
+  actualMakingPercent Float?
+  actualDiscountPercent Float?
+  actualOtherStones   Float?
+  actualTaxableTotal  Float?
+  actualGstAmount     Float?
+  actualFinalValue    Float?
+  isBilled            Boolean @default(false)
+  purchaseOrder       PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  createdAt           DateTime      @default(now())
 }
 
 model GlobalPricing {

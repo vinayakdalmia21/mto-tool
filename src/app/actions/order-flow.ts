@@ -68,20 +68,22 @@ export async function placeOrder(mtoId: string, advanceAmount: number, staffMtoI
 
   const remaining = pricing.finalPrice - advanceAmount;
 
-  // Create or update the MTO Order
-  await prisma.mtoOrder.upsert({
+  // Find max version
+  const lastOrder = await prisma.mtoOrder.findFirst({
     where: { mtoQueryId: mtoId },
-    update: {
-      advanceAmount,
-      remainingAmount: remaining > 0 ? remaining : 0,
-      ...(staffMtoId && { staffMtoId }),
-    },
-    create: {
+    orderBy: { version: 'desc' }
+  });
+  const nextVersion = (lastOrder?.version || 0) + 1;
+
+  // Create new MTO Order Version
+  await prisma.mtoOrder.create({
+    data: {
       mtoQueryId: mtoId,
       advanceAmount,
       remainingAmount: remaining > 0 ? remaining : 0,
       status: 'PENDING',
       staffMtoId: staffMtoId || null,
+      version: nextVersion
     }
   });
 
@@ -99,21 +101,25 @@ export async function placeOrder(mtoId: string, advanceAmount: number, staffMtoI
   return { success: true };
 }
 
-// Move order to operations team
-export async function moveToOperations(mtoId: string) {
+// Move order to operations team (CAD Upload stage)
+export async function moveToOperations(orderId: number) {
   // Ensure order exists
   const order = await prisma.mtoOrder.findUnique({
-    where: { mtoQueryId: mtoId }
+    where: { id: orderId }
   });
-  if (!order) throw new Error("Order not found. Save order details first.");
+  if (!order) throw new Error("Order not found");
 
+  // Mark this specific version as the active one
   await prisma.mtoOrder.update({
-    where: { mtoQueryId: mtoId },
-    data: { status: 'MOVED_TO_OPS' }
+    where: { id: orderId },
+    data: { 
+      status: 'MOVED_TO_OPS',
+      isMovedToOps: true 
+    }
   });
 
   await prisma.mtoQuery.update({
-    where: { id: mtoId },
+    where: { id: order.mtoQueryId },
     data: { 
       status: 'ORDER_PLACED',
       statusHistory: { create: { status: 'ORDER_PLACED' } }
@@ -147,20 +153,24 @@ export async function getActiveOrders() {
 }
 
 // Upload CAD designs (URLs or file paths)
-export async function uploadCadDesigns(mtoQueryId: string, cadUrls: string[]) {
-  const order = await prisma.mtoOrder.findUnique({
-    where: { mtoQueryId }
+export async function uploadCadDesigns(mtoQueryId: string, cadUrls: string[], cadRequired: boolean = true) {
+  const order = await prisma.mtoOrder.findFirst({
+    where: { 
+      mtoQueryId,
+      isMovedToOps: true
+    }
   });
-  if (!order) throw new Error("Order not found");
+  if (!order) throw new Error("Active order version not found");
 
   // Merge with existing CAD designs
   const existing: string[] = order.cadDesigns ? JSON.parse(order.cadDesigns) : [];
   const merged = [...existing, ...cadUrls];
 
   await prisma.mtoOrder.update({
-    where: { mtoQueryId },
+    where: { id: order.id },
     data: {
       cadDesigns: JSON.stringify(merged),
+      cadRequired,
       status: 'CAD_UPLOADED'
     }
   });
@@ -174,6 +184,21 @@ export async function uploadCadDesigns(mtoQueryId: string, cadUrls: string[]) {
   });
 
   revalidatePath('/active-orders');
+  return { success: true };
+}
+
+// Move from CAD stage to Purchase Order stage
+export async function moveToPurchaseOrder(mtoQueryId: string) {
+  await prisma.mtoQuery.update({
+    where: { id: mtoQueryId },
+    data: { 
+      status: 'PO_PENDING',
+      statusHistory: { create: { status: 'PO_PENDING' } }
+    }
+  });
+
+  revalidatePath('/active-orders');
+  revalidatePath('/orders');
   return { success: true };
 }
 

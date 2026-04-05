@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { formatIST } from "@/lib/date-utils";
 
 export default async function VendorEstimateSharePage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -67,7 +68,7 @@ export default async function VendorEstimateSharePage(props: { params: Promise<{
               </div>
               <div>
                 <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Date Logged</span>
-                <strong>{new Date(estimate.createdAt).toLocaleDateString()}</strong>
+                <strong>{formatIST(estimate.createdAt)}</strong>
               </div>
             </div>
 

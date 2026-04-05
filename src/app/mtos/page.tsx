@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import DeleteMtoButton from './components/DeleteMtoButton';
 import ShareButton from './[id]/ShareButton';
+import { formatIST } from '@/lib/date-utils';
 
 export const dynamic = "force-dynamic";
 
@@ -68,7 +69,7 @@ export default async function MtosPage() {
                   {mto.referenceImages ? <span style={{ color: 'var(--primary)' }}>Yes</span> : <span style={{ color: 'var(--text-muted)' }}>No</span>}
                 </td>
                 <td style={{ padding: '0.75rem' }}>{mto.catalogueSku || '-'}</td>
-                <td style={{ padding: '0.75rem' }}>{new Date(mto.createdAt).toLocaleDateString()}</td>
+                <td style={{ padding: '0.75rem' }}>{formatIST(mto.createdAt)}</td>
                 <td style={{ padding: '0.75rem', fontWeight: 500 }}>{mto.customer.name}</td>
                 <td style={{ padding: '0.75rem' }}>{mto.customer.phone}</td>
                 <td style={{ padding: '0.75rem' }}>{mto.staff?.name || '-'}</td>

@@ -16,12 +16,6 @@ export default async function OrdersPage() {
     await createPurchaseOrder(orderId, delivery, poNumber);
   }
 
-  async function handleUpdateStatus(formData: FormData) {
-    "use server";
-    const poId = Number(formData.get('poId'));
-    const status = formData.get('status') as string;
-    await updatePurchaseOrderStatus(poId, status);
-  }
 
   // Sort: PO Pending on top
   const sortedOrders = [...orders].sort((a: any, b: any) => {
@@ -96,15 +90,12 @@ export default async function OrdersPage() {
                       <button type="submit" className="btn btn-primary" style={{ fontSize: '0.85rem' }}>Raise PO</button>
                     </form>
                   ) : (
-                    <form action={handleUpdateStatus} style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
-                       <input type="hidden" name="poId" value={order.purchaseOrder.id} />
-                       <select name="status" defaultValue={order.purchaseOrder.status} style={{ padding: '0.3rem', fontSize: '0.8rem' }}>
-                        <option value="RAISED">Raised</option>
-                        <option value="IN_PRODUCTION">In Production</option>
-                        <option value="DISPATCHED">Dispatched for QC</option>
-                      </select>
-                      <button type="submit" className="btn" style={{ background: 'rgba(255,255,255,0.1)', padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>Update</button>
-                    </form>
+                    <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>MTO-{order.staffMtoId}</span>
+                      <Link href="/qc" className="btn" style={{ background: 'rgba(255,255,255,0.1)', padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: 'white', textDecoration: 'none' }}>
+                        Go to QC →
+                      </Link>
+                    </div>
                   )}
                 </td>
               </tr>
