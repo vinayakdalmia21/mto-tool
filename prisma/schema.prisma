@@ -144,6 +144,7 @@ model MtoOrder {
 model PurchaseOrder {
   id               Int       @id @default(autoincrement())
   mtoOrderId       Int       @unique
+  poNumber         String?   // Manual PO ID entered by staff
   vendorName       String
   lockedGoldPrice  Float
   deliveryTimeline String

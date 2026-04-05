@@ -11,8 +11,9 @@ export default async function OrdersPage() {
     "use server";
     const orderId = Number(formData.get('orderId'));
     const delivery = formData.get('delivery') as string;
+    const poNumber = formData.get('poNumber') as string;
 
-    await createPurchaseOrder(orderId, delivery);
+    await createPurchaseOrder(orderId, delivery, poNumber);
   }
 
   async function handleUpdateStatus(formData: FormData) {
@@ -58,9 +59,16 @@ export default async function OrdersPage() {
                 <td style={{ padding: '1rem' }}>{order.mtoQuery?.category}</td>
                 <td style={{ padding: '1rem' }}>
                   {order.purchaseOrder ? (
-                    <span className={`badge ${order.purchaseOrder.status === 'RAISED' ? 'badge-info' : 'badge-success'}`}>
-                      PO: {order.purchaseOrder.status}
-                    </span>
+                    <div>
+                      <span className={`badge ${order.purchaseOrder.status === 'RAISED' ? 'badge-info' : 'badge-success'}`}>
+                        PO: {order.purchaseOrder.status}
+                      </span>
+                      {order.purchaseOrder.poNumber && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                          ID: {order.purchaseOrder.poNumber}
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <span className="badge badge-warning">PO Pending</span>
                   )}
@@ -71,10 +79,18 @@ export default async function OrdersPage() {
                       <input type="hidden" name="orderId" value={order.id} />
                       <input 
                         type="text" 
-                        name="delivery" 
-                        placeholder="e.g., 20-25 days" 
+                        name="poNumber" 
+                        placeholder="PO ID (e.g. PO-89)" 
                         className="input-field" 
-                        style={{ maxWidth: '150px', padding: '0.4rem' }} 
+                        style={{ maxWidth: '120px', padding: '0.4rem' }} 
+                        required 
+                      />
+                      <input 
+                        type="text" 
+                        name="delivery" 
+                        placeholder="Timeline" 
+                        className="input-field" 
+                        style={{ maxWidth: '100px', padding: '0.4rem' }} 
                         required 
                       />
                       <button type="submit" className="btn btn-primary" style={{ fontSize: '0.85rem' }}>Raise PO</button>

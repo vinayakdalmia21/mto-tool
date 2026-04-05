@@ -19,7 +19,7 @@ export async function getOrdersForOperations() {
   });
 }
 
-export async function createPurchaseOrder(mtoOrderId: number, deliveryTimeline: string) {
+export async function createPurchaseOrder(mtoOrderId: number, deliveryTimeline: string, poNumber?: string) {
   const order = await prisma.mtoOrder.findUnique({
     where: { id: mtoOrderId },
     include: {
@@ -40,6 +40,7 @@ export async function createPurchaseOrder(mtoOrderId: number, deliveryTimeline: 
   const po = await prisma.purchaseOrder.create({
     data: {
       mtoOrderId,
+      poNumber,
       vendorName,
       lockedGoldPrice,
       deliveryTimeline,
