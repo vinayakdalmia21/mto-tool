@@ -30,7 +30,6 @@ export async function submitVendorEstimation(formData: FormData) {
     const labourCharges = formData.get('labourCharges') ? parseFloat(formData.get('labourCharges') as string) : null;
     const goldRate = formData.get('goldRate') ? parseFloat(formData.get('goldRate') as string) : null;
     const remarks = formData.get('remarks') as string;
-    const isAccepted = formData.get('isAccepted') === 'true';
 
     // Handle Image Upload
     const rawImage = formData.get('image');
@@ -51,16 +50,9 @@ export async function submitVendorEstimation(formData: FormData) {
         goldRate,
         remarks,
         images: base64Image,
-        isAccepted
+        isAccepted: false
       }
     });
-
-    if (isAccepted) {
-       await prisma.mtoQuery.update({
-         where: { id: mtoQueryId },
-         data: { status: 'ESTIMATING' }
-       });
-    }
 
     revalidatePath('/vendor-estimations');
     return { success: true, estimation };
@@ -80,6 +72,36 @@ export async function getVendorEstimationHistory() {
   });
 }
 
+export async function acceptVendorEstimate(id: number) {
+  try {
+    const est = await prisma.vendorEstimation.findUnique({ where: { id } });
+    if (!est) throw new Error("Estimate not found");
+
+    // Ensure all other estimates for this query are NOT accepted natively
+    await prisma.vendorEstimation.updateMany({
+      where: { mtoQueryId: est.mtoQueryId },
+      data: { isAccepted: false }
+    });
+
+    // Mark current as accepted
+    const updated = await prisma.vendorEstimation.update({
+      where: { id },
+      data: { isAccepted: true }
+    });
+
+    // Bubble up workflow to sales
+    await prisma.mtoQuery.update({
+      where: { id: est.mtoQueryId },
+      data: { status: 'ESTIMATING' }
+    });
+
+    revalidatePath('/vendor-estimations');
+    return { success: true, updated };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
 export async function updateVendorEstimation(id: number, formData: FormData) {
   try {
     const vendorName = formData.get('vendorName') as string;
@@ -88,7 +110,6 @@ export async function updateVendorEstimation(id: number, formData: FormData) {
     const labourCharges = formData.get('labourCharges') ? parseFloat(formData.get('labourCharges') as string) : null;
     const goldRate = formData.get('goldRate') ? parseFloat(formData.get('goldRate') as string) : null;
     const remarks = formData.get('remarks') as string;
-    const isAccepted = formData.get('isAccepted') === 'true';
 
     const rawImage = formData.get('image');
     let base64Image: string | undefined = undefined;
@@ -98,31 +119,18 @@ export async function updateVendorEstimation(id: number, formData: FormData) {
       base64Image = `data:${rawImage.type};base64,${base64Str}`;
     }
 
-    const dataToUpdate: any = {
-      vendorName,
-      goldWeight,
-      diamondWeight,
-      labourCharges,
-      goldRate,
-      remarks,
-      isAccepted
-    };
-
-    if (base64Image) {
-      dataToUpdate.images = base64Image;
-    }
-
     const updated = await prisma.vendorEstimation.update({
       where: { id },
-      data: dataToUpdate
+      data: {
+        vendorName,
+        goldWeight,
+        diamondWeight,
+        labourCharges,
+        goldRate,
+        remarks,
+        ...(base64Image !== undefined && { images: base64Image })
+      }
     });
-
-    if (isAccepted) {
-       await prisma.mtoQuery.update({
-         where: { id: updated.mtoQueryId },
-         data: { status: 'ESTIMATING' }
-       });
-    }
 
     revalidatePath('/vendor-estimations');
     return { success: true, estimation: updated };
