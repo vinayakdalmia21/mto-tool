@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { submitVendorEstimation, updateVendorEstimation } from '../actions/vendor';
 
-export default function VendorEstimationsClient({ pendingQueries, history }: { pendingQueries: any[], history: any[] }) {
+export default function VendorEstimationsClient({ pendingQueries, history, globalPricing }: { pendingQueries: any[], history: any[], globalPricing: any }) {
   const [selectedQueryId, setSelectedQueryId] = useState('');
   const [editEstId, setEditEstId] = useState<number | null>(null);
   const [isAccepted, setIsAccepted] = useState('false');
@@ -15,6 +15,16 @@ export default function VendorEstimationsClient({ pendingQueries, history }: { p
   const [error, setError] = useState<string | null>(null);
 
   const selectedQuery = editingEst ? editingEst.mtoQuery : pendingQueries.find(q => q.id === selectedQueryId);
+
+  let defaultGoldRate = '';
+  if (selectedQuery?.goldKaratage && globalPricing) {
+    const k = selectedQuery.goldKaratage;
+    if (k === '9K') defaultGoldRate = globalPricing.rate9k;
+    else if (k === '14K') defaultGoldRate = globalPricing.rate14k;
+    else if (k === '18K') defaultGoldRate = globalPricing.rate18k;
+    else if (k === '22K') defaultGoldRate = globalPricing.rate22k;
+    else if (k === '24K') defaultGoldRate = globalPricing.rate24k;
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -131,16 +141,16 @@ export default function VendorEstimationsClient({ pendingQueries, history }: { p
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Labour/Making Charges (₹)</label>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Labour Charges</label>
                       <input type="number" step="0.01" name="labourCharges" defaultValue={editingEst?.labourCharges} placeholder="e.g. 5000" />
                     </div>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Rate (₹ per g)</label>
-                      <input type="number" step="0.01" name="goldRate" defaultValue={editingEst?.goldRate} placeholder="e.g. 7200" />
+                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gold Rate per gram of that specific karatage required</label>
+                      <input type="number" step="0.01" name="goldRate" defaultValue={editingEst?.goldRate || defaultGoldRate} placeholder="e.g. 7200" />
                     </div>
                   </div>
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
-                    Provide rates specific to the <strong>{selectedQuery?.goldKaratage || 'requested'}</strong> karatage.
+                    Rate auto-fetched from Pricing Hub for <strong>{selectedQuery?.goldKaratage || 'requested'}</strong> karatage.
                   </p>
                 </div>
               )}
