@@ -59,8 +59,8 @@ export async function getLockedPriceQueries() {
   });
 }
 
-// Place order with Order ID + Advance
-export async function placeOrder(mtoId: string, orderRefId: string, advanceAmount: number) {
+// Place order with Advance
+export async function placeOrder(mtoId: string, advanceAmount: number) {
   const pricing = await prisma.promisedPricing.findUnique({
     where: { mtoQueryId: mtoId }
   });
@@ -72,13 +72,11 @@ export async function placeOrder(mtoId: string, orderRefId: string, advanceAmoun
   await prisma.mtoOrder.upsert({
     where: { mtoQueryId: mtoId },
     update: {
-      orderRefId,
       advanceAmount,
       remainingAmount: remaining > 0 ? remaining : 0,
     },
     create: {
       mtoQueryId: mtoId,
-      orderRefId,
       advanceAmount,
       remainingAmount: remaining > 0 ? remaining : 0,
       status: 'PENDING',
@@ -106,7 +104,6 @@ export async function moveToOperations(mtoId: string) {
     where: { mtoQueryId: mtoId }
   });
   if (!order) throw new Error("Order not found. Save order details first.");
-  if (!order.orderRefId) throw new Error("Please enter an Order ID before moving to operations.");
 
   await prisma.mtoOrder.update({
     where: { mtoQueryId: mtoId },

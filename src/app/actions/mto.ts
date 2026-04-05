@@ -100,68 +100,33 @@ export async function getMtos() {
   });
 }
 
-export async function updateMtoQuery(id: string, formData: FormData) {
-  const customerName = formData.get('customerName') as string;
-  const phoneNumber = formData.get('phoneNumber') as string;
-  const leadType = formData.get('leadType') as string;
-  const mtoType = formData.get('mtoType') as string;
-  let category = formData.get('category') as string;
-  if (category === 'OTHER') {
-    category = formData.get('otherCategory') as string || 'OTHER';
+
+export async function deleteMtoQuery(id: string) {
+  try {
+    // We must delete dependent records in a transaction to avoid foreign key errors
+    await prisma.$transaction(async (tx) => {
+      // 1. If it has an order, let's cascade delete the order's dependents
+      const order = await tx.mtoOrder.findUnique({ where: { mtoQueryId: id } });
+      if (order) {
+         await tx.purchaseOrder.deleteMany({ where: { mtoOrderId: order.id } });
+         await tx.invoice.deleteMany({ where: { mtoOrderId: order.id } });
+         await tx.mtoOrder.delete({ where: { mtoQueryId: id } });
+      }
+
+      await tx.payment.deleteMany({ where: { mtoQueryId: id } });
+      await tx.promisedPricing.deleteMany({ where: { mtoQueryId: id } });
+      await tx.estimation.deleteMany({ where: { mtoQueryId: id } });
+      await tx.vendorEstimation.deleteMany({ where: { mtoQueryId: id } });
+      await tx.mtoStatusHistory.deleteMany({ where: { mtoQueryId: id } });
+      
+      // Finally delete the query
+      await tx.mtoQuery.delete({ where: { id } });
+    });
+
+    revalidatePath('/mtos');
+    revalidatePath('/dashboard');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to delete query" };
   }
-  const metalType = formData.get('metalType') as string;
-  const isStudded = formData.get('isStudded') === 'true';
-  const notes = formData.get('notes') as string;
-
-  // Allow full editing of base entities
-  const originalMto = await prisma.mtoQuery.findUnique({ where: { id } });
-  if (originalMto) {
-    await prisma.customer.update({
-      where: { id: originalMto.customerId },
-      data: { name: customerName, phone: phoneNumber }
-    }).catch(() => null);
-  }
-
-  const rawImage = formData.get('referenceImage');
-  let base64Image: string | undefined = undefined;
-  if (rawImage instanceof File && rawImage.size > 0) {
-    const arrayBuffer = await rawImage.arrayBuffer();
-    const base64Str = Buffer.from(arrayBuffer).toString('base64');
-    base64Image = `data:${rawImage.type};base64,${base64Str}`;
-  }
-
-  const staffIdStr = formData.get('staffId') as string;
-  const goldKaratage = formData.get('goldKaratage') as string;
-  const metalColor = formData.get('metalColor') as string;
-  const diamondCaratage = formData.get('diamondCaratage') as string;
-  const goldWeight = formData.get('goldWeight') as string;
-  const size = formData.get('size') as string;
-
-  const dataToUpdate: any = {
-    staffId: staffIdStr ? parseInt(staffIdStr) : undefined,
-    leadType,
-    mtoType,
-    category,
-    metalType,
-    isStudded,
-    diamondCaratage: diamondCaratage || null,
-    goldKaratage: goldKaratage || null,
-    goldWeight: goldWeight || null,
-    metalColor: metalColor || null,
-    size: size || null,
-    notes
-  };
-
-  if (base64Image) {
-    dataToUpdate.referenceImages = base64Image;
-  }
-
-  await prisma.mtoQuery.update({
-    where: { id },
-    data: dataToUpdate
-  });
-
-  revalidatePath('/mtos');
-  revalidatePath(`/mtos/${id}`);
-  return { success: true };
 }

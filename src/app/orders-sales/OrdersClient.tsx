@@ -30,7 +30,6 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
   const existingOrder = query.order;
   const isMovedToOps = existingOrder?.orderStatus === 'MOVED_TO_OPS' || query.status === 'ORDER_PLACED';
 
-  const [orderRefId, setOrderRefId] = useState(existingOrder?.orderRefId || '');
   const [advance, setAdvance] = useState(existingOrder?.advanceAmount?.toString() || '');
   const [saving, setSaving] = useState(false);
   const [moving, setMoving] = useState(false);
@@ -39,11 +38,10 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
   const remaining = lockedPrice - advanceNum;
 
   const handleSave = async () => {
-    if (!orderRefId.trim()) { alert('Please enter an Order ID'); return; }
     if (advanceNum <= 0) { alert('Please enter advance amount'); return; }
     setSaving(true);
     try {
-      await placeOrder(query.id, orderRefId, advanceNum);
+      await placeOrder(query.id, advanceNum);
       onRefresh();
     } catch (err: any) {
       alert('Error: ' + err.message);
@@ -52,10 +50,9 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
   };
 
   const handleMoveToOps = async () => {
-    if (!orderRefId.trim()) { alert('Please save order details first'); return; }
     setMoving(true);
     try {
-      await placeOrder(query.id, orderRefId, advanceNum);
+      await placeOrder(query.id, advanceNum);
       await moveToOperations(query.id);
       onRefresh();
     } catch (err: any) {
@@ -83,14 +80,10 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
         <div style={{ padding: '1rem', background: 'rgba(0, 200, 0, 0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span>✅</span>
           <span style={{ fontWeight: 600 }}>Moved to Operations</span>
-          <span style={{ color: 'var(--text-muted)', marginLeft: 'auto' }}>Order ID: {existingOrder?.orderRefId}</span>
+          <span style={{ color: 'var(--text-muted)', marginLeft: 'auto' }}>MTO ID: {existingOrder?.staffMtoId}</span>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', alignItems: 'end' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Order ID (POS Ref)</label>
-            <input type="text" value={orderRefId} onChange={e => setOrderRefId(e.target.value)} placeholder="e.g. POS-12345" style={{ width: '100%', padding: '0.6rem' }} />
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'end' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Advance Amount (₹)</label>
             <input type="number" value={advance} onChange={e => setAdvance(e.target.value)} placeholder="Enter advance" style={{ width: '100%', padding: '0.6rem' }} />

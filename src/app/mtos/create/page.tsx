@@ -144,7 +144,9 @@ export default function CreateMtoPage() {
             )}
             <div>
               <input type="hidden" name="metalType" value="GOLD" />
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Product Size</label>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>
+                {category === 'RING' ? 'Ring Size' : 'Product Size (Or Not Applicable)'}
+              </label>
               <input name="size" placeholder="e.g. Ring Size 12" />
             </div>
             <div>

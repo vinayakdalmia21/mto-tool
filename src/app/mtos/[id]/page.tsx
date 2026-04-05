@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import DecisionButtons from './DecisionButtons';
 import ShareButton from './ShareButton';
+import DeleteMtoButton from '../components/DeleteMtoButton';
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +35,7 @@ export default async function MtoDetailsPage({ params }: { params: Promise<{ id:
             {mto.status}
           </span>
           <ShareButton queryId={mto.id} />
-          <Link href={`/mtos/${mto.id}/edit`} className="btn" style={{ padding: '0.2rem 0.6rem', fontSize: '0.8rem', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-main)' }}>
-            Edit
-          </Link>
+          <DeleteMtoButton id={mto.id} redirectUrl="/mtos" />
         </div>
       </header>
 

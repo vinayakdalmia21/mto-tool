@@ -1,6 +1,7 @@
 import { getMtos } from '../actions/mto';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
+import DeleteMtoButton from './components/DeleteMtoButton';
 import ShareButton from './[id]/ShareButton';
 
 export const dynamic = "force-dynamic";
@@ -82,9 +83,7 @@ export default async function MtosPage() {
                 <td style={{ padding: '1rem', textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                     <ShareButton queryId={mto.id} />
-                    <Link href={`/mtos/${mto.id}/edit`} className="btn" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-main)', display: 'flex', alignItems: 'center' }}>
-                      Edit
-                    </Link>
+                    <DeleteMtoButton id={mto.id} />
                     <Link href={`/mtos/${mto.id}`} className="btn-icon" style={{ display: 'inline-flex', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', textDecoration: 'none', color: 'var(--text-main)' }}>
                       <ChevronRight size={16} />
                     </Link>
