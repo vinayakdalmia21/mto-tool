@@ -143,6 +143,7 @@ export async function getMasterTableQueries() {
       lockedPrice: Number(q.pricing?.finalPrice || 0),
       qcFinalPrice: Number(q.orders[0]?.purchaseOrder?.qcRecord?.actualFinalValue || 0),
       daysInPipeline: Number(daysInPipeline || 0),
+      droppedAtStage: isDropped ? String(q.dropReason?.split('at ')?.[1] || q.dropReason || 'Initial Stage') : null,
       updatedAt: q.updatedAt instanceof Date ? q.updatedAt.toISOString() : String(q.updatedAt),
       stages: { ...stages }
     };

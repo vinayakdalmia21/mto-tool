@@ -185,7 +185,7 @@ export async function dropMtoQuery(id: string, reason: string = "Staff action") 
       where: { id },
       data: { 
         status: 'DROPPED',
-        dropReason: reason,
+        dropReason: `Dropped at ${stageAtDrop}${reason ? `: ${reason}` : ''}`,
         statusHistory: {
           create: {
             status: `DROPPED`
