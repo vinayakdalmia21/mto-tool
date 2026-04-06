@@ -100,7 +100,18 @@ export async function getMasterTableQueries() {
     const hasInvoice = q.status === 'COMPLETED' || !!q.orders[0]?.invoice;
     const hasQC = hasInvoice || q.orders[0]?.purchaseOrder?.qcRecord?.status === 'PASS';
     const hasPO = hasQC || !!q.orders[0]?.purchaseOrder;
-    const hasCAD = hasPO || (!!q.orders[0]?.cadDesigns && JSON.parse(q.orders[0].cadDesigns).length > 0);
+    
+    let hasCAD = false;
+    try {
+      if (q.orders[0]?.cadDesigns) {
+        const designs = JSON.parse(q.orders[0].cadDesigns);
+        hasCAD = Array.isArray(designs) && designs.length > 0;
+      }
+    } catch (e) {
+      console.error("CAD Parse Error:", e);
+    }
+    hasCAD = hasPO || hasCAD;
+
     const hasOrder = hasCAD || !!q.orders[0];
     const hasLock = hasOrder || !!q.pricing || ['ORDER_PLACED', 'CAD_UPLOADED', 'MOVED_TO_OPS'].includes(q.status);
     const hasEst = hasLock || q.estimations.length > 0;
