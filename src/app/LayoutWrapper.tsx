@@ -3,9 +3,12 @@
 import React from 'react';
 import Sidebar from '../components/Sidebar';
 import { usePathname } from 'next/navigation';
+import { useAuth } from './auth-context';
+import LoginScreen from '../components/LoginScreen';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
   const [mounted, setMounted] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
 
@@ -26,6 +29,10 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         {children}
       </main>
     );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
   }
 
   return (

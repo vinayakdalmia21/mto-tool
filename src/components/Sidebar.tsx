@@ -14,7 +14,8 @@ import {
   TrendingUp, 
   Image as ImageIcon,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -25,12 +26,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
-  const { role, setRole, userName } = useAuth();
+  const { role, userName, logout } = useAuth();
   const pathname = usePathname();
-
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRole(e.target.value as Role);
-  };
 
   const menuItems = [
     { label: 'Dashboard', icon: <LayoutDashboard size={20} />, href: '/', roles: ['SALES', 'OPERATIONS'] },
@@ -62,16 +59,6 @@ export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps)
         </button>
       </header>
 
-      {!isCollapsed && (
-        <div className={styles.roleSelector}>
-          <label>View As:</label>
-          <select value={role} onChange={handleRoleChange} className={styles.select}>
-            <option value="SALES">Store Staff</option>
-            <option value="OPERATIONS">Operations</option>
-          </select>
-        </div>
-      )}
-
       <nav className={styles.nav}>
         {visibleItems.map(item => {
            const isActive = pathname === item.href;
@@ -90,16 +77,31 @@ export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps)
       </nav>
 
       <div className={styles.footer}>
-        <div className={styles.userProfile}>
-          <div className={styles.avatar}>
-            {userName.charAt(0)}
-          </div>
-          {!isCollapsed && (
-            <div className={styles.userInfo}>
-              <p className={styles.userName}>{userName}</p>
-              <p className={styles.userRole}>{role === 'SALES' ? 'Store Staff' : 'Operations'}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className={styles.userProfile}>
+            <div className={styles.avatar}>
+              {userName.charAt(0)}
             </div>
-          )}
+            {!isCollapsed && (
+              <div className={styles.userInfo}>
+                <p className={styles.userName}>{userName}</p>
+                <p className={styles.userRole}>{role === 'SALES' ? 'Store Staff' : 'Operations'}</p>
+              </div>
+            )}
+          </div>
+          
+          <button 
+             onClick={logout}
+             className={styles.collapseToggle} 
+             title="Logout"
+             style={{ 
+               background: 'rgba(239, 68, 68, 0.1)', 
+               color: 'var(--danger)', 
+               border: '1px solid rgba(239, 68, 68, 0.2)' 
+             }}
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
     </aside>
