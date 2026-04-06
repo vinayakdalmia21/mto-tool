@@ -17,15 +17,17 @@ export default function ShareLayout({
       {/* Google Fonts for Serif elegance */}
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-      <header className="mb-12 flex flex-col items-center w-full max-w-4xl text-center">
-        <div className="relative mb-6">
+      <header className="mb-12 flex flex-col items-center w-full max-w-4xl">
+        <div className="flex justify-center w-full mb-6">
           <Image 
             src="/veda-logo.png" 
             alt="VEDA Silver | Gold | Diamonds" 
-            width={320} 
-            height={320} 
-            className="drop-shadow-[0_4px_10px_rgba(99,30,50,0.15)] transition-transform duration-500 hover:scale-105"
+            width={350} 
+            height={350} 
+            className="transition-transform duration-500 hover:scale-105"
+            style={{ mixBlendMode: 'multiply' }}
             priority
+            unoptimized
           />
         </div>
         
