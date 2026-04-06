@@ -36,13 +36,13 @@ export default function ShareLayout({
           width: '100%', 
           marginBottom: '1.5rem',
           mixBlendMode: 'multiply',
-          filter: 'contrast(1.1) brightness(1.05)' 
+          filter: 'brightness(1.6) contrast(1.4) saturate(1.2)' 
         }}>
           <Image 
             src="/veda-logo.png" 
             alt="VEDA Silver | Gold | Diamonds" 
-            width={380} 
-            height={380} 
+            width={340} 
+            height={340} 
             style={{ 
               display: 'block',
               maxWidth: '100%',
