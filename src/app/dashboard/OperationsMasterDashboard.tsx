@@ -49,8 +49,9 @@ export default function OperationsMasterDashboard({
       { key: 'completed', label: 'Final Billing' }
     ];
 
+    const stages = q?.stages || {};
     for (const s of stageOrder) {
-      if (q.stages[s.key] === 'PENDING') return s.label;
+      if (stages[s.key] === 'PENDING') return s.label;
     }
     
     return 'No Action Required';
@@ -241,10 +242,10 @@ export default function OperationsMasterDashboard({
           {!hideKpis && (
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(4, 1fr)',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
               gap: '1.25rem' 
             }}>
-              {kpis.map((kpi, idx) => (
+              {(kpis || []).map((kpi, idx) => (
                 <div key={idx} className="glass-panel" 
                   style={{ 
                     padding: '1.5rem', 
@@ -365,8 +366,9 @@ export default function OperationsMasterDashboard({
                     <tr><td colSpan={17} style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>No queries match your current focus.</td></tr>
                   ) : null}
                   {filteredQueries.map(q => {
+                    const qUpdatedAt = q.updatedAt ? new Date(q.updatedAt) : new Date();
                     const isInactive = !['COMPLETED', 'DROPPED'].includes(q.status) && 
-                                       (Date.now() - new Date(q.updatedAt).getTime()) > (inactiveDays * 24 * 60 * 60 * 1000);
+                                       (Date.now() - qUpdatedAt.getTime()) > (inactiveDays * 24 * 60 * 60 * 1000);
                     return (
                       <tr key={q.id} className="glass-panel-interactive" style={{ borderBottom: '1px solid var(--surface-border)', opacity: q.status === 'DROPPED' ? 0.6 : 1 }}>
                         <td style={{ padding: '0.75rem', fontWeight: 700, fontSize: '0.8rem' }}>

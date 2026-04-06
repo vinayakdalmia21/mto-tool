@@ -58,16 +58,16 @@ export async function getMasterTrackingStats(inactiveDays: number = 3) {
   }, 0);
 
   return {
-    totalQueries,
-    activeQueries: activeQueriesCount,
-    inactiveQueries: inactiveQueriesCount,
-    conversionRate: conversionRate.toFixed(1),
-    dropCount: droppedQueries,
-    dropRate: dropRate.toFixed(1),
-    avgPipelineTime: avgPipelineTime.toFixed(1),
-    totalPipelineValue,
-    lockedValue,
-    inactiveDays // Echo back the threshold used
+    totalQueries: Number(totalQueries || 0),
+    activeQueries: Number(activeQueriesCount || 0),
+    inactiveQueries: Number(inactiveQueriesCount || 0),
+    conversionRate: String(conversionRate.toFixed(1)),
+    dropCount: Number(droppedQueries || 0),
+    dropRate: String(dropRate.toFixed(1)),
+    avgPipelineTime: String(avgPipelineTime.toFixed(1)),
+    totalPipelineValue: Number(totalPipelineValue || 0),
+    lockedValue: Number(lockedValue || 0),
+    inactiveDays: Number(inactiveDays || 3)
   };
 }
 
@@ -129,21 +129,22 @@ export async function getMasterTableQueries() {
       completed: !isDropped && hasInvoice ? 'PASSED' : (!isDropped && hasQC ? 'PENDING' : 'DASH')
     };
 
+    // Manual Mapping to guarantee plain serializable objects
     return {
       id: q.id,
-      queryNo: q.queryNo,
-      customerName: q.customer?.name || 'N/A',
+      queryNo: Number(q.queryNo || 0),
+      customerName: q.customer?.name || 'Unknown',
       staffName: q.staff?.name || 'N/A',
-      status: q.status,
+      status: q.status || 'OPEN',
       vendor: q.orders[0]?.purchaseOrder?.vendorName || '—',
       staffMtoId: q.orders[0]?.staffMtoId || '—',
-      estimatedValue: q.estimations[0]?.finalEstimatedPrice || 0,
-      vendorEstValue: q.vendorEstimations[0]?.labourCharges || 0, // Using labour quote as the primary vendor ref
-      lockedPrice: q.pricing?.finalPrice || 0,
-      qcFinalPrice: q.orders[0]?.purchaseOrder?.qcRecord?.actualFinalValue || 0,
-      daysInPipeline,
-      updatedAt: q.updatedAt,
-      stages
+      estimatedValue: Number(q.estimations[0]?.finalEstimatedPrice || 0),
+      vendorEstValue: Number(q.vendorEstimations[0]?.labourCharges || 0),
+      lockedPrice: Number(q.pricing?.finalPrice || 0),
+      qcFinalPrice: Number(q.orders[0]?.purchaseOrder?.qcRecord?.actualFinalValue || 0),
+      daysInPipeline: Number(daysInPipeline || 0),
+      updatedAt: q.updatedAt instanceof Date ? q.updatedAt.toISOString() : String(q.updatedAt),
+      stages: { ...stages }
     };
   });
 }
