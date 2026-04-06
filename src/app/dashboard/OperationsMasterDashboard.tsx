@@ -162,7 +162,7 @@ export default function OperationsMasterDashboard({
   const handleDownloadCSV = () => {
     const headers = [
       'Query ID', 'MTO ID', 'Customer', 'Staff', 'Vendor', 'Pending Stage',
-      'Vendor Est.', 'Estimate Sent', 'Price Locked', 'MTO Raised', 'CAD Upload', 'PO Raised', 'QC Passed', 'Completed',
+      'Vendor Est.', 'Estimate Sent', 'Price Locked', 'MTO Raised', 'CAD Upload', 'PO Raised', 'QC Passed', 'Final Billing',
       'Pipeline Time', 'Customer Locked Price', 'QC Final Price'
     ];
     
@@ -331,7 +331,7 @@ export default function OperationsMasterDashboard({
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>CAD Upload</th>
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>PO Raised</th>
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>QC Passed</th>
-                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>Completed</th>
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>Final Billing</th>
 
                     {/* SUPPLEMENTARY FINANCIALS */}
                     <th style={{ padding: '0.75rem', color: 'var(--primary)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Pipeline Time</th>

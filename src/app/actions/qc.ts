@@ -15,7 +15,8 @@ export async function getReceivedPos() {
             include: {
               customer: true,
               pricing: true,
-              vendorEstimations: { where: { isAccepted: true }, take: 1 }
+              vendorEstimations: { where: { isAccepted: true }, take: 1 },
+              estimations: { orderBy: { version: 'desc' }, take: 1 }
             }
           }
         }

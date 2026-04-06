@@ -10,22 +10,30 @@ export default function QcItemCard({ po }: { po: any }) {
   const [passMode, setPassMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Promised Data (from the Order Snapshot)
+  // Promised Data Sources
   const promised = po.mtoOrder;
-  const queryPricing = po.mtoOrder.mtoQuery?.pricing;
-  const vendorEst = po.mtoOrder.mtoQuery?.vendorEstimations?.[0];
+  const query = po.mtoOrder.mtoQuery;
+  const qcData = po.qcRecord;
+  const queryPricing = query?.pricing;
+  const latestEst = query?.estimations?.[0]; // Fetched in latest getReceivedPos update
+  const vendorEst = query?.vendorEstimations?.[0];
 
-  // Actuals State (Detailed Pricing Table)
+  // Helper to get best available promised data for comparison: Snapshot -> Estimation -> Pricing
+  const getP = (field: string) => {
+    return promised?.[field] || latestEst?.[field] || queryPricing?.[field] || 0;
+  };
+
+  // Actuals State (Detailed Pricing Table) - Prioritize saved QC Record for persistence
   const [actuals, setActuals] = useState({
-    goldWeight: promised?.goldWeight || queryPricing?.goldWeight || vendorEst?.goldWeight || 0,
-    goldRate: promised?.goldRate || queryPricing?.goldRate || 0,
-    diamondWeight: promised?.diamondWeight || queryPricing?.diamondWeight || vendorEst?.diamondWeight || 0,
-    diamondRate: promised?.diamondRate || queryPricing?.diamondRate || vendorEst?.diamondRate || 0,
-    makingPercent: promised?.makingPercent || queryPricing?.makingPercent || 0,
-    otherStones: promised?.otherStones || queryPricing?.otherStones || 0,
-    discountPercent: promised?.discountPercent || queryPricing?.discountPercent || 0,
+    goldWeight: qcData?.actualGoldWeight ?? (promised?.goldWeight || queryPricing?.goldWeight || latestEst?.goldWeight || vendorEst?.goldWeight || 0),
+    goldRate: qcData?.actualGoldRate ?? (promised?.goldRate || queryPricing?.goldRate || latestEst?.goldRate || 0),
+    diamondWeight: qcData?.actualDiamondWeight ?? (promised?.diamondWeight || latestEst?.diamondWeight || vendorEst?.diamondWeight || 0),
+    diamondRate: qcData?.actualDiamondRate ?? (promised?.diamondRate || latestEst?.diamondRate || vendorEst?.diamondRate || 0),
+    makingPercent: qcData?.actualMakingPercent ?? (promised?.makingPercent || latestEst?.makingPercent || 0),
+    otherStones: qcData?.actualOtherStones ?? (promised?.otherStones || latestEst?.otherStones || 0),
+    discountPercent: qcData?.actualDiscountPercent ?? (promised?.discountPercent || latestEst?.discountPercent || 0),
     gstPercent: 3,
-    notes: ""
+    notes: qcData?.notes || ""
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -198,56 +206,56 @@ export default function QcItemCard({ po }: { po: any }) {
               {/* Gold Comparison */}
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                 <td style={{ padding: '0.5rem 0' }}>Gold ({po.mtoOrder.mtoQuery?.goldKaratage || 'N/A'})</td>
-                <td style={{ textAlign: 'right' }}>₹{((promised?.goldRate || 0) * (Number(promised?.goldWeight) || 0)).toLocaleString()}</td>
+                <td style={{ textAlign: 'right' }}>₹{(Number(getP('goldRate')) * Number(getP('goldWeight'))).toLocaleString()}</td>
                 <td style={{ textAlign: 'right' }}>₹{goldValue.toLocaleString()}</td>
-                <td style={{ textAlign: 'right', color: goldValue > ((promised?.goldRate || 0) * (Number(promised?.goldWeight) || 0)) ? 'var(--error)' : 'var(--success)' }}>
-                  ₹{(goldValue - ((promised?.goldRate || 0) * (Number(promised?.goldWeight) || 0))).toLocaleString()}
+                <td style={{ textAlign: 'right', color: goldValue > (Number(getP('goldRate')) * Number(getP('goldWeight'))) ? 'var(--error)' : 'var(--success)' }}>
+                  ₹{(goldValue - (Number(getP('goldRate')) * Number(getP('goldWeight')))).toLocaleString()}
                 </td>
               </tr>
 
               {/* Diamond Comparison */}
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                 <td style={{ padding: '0.5rem 0' }}>Diamond</td>
-                <td style={{ textAlign: 'right' }}>₹{((promised?.diamondRate || 0) * (promised?.diamondWeight || 0)).toLocaleString()}</td>
+                <td style={{ textAlign: 'right' }}>₹{(Number(getP('diamondRate')) * Number(getP('diamondWeight'))).toLocaleString()}</td>
                 <td style={{ textAlign: 'right' }}>₹{diamondValue.toLocaleString()}</td>
-                <td style={{ textAlign: 'right', color: diamondValue > ((promised?.diamondRate || 0) * (promised?.diamondWeight || 0)) ? 'var(--error)' : 'var(--success)' }}>
-                  ₹{(diamondValue - ((promised?.diamondRate || 0) * (promised?.diamondWeight || 0))).toLocaleString()}
+                <td style={{ textAlign: 'right', color: diamondValue > (Number(getP('diamondRate')) * Number(getP('diamondWeight'))) ? 'var(--error)' : 'var(--success)' }}>
+                  ₹{(diamondValue - (Number(getP('diamondRate')) * Number(getP('diamondWeight')))).toLocaleString()}
                 </td>
               </tr>
 
               {/* Making Comparison */}
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                 <td style={{ padding: '0.5rem 0' }}>Making</td>
-                <td style={{ textAlign: 'right' }}>₹{( (promised?.goldRate || 0) * (Number(promised?.goldWeight) || 0) * (promised?.makingPercent || 0) / 100 ).toLocaleString()}</td>
+                <td style={{ textAlign: 'right' }}>₹{( Number(getP('goldRate')) * Number(getP('goldWeight')) * Number(getP('makingPercent')) / 100 ).toLocaleString()}</td>
                 <td style={{ textAlign: 'right' }}>₹{makingCharges.toLocaleString()}</td>
-                <td style={{ textAlign: 'right' }}>₹{(makingCharges - ((promised?.goldRate || 0) * (Number(promised?.goldWeight) || 0) * (promised?.makingPercent || 0) / 100)).toLocaleString()}</td>
+                <td style={{ textAlign: 'right' }}>₹{(makingCharges - (Number(getP('goldRate')) * Number(getP('goldWeight')) * Number(getP('makingPercent')) / 100)).toLocaleString()}</td>
               </tr>
 
               {/* Discount Comparison */}
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                 <td style={{ padding: '0.5rem 0' }}>Discount</td>
-                <td style={{ textAlign: 'right', color: 'var(--error)' }}>-₹{(Number(promised?.discountAmount) || 0).toLocaleString()}</td>
+                <td style={{ textAlign: 'right', color: 'var(--error)' }}>-₹{Number(getP('discountAmount')).toLocaleString()}</td>
                 <td style={{ textAlign: 'right', color: 'var(--error)' }}>-₹{discountAmount.toLocaleString()}</td>
-                <td style={{ textAlign: 'right' }}>₹{( (Number(promised?.discountAmount) || 0) - discountAmount ).toLocaleString()}</td>
+                <td style={{ textAlign: 'right' }}>₹{( Number(getP('discountAmount')) - discountAmount ).toLocaleString()}</td>
               </tr>
 
               {/* GST Comparison */}
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                 <td style={{ padding: '0.5rem 0' }}>GST (3%)</td>
-                <td style={{ textAlign: 'right' }}>₹{(promised?.gstAmount || 0).toLocaleString()}</td>
+                <td style={{ textAlign: 'right' }}>₹{Number(getP('gstAmount')).toLocaleString()}</td>
                 <td style={{ textAlign: 'right' }}>₹{gstAmount.toLocaleString()}</td>
-                <td style={{ textAlign: 'right' }}>₹{(gstAmount - (promised?.gstAmount || 0)).toLocaleString()}</td>
+                <td style={{ textAlign: 'right' }}>₹{(gstAmount - Number(getP('gstAmount'))).toLocaleString()}</td>
               </tr>
 
               {/* Grand Total Comparison */}
               <tr style={{ fontWeight: 700, background: 'rgba(255,255,255,0.05)', fontSize: '0.9rem' }}>
                 <td style={{ padding: '0.8rem 0.5rem' }}>TOTAL</td>
                 <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem' }}>
-                  ₹{( (Number(promised?.totalAmount) || 0) + (Number(promised?.gstAmount) || 0) || queryPricing?.finalPrice || 0 ).toLocaleString()}
+                  ₹{Number(getP('totalAmount') || queryPricing?.finalPrice || 0).toLocaleString()}
                 </td>
                 <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem', color: 'var(--primary)' }}>₹{actualTotal.toLocaleString()}</td>
                 <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem', color: difference > 0 ? 'var(--error)' : 'var(--success)' }}>
-                  ₹{(actualTotal - ((Number(promised?.totalAmount) || 0) + (Number(promised?.gstAmount) || 0) || queryPricing?.finalPrice || 0)).toLocaleString()}
+                  ₹{(actualTotal - Number(getP('totalAmount') || queryPricing?.finalPrice || 0)).toLocaleString()}
                 </td>
               </tr>
             </tbody>
