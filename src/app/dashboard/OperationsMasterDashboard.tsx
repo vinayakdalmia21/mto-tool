@@ -154,8 +154,26 @@ export default function OperationsMasterDashboard({
 
   // 3. Status Display Logic
   const renderStageStatus = (status: string, customLabel?: string) => {
-    if (status === 'PASSED') return <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)', fontWeight: 600, fontSize: '0.75rem' }}>{customLabel || 'Passed'}</div>;
-    if (status === 'PENDING') return <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--warning)', fontWeight: 600, fontSize: '0.75rem' }}>Pending</div>;
+    const tooltipText = status === 'PASSED' 
+      ? `Successfully ${customLabel || 'Passed'}` 
+      : (status === 'PENDING' ? 'Awaiting action/update' : 'Stage not yet reached');
+
+    if (status === 'PASSED') return (
+      <div 
+        data-tooltip={tooltipText}
+        style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)', fontWeight: 600, fontSize: '0.75rem', cursor: 'help' }}
+      >
+        {customLabel || 'Passed'}
+      </div>
+    );
+    if (status === 'PENDING') return (
+      <div 
+        data-tooltip={tooltipText}
+        style={{ display: 'flex', justifyContent: 'center', color: 'var(--warning)', fontWeight: 600, fontSize: '0.75rem', cursor: 'help' }}
+      >
+        Pending
+      </div>
+    );
     return <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--surface-border)' }}>—</div>;
   };
 
@@ -237,14 +255,15 @@ export default function OperationsMasterDashboard({
                     position: 'relative'
                   }}>
                   <div 
-                    title={kpi.tooltip}
+                    data-tooltip={kpi.tooltip}
                     style={{ 
                       position: 'absolute', 
                       top: '0.75rem', 
                       right: '0.75rem', 
                       color: 'var(--text-muted)',
                       cursor: 'help',
-                      opacity: 0.6
+                      opacity: 0.6,
+                      zIndex: 10
                     }}
                   >
                     <HelpCircle size={14} />

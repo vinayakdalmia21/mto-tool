@@ -141,18 +141,80 @@ h1, h2, h3 {
   letter-spacing: -0.02em;
   text-transform: none;
   background: none;
-  -webkit-background-clip: initial;
-  -webkit-text-fill-color: initial;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: var(--text-main);
 }
 
 .veda-card {
-  @extend .glass-panel;
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(197, 160, 89, 0.1);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-lg);
   background: linear-gradient(135deg, rgba(26, 22, 20, 0.8) 0%, rgba(15, 13, 12, 0.9) 100%);
 }
 
 .veda-divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(197, 160, 89, 0.3), transparent);
+}
+
+/* Tooltip Styles */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 140%;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  padding: 0.6rem 0.8rem;
+  background: #1e1b4b; /* Deep indigo/navy */
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  border-radius: 8px;
+  z-index: 1000;
+  width: max-content;
+  max-width: 220px;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Tooltip Arrow */
+[data-tooltip]::after {
+  content: '';
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #1e1b4b transparent transparent transparent;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  z-index: 1000;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
 }
