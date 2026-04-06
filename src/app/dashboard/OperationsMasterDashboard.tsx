@@ -32,6 +32,27 @@ export default function OperationsMasterDashboard({
   const [inactiveDays, setInactiveDays] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Helper to find the current pending stage
+  const getPendingStageLabel = (stages: any) => {
+    if (stages.completed === 'PASSED') return 'Completed';
+    
+    const stageOrder = [
+      { key: 'vendorEst', label: 'Vendor Estimation' },
+      { key: 'estSent', label: 'Estimate to Customer' },
+      { key: 'priceLocked', label: 'Price Locking' },
+      { key: 'mtoRaised', label: 'MTO Raising' },
+      { key: 'cadUpload', label: 'CAD Upload' },
+      { key: 'poRaised', label: 'PO Raising' },
+      { key: 'qcPassed', label: 'Production / QC' }
+    ];
+
+    for (const s of stageOrder) {
+      if (stages[s.key] === 'PENDING') return s.label;
+    }
+    
+    return 'Processing';
+  };
+
   // 1. KPI Calculation Logic
   const kpis = [
     { 
@@ -53,7 +74,23 @@ export default function OperationsMasterDashboard({
     { 
       label: 'Inactive Queries', 
       value: stats.inactiveQueries, 
-      sub: `No status changes (> ${inactiveDays} days)`, 
+      sub: (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span>Threshold:</span>
+          <select 
+              value={inactiveDays} 
+              onChange={(e) => setInactiveDays(Number(e.target.value))}
+              onClick={(e) => e.stopPropagation()}
+              style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--primary)', border: 'none', borderRadius: '4px', fontWeight: 600, cursor: 'pointer', outline: 'none', padding: '0 0.2rem' }}
+          >
+            <option value={1}>1d</option>
+            <option value={2}>2d</option>
+            <option value={3}>3d</option>
+            <option value={5}>5d</option>
+            <option value={7}>7d</option>
+          </select>
+        </div>
+      ), 
       icon: <AlertCircle size={20} />, 
       color: '#ef4444',
       tooltip: 'Queries with no activity/status updates beyond the defined threshold.'
@@ -123,9 +160,9 @@ export default function OperationsMasterDashboard({
   // 4. CSV Download Logic
   const handleDownloadCSV = () => {
     const headers = [
-      'Query ID', 'MTO ID', 'Customer', 'Staff', 'Vendor',
+      'Query ID', 'MTO ID', 'Customer', 'Staff', 'Vendor', 'Pending Stage',
       'Vendor Est.', 'Estimate Sent', 'Price Locked', 'MTO Raised', 'CAD Upload', 'PO Raised', 'QC Passed', 'Completed',
-      'Pipeline Time', 'Vendor Est Amount', 'Customer Locked Price', 'QC Final Price'
+      'Pipeline Time', 'Customer Locked Price', 'QC Final Price'
     ];
     
     const rows = filteredQueries.map(q => [
@@ -134,6 +171,7 @@ export default function OperationsMasterDashboard({
       q.customerName,
       q.staffName,
       q.vendor,
+      getPendingStageLabel(q.stages),
       q.stages.vendorEst,
       q.stages.estSent,
       q.stages.priceLocked,
@@ -143,7 +181,6 @@ export default function OperationsMasterDashboard({
       q.stages.qcPassed,
       q.stages.completed,
       `${q.daysInPipeline} Days`,
-      q.vendorEstValue,
       q.lockedPrice,
       q.qcFinalPrice
     ]);
@@ -227,20 +264,6 @@ export default function OperationsMasterDashboard({
             <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Master Operational Pipeline</h2>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.85rem' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>Follow-up Threshold:</span>
-                    <select 
-                       value={inactiveDays} 
-                       onChange={(e) => setInactiveDays(Number(e.target.value))}
-                       style={{ background: 'transparent', color: 'var(--primary)', border: 'none', fontWeight: 600, cursor: 'pointer', outline: 'none' }}
-                    >
-                      <option value={1}>1 Day</option>
-                      <option value={2}>2 Days</option>
-                      <option value={3}>3 Days</option>
-                      <option value={5}>5 Days</option>
-                      <option value={7}>7 Days</option>
-                    </select>
-                  </div>
                </div>
 
                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -284,6 +307,7 @@ export default function OperationsMasterDashboard({
                     <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Customer</th>
                     <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Staff</th>
                     <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Vendor</th>
+                    <th style={{ padding: '0.75rem', color: 'var(--warning)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Pending</th>
                     
                     {/* STAGES (13 core) */}
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>Vendor Est.</th>
@@ -297,7 +321,6 @@ export default function OperationsMasterDashboard({
 
                     {/* SUPPLEMENTARY FINANCIALS */}
                     <th style={{ padding: '0.75rem', color: 'var(--primary)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Pipeline Time</th>
-                    <th style={{ padding: '0.75rem', color: 'var(--primary)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Vendor Est.</th>
                     <th style={{ padding: '0.75rem', color: 'var(--primary)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Locked Price</th>
                     <th style={{ padding: '0.75rem', color: 'var(--success)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>QC Final</th>
                   </tr>
@@ -320,6 +343,9 @@ export default function OperationsMasterDashboard({
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.customerName}</td>
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.staffName}</td>
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.vendor}</td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--warning)' }}>
+                           {getPendingStageLabel(q.stages)}
+                        </td>
                         
                         {/* STAGES */}
                         <td style={{ padding: '0.5rem' }}>{renderStageStatus(q.stages.vendorEst)}</td>
@@ -337,9 +363,6 @@ export default function OperationsMasterDashboard({
                              <Clock size={12} />
                              {q.daysInPipeline}d
                            </div>
-                        </td>
-                        <td style={{ padding: '0.75rem', textAlign: 'right', fontSize: '0.8rem', fontWeight: 600 }}>
-                           {q.vendorEstValue > 0 ? `₹${q.vendorEstValue.toLocaleString()}` : '—'}
                         </td>
                         <td style={{ padding: '0.75rem', textAlign: 'right', fontSize: '0.8rem', fontWeight: 600 }}>
                            {q.lockedPrice > 0 ? `₹${q.lockedPrice.toLocaleString()}` : '—'}
