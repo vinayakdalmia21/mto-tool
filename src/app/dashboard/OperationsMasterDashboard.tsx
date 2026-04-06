@@ -13,7 +13,8 @@ import {
   Calendar,
   XCircle,
   Search,
-  Download
+  Download,
+  HelpCircle
 } from 'lucide-react';
 
 export default function OperationsMasterDashboard({ 
@@ -225,7 +226,6 @@ export default function OperationsMasterDashboard({
             }}>
               {kpis.map((kpi, idx) => (
                 <div key={idx} className="glass-panel" 
-                  title={kpi.tooltip}
                   style={{ 
                     padding: '1.5rem', 
                     borderLeft: `4px solid ${kpi.color}`,
@@ -233,8 +233,22 @@ export default function OperationsMasterDashboard({
                     alignItems: 'center',
                     gap: '1.25rem',
                     transition: 'transform 0.2s ease',
-                    cursor: 'help'
+                    position: 'relative'
                   }}>
+                  <div 
+                    title={kpi.tooltip}
+                    style={{ 
+                      position: 'absolute', 
+                      top: '0.75rem', 
+                      right: '0.75rem', 
+                      color: 'var(--text-muted)',
+                      cursor: 'help',
+                      opacity: 0.6
+                    }}
+                  >
+                    <HelpCircle size={14} />
+                  </div>
+                  
                   <div style={{ 
                     background: `${kpi.color}20`, 
                     color: kpi.color,
