@@ -35,7 +35,7 @@ export default function OperationsMasterDashboard({
 
   // Helper to find the current pending stage
   const getPendingStageLabel = (stages: any) => {
-    if (stages.completed === 'PASSED') return 'Completed';
+    if (stages.completed === 'PASSED') return 'No Action Required';
     
     const stageOrder = [
       { key: 'vendorEst', label: 'Vendor Estimation' },
@@ -51,7 +51,7 @@ export default function OperationsMasterDashboard({
       if (stages[s.key] === 'PENDING') return s.label;
     }
     
-    return 'Processing';
+    return 'No Action Required';
   };
 
   // 1. KPI Calculation Logic
@@ -357,7 +357,12 @@ export default function OperationsMasterDashboard({
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.customerName}</td>
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.staffName}</td>
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.vendor}</td>
-                        <td style={{ padding: '0.75rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--warning)' }}>
+                        <td style={{ 
+                          padding: '0.75rem', 
+                          fontSize: '0.75rem', 
+                          fontWeight: 600, 
+                          color: getPendingStageLabel(q.stages) === 'No Action Required' ? 'var(--success)' : 'var(--warning)' 
+                        }}>
                            {getPendingStageLabel(q.stages)}
                         </td>
                         
