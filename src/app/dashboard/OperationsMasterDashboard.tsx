@@ -12,7 +12,8 @@ import {
   User, 
   Calendar,
   XCircle,
-  Search
+  Search,
+  Download
 } from 'lucide-react';
 
 export default function OperationsMasterDashboard({ 
@@ -103,9 +104,53 @@ export default function OperationsMasterDashboard({
 
   // 3. Status Display Logic
   const renderStageStatus = (status: string) => {
-    if (status === 'PASSED') return <div style={{ display: 'flex', justifyContent: 'center' }} title="Passed"><CheckCircle2 size={18} color="var(--success)" /></div>;
-    if (status === 'PENDING') return <div style={{ display: 'flex', justifyContent: 'center' }} title="Pending"><Clock size={18} color="var(--warning)" /></div>;
-    return <div style={{ display: 'flex', justifyContent: 'center' }} title="Not Reached"><Minus size={18} color="var(--surface-border)" /></div>;
+    if (status === 'PASSED') return <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)', fontWeight: 600, fontSize: '0.75rem' }}>Passed</div>;
+    if (status === 'PENDING') return <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--warning)', fontWeight: 600, fontSize: '0.75rem' }}>Pending</div>;
+    return <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--surface-border)' }}>—</div>;
+  };
+
+  // 4. CSV Download Logic
+  const handleDownloadCSV = () => {
+    const headers = [
+      'Query ID', 'MTO ID', 'Customer', 'Staff', 'Vendor', 'Status', 
+      'Query Raised', 'Estimation', 'Negotiation', 'Price Locked', 'PO', 'Production', 'QC', 'Completed',
+      'Days in Pipeline', 'Est Amount', 'Locked Price'
+    ];
+    
+    const rows = filteredQueries.map(q => [
+      `Q-${String(q.queryNo || 0).padStart(4, '0')}`,
+      q.staffMtoId,
+      q.customerName,
+      q.staffName,
+      q.vendor,
+      q.status,
+      q.stages.queryRaised,
+      q.stages.estimation,
+      q.stages.negotiation,
+      q.stages.priceLocked,
+      q.stages.po,
+      q.stages.production,
+      q.stages.qc,
+      q.stages.completed,
+      q.daysInPipeline,
+      q.estimatedValue,
+      q.lockedPrice
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `veda_operations_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -211,16 +256,35 @@ export default function OperationsMasterDashboard({
                   </div>
                </div>
 
-               <div style={{ position: 'relative' }}>
-                 <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                 <input 
-                   type="text" 
-                   placeholder="Search ID, Customer, Staff..." 
-                   className="input" 
-                   style={{ width: '320px', paddingLeft: '2.5rem', background: 'rgba(255,255,255,0.03)' }}
-                   value={searchQuery}
-                   onChange={(e) => setSearchQuery(e.target.value)}
-                 />
+               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                 <button 
+                   onClick={handleDownloadCSV}
+                   className="btn" 
+                   style={{ 
+                     display: 'flex', 
+                     alignItems: 'center', 
+                     gap: '0.5rem', 
+                     background: 'rgba(255,255,255,0.05)', 
+                     fontSize: '0.85rem',
+                     border: '1px solid var(--surface-border)',
+                     padding: '0.5rem 1rem'
+                   }}
+                 >
+                   <Download size={16} /> 
+                   Export CSV
+                 </button>
+
+                 <div style={{ position: 'relative' }}>
+                   <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                   <input 
+                     type="text" 
+                     placeholder="Search ID, Customer, Staff..." 
+                     className="input" 
+                     style={{ width: '300px', paddingLeft: '2.5rem', background: 'rgba(255,255,255,0.03)' }}
+                     value={searchQuery}
+                     onChange={(e) => setSearchQuery(e.target.value)}
+                   />
+                 </div>
                </div>
             </div>
 
@@ -304,9 +368,9 @@ export default function OperationsMasterDashboard({
               </table>
             </div>
             <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem 1.5rem', display: 'flex', gap: '2rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><CheckCircle2 size={14} color="var(--success)" /> Passed Stage</div>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Clock size={14} color="var(--warning)" /> Current Stage (Pending)</div>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Minus size={14} color="var(--surface-border)" /> Not Reached / Not Applicable</div>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><span style={{ color: 'var(--success)', fontWeight: 700 }}>Passed</span> / Validated</div>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><span style={{ color: 'var(--warning)', fontWeight: 700 }}>Pending</span> / Action Required</div>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><span style={{ color: 'var(--surface-border)', fontWeight: 700 }}>—</span> Not Reached</div>
             </div>
           </div>
 

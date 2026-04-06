@@ -94,20 +94,24 @@ export async function getMasterTableQueries() {
   return queries.map(q => {
     const daysInPipeline = Math.floor((Date.now() - new Date(q.createdAt).getTime()) / (1000 * 60 * 60 * 24));
     
-    // Stage-wise Progression Logic
+    // Step-by-step logic based on chronological progression
+    const hasComp = q.status === 'COMPLETED';
+    const hasQC = hasComp || q.orders[0]?.purchaseOrder?.qcRecord?.status === 'PASS';
+    const hasProd = hasQC || q.orders[0]?.purchaseOrder?.status === 'COMPLETED';
+    const hasPO = hasProd || !!q.orders[0]?.purchaseOrder;
+    const hasLock = hasPO || ['ORDER_PLACED', 'CAD_UPLOADED', 'MOVED_TO_OPS'].includes(q.status) || q.status === 'PRICE_LOCKED';
+    const hasNegot = hasLock || ['AWAITING_RESPONSE', 'NEGOTIATION'].includes(q.status);
+    const hasEst = hasNegot || q.estimations.length > 0;
+
     const stages = {
-      queryRaised: 'PASSED', // Always passed if it exists
-      estimation: (q.estimations.length > 0) ? 'PASSED' : (q.status === 'ESTIMATING' ? 'PENDING' : 'DASH'),
-      negotiation: (['AWAITING_RESPONSE', 'NEGOTIATION'].includes(q.status)) ? 'PENDING' : 
-                   (['PRICE_LOCKED', 'ORDER_PLACED', 'CAD_UPLOADED', 'MOVED_TO_OPS', 'COMPLETED'].includes(q.status) ? 'PASSED' : 'DASH'),
-      priceLocked: (q.status === 'PRICE_LOCKED') ? 'PENDING' : 
-                   (['ORDER_PLACED', 'CAD_UPLOADED', 'MOVED_TO_OPS', 'COMPLETED'].includes(q.status) ? 'PASSED' : 'DASH'),
-      po: (q.orders[0]?.purchaseOrder) ? 'PASSED' : (q.status === 'PRICE_LOCKED' || q.status === 'ORDER_PLACED' ? 'PENDING' : 'DASH'),
-      production: (q.orders[0]?.purchaseOrder?.status === 'COMPLETED') ? 'PASSED' : 
-                  (q.orders[0]?.purchaseOrder?.status === 'IN_PRODUCTION' || q.orders[0]?.purchaseOrder?.status === 'RAISED' ? 'PENDING' : 'DASH'),
-      qc: (q.orders[0]?.purchaseOrder?.qcRecord?.status === 'PASS') ? 'PASSED' : 
-          (q.orders[0]?.purchaseOrder?.status === 'DISPATCHED' ? 'PENDING' : 'DASH'),
-      completed: (q.status === 'COMPLETED') ? 'PASSED' : 'DASH'
+      queryRaised: 'PASSED',
+      estimation: hasNegot ? 'PASSED' : (q.estimations.length > 0 ? 'PASSED' : (q.status === 'ESTIMATING' || q.status === 'OPEN' ? 'PENDING' : 'DASH')),
+      negotiation: hasLock ? 'PASSED' : (['AWAITING_RESPONSE', 'NEGOTIATION'].includes(q.status) ? 'PENDING' : 'DASH'),
+      priceLocked: hasPO ? 'PASSED' : (q.status === 'PRICE_LOCKED' ? 'PENDING' : 'DASH'),
+      po: hasProd ? 'PASSED' : (q.orders[0]?.purchaseOrder ? 'PASSED' : (q.status === 'PRICE_LOCKED' || q.status === 'ORDER_PLACED' ? 'PENDING' : 'DASH')),
+      production: hasQC ? 'PASSED' : (q.orders[0]?.purchaseOrder?.status === 'COMPLETED' ? 'PASSED' : (['IN_PRODUCTION', 'RAISED'].includes(q.orders[0]?.purchaseOrder?.status || '') ? 'PENDING' : 'DASH')),
+      qc: hasProd && q.orders[0]?.purchaseOrder?.status === 'DISPATCHED' && !hasQC ? 'PENDING' : (hasQC ? 'PASSED' : 'DASH'),
+      completed: hasComp ? 'PASSED' : 'DASH'
     };
 
     return {
