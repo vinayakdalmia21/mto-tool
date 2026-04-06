@@ -47,8 +47,9 @@ export default function QcClient({ pos }: { pos: any[] }) {
                     po.status === 'REWORKING' ? 'badge-danger' : 
                     'badge-warning'
                   }`}>
-                    {po.status === 'DISPATCHED' ? 'Awaiting QC' : 
-                     po.status === 'COMPLETED' ? 'Passed' : 
+                    {po.qcRecord?.isBilled ? 'BILLING CONFIRMED' :
+                     po.status === 'DISPATCHED' ? 'AWAITING QC' : 
+                     po.status === 'COMPLETED' ? 'QC PASSED' : 
                      po.status.replace(/_/g, ' ')}
                   </span>
                 </td>
