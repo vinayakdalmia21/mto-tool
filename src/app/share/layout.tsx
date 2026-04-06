@@ -12,21 +12,42 @@ export default function ShareLayout({
         backgroundColor: '#FDF8F0', 
         color: '#1A1A1A',
         fontFamily: "'Playfair Display', 'Georgia', serif",
-        width: '100%'
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
       }}
     >
       {/* Google Fonts for Serif elegance */}
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-      <header className="mb-12 flex flex-col items-center w-full max-w-4xl text-center mx-auto">
-        <div className="flex justify-center w-full mb-6 mx-auto">
+      <header style={{ 
+        marginBottom: '3rem', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        width: '100%', 
+        maxWidth: '1000px', 
+        textAlign: 'center' 
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          width: '100%', 
+          marginBottom: '1.5rem',
+          mixBlendMode: 'multiply',
+          filter: 'contrast(1.1) brightness(1.05)' 
+        }}>
           <Image 
             src="/veda-logo.png" 
             alt="VEDA Silver | Gold | Diamonds" 
             width={380} 
             height={380} 
-            className="transition-transform duration-500 hover:scale-105 mx-auto"
-            style={{ mixBlendMode: 'multiply', display: 'block' }}
+            style={{ 
+              display: 'block',
+              maxWidth: '100%',
+              height: 'auto'
+            }}
             priority
             unoptimized
           />
