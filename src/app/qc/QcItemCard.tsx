@@ -104,7 +104,7 @@ export default function QcItemCard({ po }: { po: any }) {
             <tbody>
               {/* Gold Row */}
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <td style={{ padding: '0.6rem 0' }}>Gold</td>
+                <td style={{ padding: '0.6rem 0' }}>Gold ({po.mtoOrder.mtoQuery?.goldKaratage || 'N/A'})</td>
                 <td style={{ padding: '0.6rem 0.5rem' }}>
                   <input type="number" step="0.001" value={actuals.goldWeight} onChange={e => handleInputChange('goldWeight', e.target.value)} style={{ width: '60px', padding: '0.3rem' }} />g
                 </td>
@@ -197,7 +197,7 @@ export default function QcItemCard({ po }: { po: any }) {
             <tbody>
               {/* Gold Comparison */}
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                <td style={{ padding: '0.5rem 0' }}>Gold</td>
+                <td style={{ padding: '0.5rem 0' }}>Gold ({po.mtoOrder.mtoQuery?.goldKaratage || 'N/A'})</td>
                 <td style={{ textAlign: 'right' }}>₹{((promised?.goldRate || 0) * (Number(promised?.goldWeight) || 0)).toLocaleString()}</td>
                 <td style={{ textAlign: 'right' }}>₹{goldValue.toLocaleString()}</td>
                 <td style={{ textAlign: 'right', color: goldValue > ((promised?.goldRate || 0) * (Number(promised?.goldWeight) || 0)) ? 'var(--error)' : 'var(--success)' }}>
