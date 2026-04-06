@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 export async function getReceivedPos() {
   return await prisma.purchaseOrder.findMany({
     where: {
-      status: { in: ['RAISED', 'IN_PRODUCTION', 'DISPATCHED'] }
+      status: { in: ['RAISED', 'IN_PRODUCTION', 'DISPATCHED', 'COMPLETED', 'REWORKING'] }
     },
     include: {
       mtoOrder: {

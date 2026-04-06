@@ -2,19 +2,19 @@
 
 import { prisma } from "@/lib/prisma";
 
-export async function getMasterTrackingStats() {
+export async function getMasterTrackingStats(inactiveDays: number = 3) {
   const now = new Date();
-  const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+  const inactiveThreshold = new Date(now.getTime() - inactiveDays * 24 * 60 * 60 * 1000);
 
-  // 1. Pipeline Overview
+  // 1. Core Counts
   const totalQueries = await prisma.mtoQuery.count();
-  const activeQueries = await prisma.mtoQuery.count({
+  const activeQueriesCount = await prisma.mtoQuery.count({
     where: { status: { notIn: ['DROPPED', 'COMPLETED'] } }
   });
   const inactiveQueriesCount = await prisma.mtoQuery.count({
     where: { 
       status: { notIn: ['DROPPED', 'COMPLETED'] },
-      updatedAt: { lt: threeDaysAgo } 
+      updatedAt: { lt: inactiveThreshold } 
     }
   });
   const completedQueries = await prisma.mtoQuery.count({
@@ -24,184 +24,66 @@ export async function getMasterTrackingStats() {
     where: { status: 'DROPPED' }
   });
 
+  // 2. Performance & Financial Metrics
   const conversionRate = totalQueries > 0 ? (completedQueries / totalQueries) * 100 : 0;
-  const dropOffRate = totalQueries > 0 ? (droppedQueries / totalQueries) * 100 : 0;
-  const inactivityRate = activeQueries > 0 ? (inactiveQueriesCount / activeQueries) * 100 : 0;
+  const dropRate = totalQueries > 0 ? (droppedQueries / totalQueries) * 100 : 0;
 
-  // 2. Stage-wise Funnel
-  const funnelRaw = await prisma.mtoQuery.groupBy({
-    by: ['status'],
-    _count: { _all: true }
+  // Avg Pipeline Time (for active or completed queries)
+  const allQueries = await prisma.mtoQuery.findMany({
+    select: { createdAt: true, updatedAt: true, status: true }
   });
-  
-  // Custom Funnel Ordering
-  const stageOrder = ['OPEN', 'ESTIMATING', 'AWAITING_RESPONSE', 'ACCEPTED', 'ORDER_PLACED', 'CAD_UPLOADED', 'MOVED_TO_OPS', 'COMPLETED', 'DROPPED'];
-  const funnel = funnelRaw
-    .map(f => ({ name: f.status, value: f._count._all }))
-    .sort((a, b) => stageOrder.indexOf(a.name) - stageOrder.indexOf(b.name));
+  const totalPipelineDays = allQueries.reduce((acc, q) => {
+    const end = q.status === 'COMPLETED' || q.status === 'DROPPED' ? q.updatedAt : new Date();
+    return acc + (end.getTime() - q.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+  }, 0);
+  const avgPipelineTime = allQueries.length > 0 ? totalPipelineDays / allQueries.length : 0;
 
-  // 3. Status History (Speed of System)
-  const statusHistory = await prisma.mtoStatusHistory.findMany({
-    orderBy: { createdAt: 'asc' }
-  });
-  const historyByQuery: Record<string, { status: string; createdAt: Date }[]> = {};
-  statusHistory.forEach(h => {
-    if (!historyByQuery[h.mtoQueryId]) historyByQuery[h.mtoQueryId] = [];
-    historyByQuery[h.mtoQueryId].push({ status: h.status, createdAt: h.createdAt });
+  // Pipeline Values
+  const activeQueries = await prisma.mtoQuery.findMany({
+    where: { status: { notIn: ['DROPPED', 'COMPLETED'] } },
+    include: { pricing: true, estimations: { orderBy: { version: 'desc' }, take: 1 } }
   });
 
-  let sumEstTime = 0, countEstTime = 0;
-  let sumNegTime = 0, countNegTime = 0;
-  let sumCycleTime = 0, countCycleTime = 0;
+  const totalPipelineValue = activeQueries.reduce((acc, q) => {
+    // Priority: Locked Price > Latest Estimation
+    const val = q.pricing?.finalPrice || q.estimations[0]?.finalEstimatedPrice || 0;
+    return acc + val;
+  }, 0);
 
-  for (const qId in historyByQuery) {
-    const history = historyByQuery[qId];
-    
-    const openRec = history.find(h => h.status === 'OPEN');
-    const estRec = history.find(h => h.status === 'ESTIMATING' || h.status === 'ESTIMATION_SUBMITTED');
-    const acceptRec = history.find(h => h.status === 'ACCEPTED');
-    const compRec = history.find(h => h.status === 'COMPLETED');
-
-    if (openRec && estRec) {
-      sumEstTime += (estRec.createdAt.getTime() - openRec.createdAt.getTime());
-      countEstTime++;
+  const lockedValue = activeQueries.reduce((acc, q) => {
+    if (['PRICE_LOCKED', 'ORDER_PLACED', 'CAD_UPLOADED', 'MOVED_TO_OPS'].includes(q.status)) {
+       return acc + (q.pricing?.finalPrice || 0);
     }
-    if (estRec && acceptRec) {
-      sumNegTime += (acceptRec.createdAt.getTime() - estRec.createdAt.getTime());
-      countNegTime++;
-    }
-    if (openRec && compRec) {
-      sumCycleTime += (compRec.createdAt.getTime() - openRec.createdAt.getTime());
-      countCycleTime++;
-    }
-  }
-
-  const msToDays = (ms: number) => ms / (1000 * 60 * 60 * 24);
-
-  // 4. Staff Performance Extended
-  const staffQueries = await prisma.mtoQuery.findMany({
-    select: { staffId: true, status: true, leadType: true, updatedAt: true, staff: { select: { name: true } }, pricing: { select: { finalPrice: true } } }
-  });
-  
-  const staffStatsMap: Record<string, { name: string; total: number; converted: number; revenue: number; inactive: number }> = {};
-  
-  staffQueries.forEach(q => {
-    const staffId = String(q.staffId);
-    if (!staffStatsMap[staffId]) {
-      staffStatsMap[staffId] = { name: q.staff?.name || 'Unknown', total: 0, converted: 0, revenue: 0, inactive: 0 };
-    }
-    staffStatsMap[staffId].total += 1;
-    if (['ACCEPTED', 'ORDER_PLACED', 'CAD_UPLOADED', 'COMPLETED'].includes(q.status)) {
-      staffStatsMap[staffId].converted += 1;
-      if (q.pricing) staffStatsMap[staffId].revenue += q.pricing.finalPrice;
-    }
-    if (!['DROPPED', 'COMPLETED'].includes(q.status) && q.updatedAt < threeDaysAgo) {
-      staffStatsMap[staffId].inactive += 1;
-    }
-  });
-
-  const staffPerformance = Object.values(staffStatsMap).map(s => ({
-    name: s.name,
-    total: s.total,
-    inactive: s.inactive,
-    conversionRate: s.total > 0 ? ((s.converted / s.total) * 100).toFixed(1) : 0,
-    avgDealValue: s.converted > 0 ? (s.revenue / s.converted).toFixed(0) : 0,
-    revenue: s.revenue
-  }));
-
-  // 5. Drop-off Analysis
-  const dropReasonsRaw = await prisma.mtoQuery.groupBy({
-    by: ['dropReason'],
-    where: { status: 'DROPPED', dropReason: { not: null } },
-    _count: { _all: true }
-  });
-  const dropReasons = dropReasonsRaw.map(d => ({ name: d.dropReason || 'Unknown', value: d._count._all }));
-
-  // 6. Revenue Metrics
-  const allPricings = await prisma.promisedPricing.findMany({
-    include: { mtoQuery: { select: { status: true } } }
-  });
-
-  let pipelineValue = 0;
-  let convertedValue = 0;
-  let lostValue = 0;
-
-  allPricings.forEach(p => {
-    const isCompleted = ['COMPLETED', 'MOVED_TO_OPS', 'CAD_UPLOADED', 'ORDER_PLACED'].includes(p.mtoQuery?.status || '');
-    const isDropped = p.mtoQuery?.status === 'DROPPED';
-    
-    if (isCompleted) {
-      convertedValue += p.finalPrice;
-    } else if (isDropped) {
-      lostValue += p.finalPrice;
-    } else {
-      pipelineValue += p.finalPrice;
-    }
-  });
-
-  const avgOrderValue = convertedValue > 0 && completedQueries > 0 ? convertedValue / completedQueries : 0;
-
-  // 7. Vendor Performance
-  const purchaseOrders = await prisma.purchaseOrder.findMany({
-    include: { qcRecord: true }
-  });
-
-  const vendorMap: Record<string, { totalOrders: number; passedQc: number; iterations: number }> = {};
-  purchaseOrders.forEach(po => {
-    const vName = po.vendorName.trim().toUpperCase();
-    if (!vendorMap[vName]) vendorMap[vName] = { totalOrders: 0, passedQc: 0, iterations: 0 };
-    
-    vendorMap[vName].totalOrders += 1;
-    if (po.qcRecord?.status === 'PASS') vendorMap[vName].passedQc += 1;
-    if (po.qcRecord?.iterations) vendorMap[vName].iterations += po.qcRecord.iterations;
-  });
-
-  const vendorPerformance = Object.entries(vendorMap).map(([name, data]) => ({
-    name,
-    totalOrders: data.totalOrders,
-    qcPassRate: data.totalOrders > 0 ? ((data.passedQc / data.totalOrders) * 100).toFixed(1) : 0,
-    avgIterations: data.totalOrders > 0 ? (data.iterations / data.totalOrders).toFixed(1) : 0
-  }));
+    return acc;
+  }, 0);
 
   return {
-    pipeline: {
-      total: totalQueries,
-      active: activeQueries,
-      inactive: inactiveQueriesCount,
-      completed: completedQueries,
-      dropped: droppedQueries,
-      conversionRate: conversionRate.toFixed(1),
-      dropOffRate: dropOffRate.toFixed(1),
-      inactivityRate: inactivityRate.toFixed(1)
-    },
-    timeMetrics: {
-      avgTimeFirstEstimation: countEstTime > 0 ? msToDays(sumEstTime / countEstTime).toFixed(1) : 0,
-      avgTimeNegotiation: countNegTime > 0 ? msToDays(sumNegTime / countNegTime).toFixed(1) : 0,
-      avgCycleTime: countCycleTime > 0 ? msToDays(sumCycleTime / countCycleTime).toFixed(1) : 0
-    },
-    funnel,
-    staffPerformance,
-    vendorPerformance,
-    dropReasons,
-    revenue: {
-      pipelineValue,
-      convertedValue,
-      lostValue,
-      avgOrderValue: avgOrderValue.toFixed(0)
-    }
+    totalQueries,
+    activeQueries: activeQueriesCount,
+    inactiveQueries: inactiveQueriesCount,
+    conversionRate: conversionRate.toFixed(1),
+    dropCount: droppedQueries,
+    dropRate: dropRate.toFixed(1),
+    avgPipelineTime: avgPipelineTime.toFixed(1),
+    totalPipelineValue,
+    lockedValue,
+    inactiveDays // Echo back the threshold used
   };
 }
 
 export async function getMasterTableQueries() {
-  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-  
   const queries = await prisma.mtoQuery.findMany({
     include: {
       customer: true,
       staff: true,
       pricing: true,
+      estimations: { orderBy: { version: 'desc' } },
       orders: { 
-        include: { purchaseOrder: true },
+        include: { 
+          purchaseOrder: {
+            include: { qcRecord: true }
+          } 
+        },
         orderBy: { version: 'desc' },
         take: 1
       }
@@ -210,22 +92,37 @@ export async function getMasterTableQueries() {
   });
 
   return queries.map(q => {
-    const isInactive = !['DROPPED', 'COMPLETED'].includes(q.status) && q.updatedAt < threeDaysAgo;
     const daysInPipeline = Math.floor((Date.now() - new Date(q.createdAt).getTime()) / (1000 * 60 * 60 * 24));
     
+    // Stage-wise Progression Logic
+    const stages = {
+      queryRaised: 'PASSED', // Always passed if it exists
+      estimation: (q.estimations.length > 0) ? 'PASSED' : (q.status === 'ESTIMATING' ? 'PENDING' : 'DASH'),
+      negotiation: (['AWAITING_RESPONSE', 'NEGOTIATION'].includes(q.status)) ? 'PENDING' : 
+                   (['PRICE_LOCKED', 'ORDER_PLACED', 'CAD_UPLOADED', 'MOVED_TO_OPS', 'COMPLETED'].includes(q.status) ? 'PASSED' : 'DASH'),
+      priceLocked: (q.status === 'PRICE_LOCKED') ? 'PENDING' : 
+                   (['ORDER_PLACED', 'CAD_UPLOADED', 'MOVED_TO_OPS', 'COMPLETED'].includes(q.status) ? 'PASSED' : 'DASH'),
+      po: (q.orders[0]?.purchaseOrder) ? 'PASSED' : (q.status === 'PRICE_LOCKED' || q.status === 'ORDER_PLACED' ? 'PENDING' : 'DASH'),
+      production: (q.orders[0]?.purchaseOrder?.status === 'COMPLETED') ? 'PASSED' : 
+                  (q.orders[0]?.purchaseOrder?.status === 'IN_PRODUCTION' || q.orders[0]?.purchaseOrder?.status === 'RAISED' ? 'PENDING' : 'DASH'),
+      qc: (q.orders[0]?.purchaseOrder?.qcRecord?.status === 'PASS') ? 'PASSED' : 
+          (q.orders[0]?.purchaseOrder?.status === 'DISPATCHED' ? 'PENDING' : 'DASH'),
+      completed: (q.status === 'COMPLETED') ? 'PASSED' : 'DASH'
+    };
+
     return {
       id: q.id,
       queryNo: q.queryNo,
       customerName: q.customer?.name || 'N/A',
       staffName: q.staff?.name || 'N/A',
       status: q.status,
-      leadType: q.leadType,
-      vendor: q.orders[0]?.purchaseOrder?.vendorName || 'Not Assigned',
-      estimatedValue: q.pricing?.finalPrice || null,
+      vendor: q.orders[0]?.purchaseOrder?.vendorName || '—',
+      staffMtoId: q.orders[0]?.staffMtoId || '—',
+      estimatedValue: q.estimations[0]?.finalEstimatedPrice || 0,
+      lockedPrice: q.pricing?.finalPrice || 0,
       daysInPipeline,
-      lastActivity: q.updatedAt,
-      isInactive,
-      staffMtoId: q.orders[0]?.staffMtoId || null
+      updatedAt: q.updatedAt,
+      stages
     };
   });
 }

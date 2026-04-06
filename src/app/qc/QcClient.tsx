@@ -7,10 +7,11 @@ export default function QcClient({ pos }: { pos: any[] }) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   // Sort: RECEIVED (Awaiting QC) on top
+  // Sort: Awaiting QC (DISPATCHED) and Reworking on top, Passed (COMPLETED) on bottom
   const sortedPos = [...pos].sort((a, b) => {
-    if (a.status === 'DISPATCHED' && b.status !== 'DISPATCHED') return -1;
-    if (a.status !== 'DISPATCHED' && b.status === 'DISPATCHED') return 1;
-    return 0;
+    const order = { 'DISPATCHED': 0, 'REWORKING': 1, 'RAISED': 2, 'IN_PRODUCTION': 3, 'COMPLETED': 4 };
+    const getOrder = (status: string) => (order as any)[status] ?? 99;
+    return getOrder(a.status) - getOrder(b.status);
   });
 
   return (
@@ -41,13 +42,25 @@ export default function QcClient({ pos }: { pos: any[] }) {
                 <td style={{ padding: '1rem' }}>MTO-{String(po.mtoOrder?.mtoQuery?.queryNo || 0).padStart(4, '0')}</td>
                 <td style={{ padding: '1rem' }}>{po.vendorName}</td>
                 <td style={{ padding: '1rem' }}>
-                  <span className={`badge ${po.status === 'DISPATCHED' ? 'badge-warning' : 'badge-success'}`}>
-                    {po.status === 'DISPATCHED' ? 'Awaiting QC' : po.status}
+                  <span className={`badge ${
+                    po.status === 'COMPLETED' ? 'badge-success' : 
+                    po.status === 'REWORKING' ? 'badge-danger' : 
+                    'badge-warning'
+                  }`}>
+                    {po.status === 'DISPATCHED' ? 'Awaiting QC' : 
+                     po.status === 'COMPLETED' ? 'Passed' : 
+                     po.status.replace(/_/g, ' ')}
                   </span>
                 </td>
                 <td style={{ padding: '1rem', textAlign: 'right' }}>
-                  <button className="btn" style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', border: '1px solid var(--surface-border)' }}>
-                    {expandedId === po.id ? 'Close Details' : 'QC Pass & Verify'}
+                  <button className="btn" style={{ 
+                    fontSize: '0.8rem', 
+                    padding: '0.4rem 0.8rem', 
+                    border: '1px solid var(--surface-border)',
+                    background: po.status === 'COMPLETED' ? 'transparent' : 'var(--primary)',
+                    color: po.status === 'COMPLETED' ? 'inherit' : 'white'
+                  }}>
+                    {expandedId === po.id ? 'Close' : po.status === 'COMPLETED' ? 'Edit QC' : 'QC Pass & Verify'}
                   </button>
                 </td>
               </tr>

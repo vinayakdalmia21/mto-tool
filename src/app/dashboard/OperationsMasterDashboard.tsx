@@ -2,12 +2,18 @@
 
 import React, { useState, useMemo } from 'react';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Legend
-} from 'recharts';
-
-// Color Palette for Charts
-const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+  CheckCircle2, 
+  Clock, 
+  Minus, 
+  AlertCircle, 
+  TrendingUp, 
+  DollarSign, 
+  Layers, 
+  User, 
+  Calendar,
+  XCircle,
+  Search
+} from 'lucide-react';
 
 export default function OperationsMasterDashboard({ 
   stats, 
@@ -19,61 +25,124 @@ export default function OperationsMasterDashboard({
   actionView: React.ReactNode
 }) {
   const [viewMode, setViewMode] = useState<'command_center' | 'action_center'>('command_center');
-
-  // Filters for the Master table
-  const [filterStatus, setFilterStatus] = useState('ALL');
-  const [filterStaff, setFilterStaff] = useState('ALL');
+  const [inactiveDays, setInactiveDays] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Extract unique staff names
-  const staffNames = Array.from(new Set(masterQueries.map(q => q.staffName))).filter(Boolean);
+  // 1. KPI Calculation Logic
+  const kpis = [
+    { 
+      label: 'Total Queries', 
+      value: stats.totalQueries, 
+      sub: 'All-time volume', 
+      icon: <Layers size={20} />, 
+      color: '#6366f1' 
+    },
+    { 
+      label: 'Active Queries', 
+      value: stats.activeQueries, 
+      sub: 'Live workload', 
+      icon: <Clock size={20} />, 
+      color: '#10b981' 
+    },
+    { 
+      label: 'Inactive Queries', 
+      value: stats.inactiveQueries, 
+      sub: `No status changes (> ${inactiveDays} days)`, 
+      icon: <AlertCircle size={20} />, 
+      color: '#ef4444' 
+    },
+    { 
+      label: 'Conversion Rate', 
+      value: `${stats.conversionRate}%`, 
+      sub: 'Query to Completed', 
+      icon: <TrendingUp size={20} />, 
+      color: '#8b5cf6' 
+    },
+    { 
+      label: 'Drop Rate', 
+      value: `${stats.dropRate}%`, 
+      sub: `${stats.dropCount} queries lost`, 
+      icon: <XCircle size={20} />, 
+      color: '#f43f5e' 
+    },
+    { 
+      label: 'Avg Pipeline Time', 
+      value: `${stats.avgPipelineTime} Days`, 
+      sub: 'Lead to closure', 
+      icon: <Calendar size={20} />, 
+      color: '#06b6d4' 
+    },
+    { 
+      label: 'Total Pipeline Value', 
+      value: `₹${(stats.totalPipelineValue / 100000).toFixed(1)}L`, 
+      sub: 'Potential Rev', 
+      icon: <DollarSign size={20} />, 
+      color: '#f59e0b' 
+    },
+    { 
+      label: 'Locked Value', 
+      value: `₹${(stats.lockedValue / 100000).toFixed(1)}L`, 
+      sub: 'High certainty', 
+      icon: <CheckCircle2 size={20} />, 
+      color: '#22c55e' 
+    },
+  ];
 
+  // 2. Table Filtering Logic
   const filteredQueries = useMemo(() => {
     return masterQueries.filter(q => {
-      if (filterStatus !== 'ALL') {
-        if (filterStatus === 'INACTIVE' && !q.isInactive) return false;
-        if (filterStatus !== 'INACTIVE' && q.status !== filterStatus) return false;
-      }
-      if (filterStaff !== 'ALL' && q.staffName !== filterStaff) return false;
-      
-      if (searchQuery) {
-        const searchLow = searchQuery.toLowerCase();
-        return (
-          q.customerName?.toLowerCase().includes(searchLow) ||
-          q.queryNo?.toString().includes(searchLow) ||
-          q.staffMtoId?.toLowerCase().includes(searchLow) ||
-          q.vendor?.toLowerCase().includes(searchLow)
-        );
-      }
-      return true;
+      const searchLow = searchQuery.toLowerCase();
+      return (
+        q.id.toLowerCase().includes(searchLow) ||
+        q.customerName.toLowerCase().includes(searchLow) ||
+        q.staffMtoId?.toLowerCase().includes(searchLow) ||
+        q.vendor?.toLowerCase().includes(searchLow)
+      );
     });
-  }, [masterQueries, filterStatus, filterStaff, searchQuery]);
+  }, [masterQueries, searchQuery]);
+
+  // 3. Status Display Logic
+  const renderStageStatus = (status: string) => {
+    if (status === 'PASSED') return <div style={{ display: 'flex', justifyContent: 'center' }} title="Passed"><CheckCircle2 size={18} color="var(--success)" /></div>;
+    if (status === 'PENDING') return <div style={{ display: 'flex', justifyContent: 'center' }} title="Pending"><Clock size={18} color="var(--warning)" /></div>;
+    return <div style={{ display: 'flex', justifyContent: 'center' }} title="Not Reached"><Minus size={18} color="var(--surface-border)" /></div>;
+  };
 
   return (
-    <div style={{ maxWidth: 1400, margin: '0 auto', paddingBottom: '4rem' }}>
-      <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{ maxWidth: 1600, margin: '0 auto', paddingBottom: '4rem' }}>
+      <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            Master Tracking Dashboard
+          <h1 style={{ fontSize: '2.25rem', fontWeight: 800, letterSpacing: '-0.025em', marginBottom: '0.5rem' }}>
+            Operations Command Center
           </h1>
-          <p style={{ color: 'var(--text-muted)' }}>
-            Central command center for pipeline health, bottlenecks, and performance.
+          <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
+            High-signal visibility into your MTO pipeline and operational bottlenecks.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '0.4rem', borderRadius: '12px' }}>
           <button 
             onClick={() => setViewMode('command_center')}
-            className={`btn ${viewMode === 'command_center' ? 'btn-primary' : ''}`}
-            style={{ background: viewMode === 'command_center' ? '' : 'transparent', border: 'none' }}
+            className={`btn ${viewMode === 'command_center' ? 'btn-primary shadow-glow' : ''}`}
+            style={{ 
+              background: viewMode === 'command_center' ? '' : 'transparent', 
+              border: 'none',
+              padding: '0.5rem 1.25rem',
+              borderRadius: '8px'
+            }}
           >
-            Command Center
+            Dashboard View
           </button>
           <button 
             onClick={() => setViewMode('action_center')}
-            className={`btn ${viewMode === 'action_center' ? 'btn-primary' : ''}`}
-            style={{ background: viewMode === 'action_center' ? '' : 'transparent', border: 'none' }}
+            className={`btn ${viewMode === 'action_center' ? 'btn-primary shadow-glow' : ''}`}
+            style={{ 
+              background: viewMode === 'action_center' ? '' : 'transparent', 
+              border: 'none',
+              padding: '0.5rem 1.25rem',
+              borderRadius: '8px'
+            }}
           >
-            Action Center (Legacy)
+            Action Lists
           </button>
         </div>
       </header>
@@ -81,256 +150,163 @@ export default function OperationsMasterDashboard({
       {viewMode === 'action_center' ? (
         actionView
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
           
-          {/* --- 1. CORE PIPELINE OVERVIEW --- */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid #6366f1' }}>
-              <h3 style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Total vs Active Queries</h3>
-              <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>
-                {stats.pipeline.active} <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/ {stats.pipeline.total}</span>
+          {/* --- KPI SECTION --- */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '1.25rem' 
+          }}>
+            {kpis.map((kpi, idx) => (
+              <div key={idx} className="glass-panel" style={{ 
+                padding: '1.5rem', 
+                borderLeft: `4px solid ${kpi.color}`,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1.25rem',
+                transition: 'transform 0.2s ease'
+              }}>
+                <div style={{ 
+                  background: `${kpi.color}20`, 
+                  color: kpi.color,
+                  padding: '1rem',
+                  borderRadius: '12px'
+                }}>
+                  {kpi.icon}
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {kpi.label}
+                  </div>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 800 }}>
+                    {kpi.value}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                    {kpi.sub}
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--success)' }}>Active Pipeline Volume</div>
-            </div>
-            
-            <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: stats.pipeline.inactive > 0 ? '4px solid var(--danger)' : '4px solid var(--success)' }}>
-              <h3 style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Inactive Queries (&gt;3 Days)</h3>
-              <div style={{ fontSize: '2.5rem', fontWeight: 700, color: stats.pipeline.inactive > 0 ? 'var(--danger)' : 'inherit' }}>
-                {stats.pipeline.inactive}
-              </div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--danger)' }}>{stats.pipeline.inactivityRate}% Inactivity Rate</div>
-            </div>
-
-            <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid var(--success)' }}>
-              <h3 style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Completed Orders</h3>
-              <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>{stats.pipeline.completed}</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--success)' }}>{stats.pipeline.conversionRate}% Conversion Rate</div>
-            </div>
-
-            <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid var(--danger)' }}>
-              <h3 style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Dropped Queries</h3>
-              <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>{stats.pipeline.dropped}</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--danger)' }}>{stats.pipeline.dropOffRate}% Drop-Off Rate</div>
-            </div>
+            ))}
           </div>
 
-          {/* --- 2. VALUE & SPEED OF SYSTEM --- */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1fr) 2fr', gap: '2rem' }}>
-            {/* Speed Panel */}
-            <div className="glass-panel" style={{ padding: '1.5rem' }}>
-              <h3 style={{ marginBottom: '1.5rem' }}>Speed of System (Avg Days)</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Query to 1st Estimation:</span>
-                  <span style={{ fontWeight: 600 }}>{stats.timeMetrics.avgTimeFirstEstimation} days</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Estimation to Confirmation:</span>
-                  <span style={{ fontWeight: 600 }}>{stats.timeMetrics.avgTimeNegotiation} days</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Total Cycle Time (to Delivery):</span>
-                  <span style={{ fontWeight: 600, color: 'var(--success)' }}>{stats.timeMetrics.avgCycleTime} days</span>
-                </div>
-              </div>
-            </div>
+          {/* --- OPERATIONS MASTER TABLE --- */}
+          <div className="glass-panel" style={{ padding: '0', overflow: 'hidden', border: '1px solid var(--surface-border)' }}>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Master Operational Pipeline</h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Follow-up Threshold:</span>
+                    <select 
+                       value={inactiveDays} 
+                       onChange={(e) => setInactiveDays(Number(e.target.value))}
+                       style={{ background: 'transparent', color: 'var(--primary)', border: 'none', fontWeight: 600, cursor: 'pointer', outline: 'none' }}
+                    >
+                      <option value={1}>1 Day</option>
+                      <option value={2}>2 Days</option>
+                      <option value={3}>3 Days</option>
+                      <option value={5}>5 Days</option>
+                      <option value={7}>7 Days</option>
+                    </select>
+                  </div>
+               </div>
 
-            {/* Value Funnel */}
-            <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Pipeline Value</div>
-                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#f59e0b' }}>₹{(stats.revenue.pipelineValue / 100000).toFixed(1)}L</div>
-              </div>
-              <div style={{ fontSize: '1.5rem', color: 'var(--surface-border)' }}>→</div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Converted Value</div>
-                <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--success)' }}>₹{(stats.revenue.convertedValue / 100000).toFixed(1)}L</div>
-              </div>
-              <div style={{ fontSize: '1.5rem', color: 'var(--surface-border)' }}>/</div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Average Order Value</div>
-                <div style={{ fontSize: '2rem', fontWeight: 700 }}>₹{(stats.revenue.avgOrderValue / 1000).toFixed(1)}k</div>
-              </div>
-            </div>
-          </div>
-
-          {/* --- 3. CORE CHARTS GRID --- */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-            
-            {/* Funnel / Status Breakdown */}
-            <div className="glass-panel" style={{ padding: '1.5rem', height: 350 }}>
-              <h3 style={{ marginBottom: '1rem' }}>Stage-wise Pipeline Funnel</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.funnel} layout="vertical" margin={{ left: 50, right: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" horizontal={false} />
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} />
-                  <RechartsTooltip contentStyle={{ background: '#1e1e24', border: 'none', borderRadius: 8 }} />
-                  <Bar dataKey="value" fill="#6366f1" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Drop Reason Pie Chart */}
-            <div className="glass-panel" style={{ padding: '1.5rem', height: 350 }}>
-              <h3 style={{ marginBottom: '1rem' }}>Sieve Analysis (Drop Reasons)</h3>
-              {stats.dropReasons.length === 0 ? (
-                <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                  No drop drops recorded yet.
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={stats.dropReasons} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value">
-                      {stats.dropReasons.map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip contentStyle={{ background: '#1e1e24', border: 'none', borderRadius: 8 }} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
-            {/* Staff Performance Extended */}
-            <div className="glass-panel" style={{ padding: '1.5rem', height: 400 }}>
-              <h3 style={{ marginBottom: '1rem' }}>Staff Performance (Conversion % vs Inactive Focus)</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.staffPerformance} margin={{ bottom: 40 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
-                  <YAxis yAxisId="left" orientation="left" stroke="var(--primary)" />
-                  <YAxis yAxisId="right" orientation="right" stroke="var(--danger)" />
-                  <RechartsTooltip contentStyle={{ background: '#1e1e24', border: 'none', borderRadius: 8 }} />
-                  <Legend wrapperStyle={{ bottom: 0 }} />
-                  <Bar yAxisId="left" name="Conversion %" dataKey="conversionRate" fill="#10b981" radius={[4, 4, 0, 0]} />
-                  <Line yAxisId="right" name="Inactive Leads" type="monotone" dataKey="inactive" stroke="#ef4444" strokeWidth={3} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Vendor Performance */}
-            <div className="glass-panel" style={{ padding: '1.5rem', height: 400 }}>
-              <h3 style={{ marginBottom: '1rem' }}>Vendor Performance (Orders vs QC Pass %)</h3>
-              {stats.vendorPerformance.length === 0 ? (
-                <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                  No Vendor history logged via POs yet.
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.vendorPerformance} margin={{ bottom: 40 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
-                    <YAxis yAxisId="left" orientation="left" stroke="var(--primary)" />
-                    <YAxis yAxisId="right" orientation="right" stroke="var(--success)" domain={[0, 100]} />
-                    <RechartsTooltip contentStyle={{ background: '#1e1e24', border: 'none', borderRadius: 8 }} />
-                    <Legend wrapperStyle={{ bottom: 0 }} />
-                    <Bar yAxisId="left" name="Total Orders" dataKey="totalOrders" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                    <Line yAxisId="right" name="QC Pass %" type="monotone" dataKey="qcPassRate" stroke="#f59e0b" strokeWidth={3} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </div>
-
-          {/* --- 4. MASTER TABLE VIEW (CORE UI) --- */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-              <h3>Master Table View</h3>
-              
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <input 
-                  type="text" 
-                  placeholder="Search Customer, ID, Vendor..." 
-                  className="input"
-                  style={{ width: 250 }}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <select 
-                  className="select" 
-                  value={filterStaff} 
-                  onChange={(e) => setFilterStaff(e.target.value)}
-                  style={{ width: 160 }}
-                >
-                  <option value="ALL">All Staff</option>
-                  {staffNames.map(name => (
-                    <option key={name as string} value={name as string}>{name}</option>
-                  ))}
-                </select>
-                <select 
-                  className="select" 
-                  value={filterStatus} 
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  style={{ width: 180 }}
-                >
-                  <option value="ALL">All Status</option>
-                  <option value="INACTIVE">🔴 Inactive (&gt;3 days)</option>
-                  <option value="OPEN">Open</option>
-                  <option value="ESTIMATING">Estimating</option>
-                  <option value="AWAITING_RESPONSE">Awaiting Response</option>
-                  <option value="ACCEPTED">Accepted / Working</option>
-                  <option value="MOVED_TO_OPS">In Production</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="DROPPED">Dropped</option>
-                </select>
-              </div>
+               <div style={{ position: 'relative' }}>
+                 <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                 <input 
+                   type="text" 
+                   placeholder="Search ID, Customer, Staff..." 
+                   className="input" 
+                   style={{ width: '320px', paddingLeft: '2.5rem', background: 'rgba(255,255,255,0.03)' }}
+                   value={searchQuery}
+                   onChange={(e) => setSearchQuery(e.target.value)}
+                 />
+               </div>
             </div>
 
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1300px' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Tracking ID</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Customer</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Staff / Vendor</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Status</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Pipeline Time</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Est. / Final Value</th>
+                  <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--surface-border)' }}>
+                    <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>Basic Info</th>
+                    <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>Status</th>
+                    {/* Progression Columns */}
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Query</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Est.</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Negot.</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Locked</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>PO</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Prod.</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>QC</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Comp.</th>
+                    {/* Time & Finance */}
+                    <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>Time</th>
+                    <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Est. Amount</th>
+                    <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Locked Price</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredQueries.length === 0 && (
-                    <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>No records match the active filters.</td></tr>
-                  )}
-                  {filteredQueries.map(q => (
-                    <tr key={q.id} style={{ borderBottom: '1px solid var(--surface-border)', background: q.isInactive ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
-                      <td style={{ padding: '1rem', fontWeight: 600 }}>
-                        {q.staffMtoId ? (
-                          <div style={{ color: 'var(--success)' }}>{q.staffMtoId}</div>
-                        ) : (
-                          <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Q-{String(q.queryNo || 0).padStart(4, '0')}</div>
-                        )}
-                      </td>
-                      <td style={{ padding: '1rem' }}>
-                        <div>{q.customerName}</div>
-                        <div style={{ fontSize: '0.75rem', color: q.leadType === 'HIGH' ? 'var(--danger)' : 'var(--text-muted)' }}>
-                          {q.leadType}
-                        </div>
-                      </td>
-                      <td style={{ padding: '1rem' }}>
-                        <div><span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>S:</span> {q.staffName}</div>
-                        <div><span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>V:</span> {q.vendor}</div>
-                      </td>
-                      <td style={{ padding: '1rem' }}>
-                        <span className="badge" style={{ background: 'var(--surface-border)', color: 'var(--text-primary)' }}>
-                          {q.status.replace(/_/g, ' ')}
-                        </span>
-                      </td>
-                      <td style={{ padding: '1rem' }}>
-                        <div>{q.daysInPipeline} Days</div>
-                        {q.isInactive && (
-                          <div style={{ color: 'var(--danger)', fontSize: '0.75rem', fontWeight: 600 }}>Inactive: Follow Up!</div>
-                        )}
-                      </td>
-                      <td style={{ padding: '1rem', fontWeight: 600 }}>
-                        {q.estimatedValue ? `₹${q.estimatedValue.toLocaleString()}` : '-'}
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredQueries.length === 0 ? (
+                    <tr><td colSpan={13} style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>No queries match your current focus.</td></tr>
+                  ) : null}
+                  {filteredQueries.map(q => {
+                    const isInactive = !['COMPLETED', 'DROPPED'].includes(q.status) && 
+                                       (Date.now() - new Date(q.updatedAt).getTime()) > (inactiveDays * 24 * 60 * 60 * 1000);
+                    
+                    return (
+                      <tr key={q.id} className="glass-panel-interactive" style={{ borderBottom: '1px solid var(--surface-border)', opacity: q.status === 'DROPPED' ? 0.6 : 1 }}>
+                        <td style={{ padding: '1.25rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                             <div style={{ background: 'var(--surface-light)', height: 36, width: 36, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                               <User size={16} color="var(--primary)" />
+                             </div>
+                             <div>
+                               <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Q-{String(q.queryNo || 0).padStart(4, '0')}</div>
+                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '0.5rem' }}>
+                                 <span>{q.customerName}</span>
+                                 {q.staffMtoId !== '—' && <span style={{ color: 'var(--success)' }}>• {q.staffMtoId}</span>}
+                               </div>
+                             </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '1.25rem' }}>
+                           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>S: <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{q.staffName}</span></div>
+                           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>V: <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{q.vendor}</span></div>
+                        </td>
+                        {/* Progression Grid */}
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.queryRaised)}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.estimation)}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.negotiation)}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.priceLocked)}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.po)}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.production)}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.qc)}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.completed)}</td>
+
+                        <td style={{ padding: '1.25rem' }}>
+                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, color: isInactive ? 'var(--danger)' : 'inherit' }}>
+                             <Clock size={14} />
+                             {q.daysInPipeline}d
+                           </div>
+                           {isInactive && <div style={{ fontSize: '0.65rem', color: 'var(--danger)', fontWeight: 700, textTransform: 'uppercase' }}>Attention</div>}
+                        </td>
+
+                        <td style={{ padding: '1.25rem', textAlign: 'right', fontWeight: 600 }}>
+                           {q.estimatedValue > 0 ? `₹${q.estimatedValue.toLocaleString()}` : '—'}
+                        </td>
+                        <td style={{ padding: '1.25rem', textAlign: 'right', fontWeight: 800, color: 'var(--success)' }}>
+                           {q.lockedPrice > 0 ? `₹${q.lockedPrice.toLocaleString()}` : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem 1.5rem', display: 'flex', gap: '2rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><CheckCircle2 size={14} color="var(--success)" /> Passed Stage</div>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Clock size={14} color="var(--warning)" /> Current Stage (Pending)</div>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Minus size={14} color="var(--surface-border)" /> Not Reached / Not Applicable</div>
             </div>
           </div>
 
