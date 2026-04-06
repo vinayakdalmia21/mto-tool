@@ -25,7 +25,6 @@ export default function OperationsMasterDashboard({
   masterQueries: any[],
   actionView: React.ReactNode
 }) {
-  const [viewMode, setViewMode] = useState<'command_center' | 'action_center'>('command_center');
   const [inactiveDays, setInactiveDays] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -164,38 +163,9 @@ export default function OperationsMasterDashboard({
             High-signal visibility into your MTO pipeline and operational bottlenecks.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '0.4rem', borderRadius: '12px' }}>
-          <button 
-            onClick={() => setViewMode('command_center')}
-            className={`btn ${viewMode === 'command_center' ? 'btn-primary shadow-glow' : ''}`}
-            style={{ 
-              background: viewMode === 'command_center' ? '' : 'transparent', 
-              border: 'none',
-              padding: '0.5rem 1.25rem',
-              borderRadius: '8px'
-            }}
-          >
-            Dashboard View
-          </button>
-          <button 
-            onClick={() => setViewMode('action_center')}
-            className={`btn ${viewMode === 'action_center' ? 'btn-primary shadow-glow' : ''}`}
-            style={{ 
-              background: viewMode === 'action_center' ? '' : 'transparent', 
-              border: 'none',
-              padding: '0.5rem 1.25rem',
-              borderRadius: '8px'
-            }}
-          >
-            Action Lists
-          </button>
-        </div>
       </header>
 
-      {viewMode === 'action_center' ? (
-        actionView
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
           
           {/* --- KPI SECTION --- */}
           <div style={{ 
@@ -294,7 +264,6 @@ export default function OperationsMasterDashboard({
                   <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--surface-border)' }}>
                     <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>Basic Info</th>
                     <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>Status</th>
-                    {/* Progression Columns */}
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Query</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Est.</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Negot.</th>
@@ -303,7 +272,6 @@ export default function OperationsMasterDashboard({
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Prod.</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>QC</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Comp.</th>
-                    {/* Time & Finance */}
                     <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>Time</th>
                     <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Est. Amount</th>
                     <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Locked Price</th>
@@ -337,7 +305,6 @@ export default function OperationsMasterDashboard({
                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>S: <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{q.staffName}</span></div>
                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>V: <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{q.vendor}</span></div>
                         </td>
-                        {/* Progression Grid */}
                         <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.queryRaised)}</td>
                         <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.estimation)}</td>
                         <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.negotiation)}</td>
@@ -373,9 +340,7 @@ export default function OperationsMasterDashboard({
                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><span style={{ color: 'var(--surface-border)', fontWeight: 700 }}>—</span> Not Reached</div>
             </div>
           </div>
-
-        </div>
-      )}
+      </div>
     </div>
   );
 }
