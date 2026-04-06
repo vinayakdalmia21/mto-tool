@@ -7,24 +7,24 @@ export default async function SharedMtoPage({ params }: { params: Promise<{ id: 
   
   const mto = await prisma.mtoQuery.findUnique({
     where: { id }
-  });
+  }) as any;
 
   if (!mto) {
     notFound();
   }
 
-  const queryNoStr = String(mto.queryNo).padStart(4, '0');
+  const queryNoStr = String(mto.queryNo || 0).padStart(4, '0');
 
   return (
-    <div style={{ maxWidth: 800, margin: '2rem auto', padding: '0 1.5rem' }}>
-      <header style={{ marginBottom: '2rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 700, margin: 0, color: 'var(--text-main)' }}>
+    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 700, margin: 0, color: 'var(--text-main)' }}>
           Design Specifications
         </h1>
         <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
           Reference: MTO-{queryNoStr}
         </p>
-      </header>
+      </div>
 
       <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         

@@ -8,7 +8,7 @@ import { formatIST } from '@/lib/date-utils';
 export const dynamic = "force-dynamic";
 
 export default async function MtosPage() {
-  const mtos = await getMtos();
+  const mtos = await getMtos() as any[];
 
   return (
     <div style={{ maxWidth: '100%', margin: '0 2rem' }}>

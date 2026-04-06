@@ -14,14 +14,14 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
       vendorEstimations: { where: { isAccepted: true }, take: 1 },
       pricing: true,
     }
-  });
+  }) as any;
 
   if (!mto || !mto.orders?.length) {
     notFound();
   }
 
   const order = mto.orders[0];
-  const est = mto.estimations[0];
+  const est = mto.estimations[0] || {};
   const queryNoStr = String(mto.queryNo || 0).padStart(4, '0');
 
   // Logic values for the table - Prefer Order Snapshots, Fallback to Estimation
@@ -42,15 +42,15 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
   const hasDiscount = (order?.discountAmount || est?.discountAmount || 0) > 0;
 
   return (
-    <div style={{ maxWidth: 800, margin: '2rem auto', padding: '0 1.5rem', fontFamily: 'Inter, sans-serif' }}>
-      <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, color: 'var(--primary)', letterSpacing: '-0.02em' }}>
+    <div style={{ maxWidth: 800, margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
+      <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0, color: 'var(--primary)', letterSpacing: '-0.02em' }}>
           Quotation
         </h1>
         <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontSize: '1.1rem' }}>
           Ref: Q-{queryNoStr} | {mto.customer.name}
         </p>
-      </header>
+      </div>
 
       <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
         

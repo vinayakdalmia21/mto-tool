@@ -21,16 +21,16 @@ export default async function VendorEstimateSharePage(props: { params: Promise<{
   const queryNo = String(estimate.mtoQuery.queryNo || 0).padStart(4, '0');
 
   return (
-    <div style={{ minHeight: '100vh', padding: '2rem', display: 'flex', justifyContent: 'center', background: 'var(--background)' }}>
-      <div className="glass-panel" style={{ maxWidth: '600px', width: '100%', padding: '2rem', alignSelf: 'flex-start' }}>
-        <header style={{ borderBottom: '1px solid var(--surface-border)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+    <div style={{ padding: '0 1rem', display: 'flex', justifyContent: 'center' }}>
+      <div className="glass-panel" style={{ maxWidth: '600px', width: '100%', padding: '2rem' }}>
+        <div style={{ borderBottom: '1px solid var(--surface-border)', paddingBottom: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
             Vendor Requirement Specification
           </h1>
           <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
             Reference: Q-{queryNo}
           </div>
-        </header>
+        </div>
 
         <section style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           

@@ -9,12 +9,13 @@ export default async function SharedOrderPage({ params }: { params: Promise<{ id
     where: { id },
     include: {
       customer: true,
+      // @ts-ignore - Prisma client may be stale in IDE after schema migration
       orders: { take: 1, orderBy: { version: 'desc' } },
       estimations: { orderBy: { version: 'desc' }, take: 1 },
       vendorEstimations: { where: { isAccepted: true }, take: 1 },
       pricing: true,
     }
-  });
+  }) as any;
 
   if (!mto || !mto.orders?.length) {
     notFound();
@@ -24,18 +25,18 @@ export default async function SharedOrderPage({ params }: { params: Promise<{ id
   const est = mto.estimations[0];
   const vendorEst = mto.vendorEstimations[0];
   const cadDesigns: string[] = order.cadDesigns ? JSON.parse(order.cadDesigns) : [];
-  const queryNoStr = String(mto.queryNo).padStart(4, '0');
+  const queryNoStr = String(mto.queryNo || 0).padStart(4, '0');
 
   return (
-    <div style={{ maxWidth: 900, margin: '2rem auto', padding: '0 1.5rem', fontFamily: 'Inter, sans-serif' }}>
-      <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, color: 'var(--primary)', letterSpacing: '-0.02em' }}>
-          Order Details
+    <div style={{ maxWidth: 800, margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
+      <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0, color: 'var(--primary)', letterSpacing: '-0.02em' }}>
+          Order Specifics
         </h1>
         <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontSize: '1.1rem' }}>
           Ref: MTO-{queryNoStr} | Order: {order.orderRefId} | {mto.customer.name}
         </p>
-      </header>
+      </div>
 
       {/* Requirements */}
       <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px' }}>

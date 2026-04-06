@@ -26,17 +26,27 @@ export async function getGlobalPricing() {
   return pricing;
 }
 
+export function calculateKaratRates(pure: number) {
+  return {
+    rate24k: Math.round(pure),
+    rate22k: Math.round(pure * (22 / 24)),
+    rate18k: Math.round(pure * (18 / 24)),
+    rate14k: Math.round(pure * (14 / 24)),
+    rate9k: Math.round(pure * (9 / 24)),
+  };
+}
+
 export async function updateGlobalPricing(data: any) {
   try {
     const updated = await prisma.globalPricing.upsert({
       where: { id: 1 },
       update: {
-        rate9k: parseFloat(data.rate9k) || 0,
-        rate14k: parseFloat(data.rate14k) || 0,
-        rate18k: parseFloat(data.rate18k) || 0,
-        rate22k: parseFloat(data.rate22k) || 0,
-        rate24k: parseFloat(data.rate24k) || 0,
-        diamondRate: parseFloat(data.diamondRate) || 0,
+        rate9k: data.rate9k !== undefined ? parseFloat(data.rate9k) : undefined,
+        rate14k: data.rate14k !== undefined ? parseFloat(data.rate14k) : undefined,
+        rate18k: data.rate18k !== undefined ? parseFloat(data.rate18k) : undefined,
+        rate22k: data.rate22k !== undefined ? parseFloat(data.rate22k) : undefined,
+        rate24k: data.rate24k !== undefined ? parseFloat(data.rate24k) : undefined,
+        diamondRate: data.diamondRate !== undefined ? parseFloat(data.diamondRate) : undefined,
       },
       create: {
         id: 1,
@@ -50,8 +60,30 @@ export async function updateGlobalPricing(data: any) {
     });
 
     revalidatePath('/');
+    revalidatePath('/pricing');
     revalidatePath('/estimations/[id]', 'page');
     return { success: true, pricing: updated };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function autoUpdateGoldRates() {
+  try {
+    const res: any = await fetchLiveGoldRate();
+    if (res.success && typeof res.rate24k === 'number') {
+      const currentPricing = await getGlobalPricing();
+      const newRates = calculateKaratRates(res.rate24k);
+      
+      // Merge with existing diamond rate to avoid resetting it
+      const updateData = {
+        ...newRates,
+        diamondRate: currentPricing.diamondRate
+      };
+
+      return await updateGlobalPricing(updateData);
+    }
+    return { success: false, error: res.error || 'Failed to fetch live gold rate' };
   } catch (error: any) {
     return { success: false, error: error.message };
   }

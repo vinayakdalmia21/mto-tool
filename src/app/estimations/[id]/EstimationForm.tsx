@@ -221,14 +221,19 @@ export default function EstimationForm({
           </div>
         </form>
       ) : (
-        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', border: '1px solid var(--primary)' }}>
+        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', border: '1px solid var(--primary)', background: 'rgba(139, 92, 246, 0.05)' }}>
           <h3 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>🔒 Price Locked</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
             The price for this query has been finalized. Quotation editing is now disabled.
           </p>
-          <div style={{ marginTop: '1.5rem', fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>
+          
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '1.5rem' }}>
             Final Value: ₹{mto.estimations?.[0]?.finalEstimatedPrice?.toLocaleString() || 'N/A'}
           </div>
+
+          <button onClick={handleShare} className="btn" style={{ margin: '0 auto', background: 'var(--info)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.5rem' }}>
+             📋 Share Estimate Link
+          </button>
         </div>
       )}
 

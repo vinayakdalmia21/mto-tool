@@ -2,20 +2,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Dynamic Premium Aesthetic */
-  --bg-gradient-start: #0f172a;
-  --bg-gradient-end: #020617;
+  /* Luxury Brand Aesthetic (VEDA) */
+  --bg-gradient-start: #0F0D0C;
+  --bg-gradient-end: #050404;
   
-  --primary: #8b5cf6;
-  --primary-hover: #7c3aed;
+  --primary: #C5A059;
+  --primary-hover: #A7864B;
   
-  --surface: rgba(30, 41, 59, 0.7);
-  --surface-hover: rgba(30, 41, 59, 0.9);
-  --surface-border: rgba(255, 255, 255, 0.1);
-  --surface-border-active: rgba(139, 92, 246, 0.5);
+  --surface: rgba(26, 22, 20, 0.6);
+  --surface-hover: rgba(35, 30, 27, 0.8);
+  --surface-border: rgba(197, 160, 89, 0.15);
+  --surface-border-active: rgba(197, 160, 89, 0.4);
   
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
+  --text-main: #F4F1EE;
+  --text-muted: #9E9388;
   
   /* Status Colors */
   --success: #10b981;
@@ -130,7 +130,28 @@ input::placeholder, textarea::placeholder {
   text-transform: uppercase;
 }
 
-.badge-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
-.badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
-.badge-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
-.badge-info { background: rgba(59, 130, 246, 0.1); color: var(--info); border: 1px solid rgba(59, 130, 246, 0.2); }
+.badge-success { background: rgba(16, 185, 129, 0.05); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+.badge-warning { background: rgba(245, 158, 11, 0.05); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+.badge-danger { background: rgba(239, 68, 68, 0.05); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+.badge-info { background: rgba(59, 130, 246, 0.05); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+
+/* Luxury Enhancements */
+h1, h2, h3 {
+  font-family: 'Cinzel', 'Playfair Display', serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: linear-gradient(to bottom, #F4F1EE 0%, #C5A059 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.veda-card {
+  @extend .glass-panel;
+  border: 1px solid rgba(197, 160, 89, 0.1);
+  background: linear-gradient(135deg, rgba(26, 22, 20, 0.8) 0%, rgba(15, 13, 12, 0.9) 100%);
+}
+
+.veda-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(197, 160, 89, 0.3), transparent);
+}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { processCustomerDecision, processPaymentAndLockPricing } from '../../actions/decision';
 import { useRouter } from 'next/navigation';
+import ShareButton from './ShareButton';
 
 export default function DecisionButtons({ mtoId, currentStatus, estAmount }: { mtoId: string, currentStatus: string, estAmount: number }) {
   const router = useRouter();
@@ -55,7 +56,10 @@ export default function DecisionButtons({ mtoId, currentStatus, estAmount }: { m
     return (
       <div style={{ padding: '1.5rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid var(--success)', borderRadius: '8px', color: 'var(--success)', textAlign: 'center' }}>
         <h3 style={{ marginBottom: '0.5rem' }}>Pricing Locked & Order Confirmed</h3>
-        <p>This MTO has successfully been converted to an Order.</p>
+        <p style={{ marginBottom: '1rem' }}>This MTO has successfully been converted to an Order.</p>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <ShareButton queryId={mtoId} />
+        </div>
       </div>
     );
   }

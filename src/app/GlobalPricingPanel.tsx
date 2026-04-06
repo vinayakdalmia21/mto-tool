@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useAuth } from './auth-context';
-import { updateGlobalPricing, fetchLiveGoldRate } from './actions/pricing';
-import { TrendingUp, Gem, Save, RefreshCw } from 'lucide-react';
+import { updateGlobalPricing, fetchLiveGoldRate, calculateKaratRates } from './actions/pricing';
+import { TrendingUp, Gem, Save, RefreshCw, Clock } from 'lucide-react';
+import { formatIST } from '@/lib/date-utils';
 
 export default function GlobalPricingPanel({ initialPricing }: { initialPricing: any }) {
   const { role } = useAuth();
@@ -26,13 +27,10 @@ export default function GlobalPricingPanel({ initialPricing }: { initialPricing:
     
     if (res.success && res.rate24k) {
       const pure = parseFloat(res.rate24k);
+      const newRates = calculateKaratRates(pure);
       setRates({
         ...rates,
-        rate24k: Math.round(pure),
-        rate22k: Math.round(pure * (22/24)),
-        rate18k: Math.round(pure * (18/24)),
-        rate14k: Math.round(pure * (14/24)),
-        rate9k:  Math.round(pure * (9/24)),
+        ...newRates
       });
     } else {
       alert("Failed to fetch live metals data: " + (res.error || 'Unknown error'));
@@ -55,7 +53,15 @@ export default function GlobalPricingPanel({ initialPricing }: { initialPricing:
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Pricing Panel</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Set gold PG rates and diamond prices globally.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginTop: '0.2rem' }}>
+            <p style={{ color: 'var(--text-muted)' }}>Set gold PG rates and diamond prices globally.</p>
+            {rates.updatedAt && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)', padding: '0.2rem 0.6rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <Clock size={12} color="#cca660" />
+                <span style={{ color: '#cca660', fontWeight: 500 }}>Last Saved: {formatIST(rates.updatedAt)}</span>
+              </div>
+            )}
+          </div>
         </div>
         <button onClick={handleSave} disabled={loading} className="btn" style={{ background: '#cca660', color: '#1a1a24', display: 'flex', gap: '0.5rem', alignItems: 'center', fontWeight: 600 }}>
           <Save size={16} />
