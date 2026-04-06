@@ -2,6 +2,7 @@ import { getMtos } from '../actions/mto';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import DeleteMtoButton from './components/DeleteMtoButton';
+import DropMtoButton from './components/DropMtoButton';
 import ShareButton from './[id]/ShareButton';
 import { formatIST } from '@/lib/date-utils';
 
@@ -84,6 +85,7 @@ export default async function MtosPage() {
                 <td style={{ padding: '1rem', textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                     <ShareButton queryId={mto.id} />
+                    <DropMtoButton id={mto.id} />
                     <DeleteMtoButton id={mto.id} />
                     <Link href={`/mtos/${mto.id}`} className="btn-icon" style={{ display: 'inline-flex', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', textDecoration: 'none', color: 'var(--text-main)' }}>
                       <ChevronRight size={16} />

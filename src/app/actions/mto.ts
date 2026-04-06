@@ -137,3 +137,24 @@ export async function deleteMtoQuery(id: string) {
     return { success: false, error: err.message || "Failed to delete query" };
   }
 }
+export async function dropMtoQuery(id: string, reason: string = "Staff action") {
+  try {
+    await prisma.mtoQuery.update({
+      where: { id },
+      data: { 
+        status: 'DROPPED',
+        dropReason: reason,
+        statusHistory: {
+          create: {
+            status: 'DROPPED'
+          }
+        }
+      }
+    });
+    revalidatePath('/mtos');
+    revalidatePath('/dashboard');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to drop query" };
+  }
+}
