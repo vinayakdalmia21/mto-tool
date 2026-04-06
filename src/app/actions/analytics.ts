@@ -113,8 +113,8 @@ export async function getMasterTableQueries() {
       mtoRaised: hasCAD ? 'PASSED' : (!!q.orders[0] ? 'PASSED' : (q.status === 'PRICE_LOCKED' ? 'PENDING' : 'DASH')),
       cadUpload: hasPO ? 'PASSED' : (hasCAD ? 'PASSED' : (q.orders[0]?.status === 'PENDING' ? 'PENDING' : 'DASH')),
       poRaised: hasQC ? 'PASSED' : (!!q.orders[0]?.purchaseOrder ? 'PASSED' : (q.orders[0]?.status === 'MOVED_TO_OPS' ? 'PENDING' : 'DASH')),
-      qcPassed: hasInvoice ? 'PASSED' : (q.orders[0]?.purchaseOrder?.qcRecord?.status === 'PASS' ? 'PASSED' : (q.orders[0]?.purchaseOrder?.status === 'DISPATCHED' ? 'PENDING' : 'DASH')),
-      completed: hasInvoice ? 'PASSED' : 'DASH'
+      qcPassed: hasInvoice ? 'PASSED' : (q.orders[0]?.purchaseOrder?.qcRecord?.status === 'PASS' ? 'PASSED' : (!!q.orders[0]?.purchaseOrder ? 'PENDING' : 'DASH')),
+      completed: hasInvoice ? 'PASSED' : (hasQC ? 'PENDING' : 'DASH')
     };
 
     return {

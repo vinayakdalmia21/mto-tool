@@ -44,7 +44,8 @@ export default function OperationsMasterDashboard({
       { key: 'mtoRaised', label: 'MTO Raising' },
       { key: 'cadUpload', label: 'CAD Upload' },
       { key: 'poRaised', label: 'PO Raising' },
-      { key: 'qcPassed', label: 'Production / QC' }
+      { key: 'qcPassed', label: 'Production / QC' },
+      { key: 'completed', label: 'Final Billing' }
     ];
 
     for (const s of stageOrder) {

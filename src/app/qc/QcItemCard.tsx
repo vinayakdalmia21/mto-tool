@@ -18,23 +18,35 @@ export default function QcItemCard({ po }: { po: any }) {
   const latestEst = query?.estimations?.[0]; // Fetched in latest getReceivedPos update
   const vendorEst = query?.vendorEstimations?.[0];
 
-  // Helper to get best available promised data for comparison: Snapshot -> Estimation -> Pricing
-  const getP = (field: string) => {
-    return promised?.[field] || latestEst?.[field] || queryPricing?.[field] || 0;
+  // Helper to get precisely defined 'Locked Price' data: Snapshot -> Pricing -> Estimation
+  const getLocked = (field: string) => {
+    if (field === 'goldWeight') return promised?.goldWeight || queryPricing?.goldWeight || latestEst?.goldWeight || vendorEst?.goldWeight || 0;
+    if (field === 'goldRate') return promised?.goldRate || queryPricing?.goldRate || latestEst?.goldRate || 0;
+    if (field === 'diamondWeight') return promised?.diamondWeight || latestEst?.diamondWeight || vendorEst?.diamondWeight || 0;
+    if (field === 'diamondRate') return promised?.diamondRate || latestEst?.diamondRate || vendorEst?.diamondRate || 0;
+    if (field === 'makingPercent') return promised?.makingPercent || latestEst?.makingPercent || 0;
+    if (field === 'otherStones') return promised?.otherStones || latestEst?.otherStones || 0;
+    if (field === 'discountPercent') return promised?.discountPercent || latestEst?.discountPercent || 0;
+    if (field === 'discountAmount') return promised?.discountAmount || 0;
+    if (field === 'gstAmount') return promised?.gstAmount || 0;
+    if (field === 'totalAmount') return promised?.totalAmount || 0;
+    return 0;
   };
 
-  // Actuals State (Detailed Pricing Table) - Prioritize saved QC Record for persistence
+  // Actuals State - Seeded from Locked Price by default for efficiency
   const [actuals, setActuals] = useState({
-    goldWeight: qcData?.actualGoldWeight ?? (promised?.goldWeight || queryPricing?.goldWeight || latestEst?.goldWeight || vendorEst?.goldWeight || 0),
-    goldRate: qcData?.actualGoldRate ?? (promised?.goldRate || queryPricing?.goldRate || latestEst?.goldRate || 0),
-    diamondWeight: qcData?.actualDiamondWeight ?? (promised?.diamondWeight || latestEst?.diamondWeight || vendorEst?.diamondWeight || 0),
-    diamondRate: qcData?.actualDiamondRate ?? (promised?.diamondRate || latestEst?.diamondRate || vendorEst?.diamondRate || 0),
-    makingPercent: qcData?.actualMakingPercent ?? (promised?.makingPercent || latestEst?.makingPercent || 0),
-    otherStones: qcData?.actualOtherStones ?? (promised?.otherStones || latestEst?.otherStones || 0),
-    discountPercent: qcData?.actualDiscountPercent ?? (promised?.discountPercent || latestEst?.discountPercent || 0),
+    goldWeight: qcData?.actualGoldWeight ?? getLocked('goldWeight'),
+    goldRate: qcData?.actualGoldRate ?? getLocked('goldRate'),
+    diamondWeight: qcData?.actualDiamondWeight ?? getLocked('diamondWeight'),
+    diamondRate: qcData?.actualDiamondRate ?? getLocked('diamondRate'),
+    makingPercent: qcData?.actualMakingPercent ?? getLocked('makingPercent'),
+    otherStones: qcData?.actualOtherStones ?? getLocked('otherStones'),
+    discountPercent: qcData?.actualDiscountPercent ?? getLocked('discountPercent'),
     gstPercent: 3,
     notes: qcData?.notes || ""
   });
+
+  const getP = (field: string) => getLocked(field); // Maintain compatibility for comparison table
 
   const handleInputChange = (field: string, value: string) => {
     setActuals(prev => ({ ...prev, [field]: value === "" ? "" : parseFloat(value) }));
