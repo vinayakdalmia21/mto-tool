@@ -142,7 +142,6 @@ export async function getMasterTableQueries() {
       lockedPrice: q.pricing?.finalPrice || 0,
       qcFinalPrice: q.orders[0]?.purchaseOrder?.qcRecord?.actualFinalValue || 0,
       daysInPipeline,
-      droppedAtStage: q.droppedAtStage,
       updatedAt: q.updatedAt,
       stages
     };

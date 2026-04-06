@@ -35,7 +35,7 @@ export default function OperationsMasterDashboard({
 
   // Helper to find the current pending stage
   const getPendingStageLabel = (q: any) => {
-    if (q.status === 'DROPPED') return `Dropped at ${q.droppedAtStage || 'Initial'}`;
+    if (q.status === 'DROPPED') return `Dropped`;
     if (q.status === 'COMPLETED' || q.stages.completed === 'PASSED') return 'No Action Required';
     
     const stageOrder = [

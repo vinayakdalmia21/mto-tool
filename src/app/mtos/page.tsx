@@ -67,7 +67,7 @@ export default async function MtosPage() {
                     )}
                     {mto.status === 'DROPPED' && (
                       <span style={{ fontSize: '0.65rem', color: 'var(--warning)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Dropped @ {mto.droppedAtStage || 'Initial'}
+                        Dropped
                       </span>
                     )}
                   </div>

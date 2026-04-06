@@ -186,7 +186,6 @@ export async function dropMtoQuery(id: string, reason: string = "Staff action") 
       data: { 
         status: 'DROPPED',
         dropReason: reason,
-        droppedAtStage: stageAtDrop,
         statusHistory: {
           create: {
             status: `DROPPED`
