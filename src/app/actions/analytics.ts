@@ -126,7 +126,9 @@ export async function getMasterTableQueries() {
       vendor: q.orders[0]?.purchaseOrder?.vendorName || '—',
       staffMtoId: q.orders[0]?.staffMtoId || '—',
       estimatedValue: q.estimations[0]?.finalEstimatedPrice || 0,
+      vendorEstValue: q.vendorEstimations[0]?.labourCharges || 0, // Using labour quote as the primary vendor ref
       lockedPrice: q.pricing?.finalPrice || 0,
+      qcFinalPrice: q.orders[0]?.purchaseOrder?.qcRecord?.actualFinalValue || 0,
       daysInPipeline,
       updatedAt: q.updatedAt,
       stages

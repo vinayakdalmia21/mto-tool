@@ -242,20 +242,37 @@ export default function QcItemCard({ po }: { po: any }) {
               {/* Grand Total Comparison */}
               <tr style={{ fontWeight: 700, background: 'rgba(255,255,255,0.05)', fontSize: '0.9rem' }}>
                 <td style={{ padding: '0.8rem 0.5rem' }}>TOTAL</td>
-                <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem' }}>₹{(promised?.totalAmount || queryPricing?.finalPrice || 0).toLocaleString()}</td>
+                <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem' }}>
+                  ₹{( (Number(promised?.totalAmount) || 0) + (Number(promised?.gstAmount) || 0) || queryPricing?.finalPrice || 0 ).toLocaleString()}
+                </td>
                 <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem', color: 'var(--primary)' }}>₹{actualTotal.toLocaleString()}</td>
                 <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem', color: difference > 0 ? 'var(--error)' : 'var(--success)' }}>
-                  ₹{difference.toLocaleString()}
+                  ₹{(actualTotal - ((Number(promised?.totalAmount) || 0) + (Number(promised?.gstAmount) || 0) || queryPricing?.finalPrice || 0)).toLocaleString()}
                 </td>
               </tr>
             </tbody>
           </table>
 
-          {po.qcRecord?.status === 'PASS' && !po.qcRecord?.isBilled && (
-            <div style={{ marginTop: '1.5rem', textAlign: 'center', background: 'rgba(16, 185, 129, 0.1)', padding: '1rem', borderRadius: '8px' }}>
-              <p style={{ fontSize: '0.85rem', marginBottom: '0.8rem' }}>Comparison looks good? Proceed to final billing.</p>
-              <button onClick={handleFinalizeBilling} className="btn btn-primary" style={{ width: '100%' }}>
-                ✅ Finalize & Mark as Billed
+          {(po.qcRecord?.status === 'PASS' || passMode) && !po.qcRecord?.isBilled && (
+            <div id="finalize-section" style={{ 
+              marginTop: '1.5rem', 
+              textAlign: 'center', 
+              background: 'rgba(16, 185, 129, 0.15)', 
+              padding: '1.25rem', 
+              borderRadius: '12px',
+              border: '1px solid var(--success)',
+              animation: 'pulse 2s infinite'
+            }}>
+              <p style={{ fontSize: '0.9rem', marginBottom: '0.8rem', fontWeight: 600 }}>
+                QC Passed! Comparison looks good? Proceed to final billing.
+              </p>
+              <button 
+                onClick={handleFinalizeBilling} 
+                className="btn btn-primary" 
+                style={{ width: '100%', padding: '0.8rem', fontSize: '1rem' }}
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : '✅ Finalize & Mark as Billed'}
               </button>
             </div>
           )}

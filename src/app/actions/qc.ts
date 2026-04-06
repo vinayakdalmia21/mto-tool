@@ -90,10 +90,26 @@ export async function recordQcActuals(poId: number, data: {
 }
 
 export async function markAsBilled(qcId: number) {
-  await prisma.qcRecord.update({
+  const qc = await prisma.qcRecord.update({
     where: { id: qcId },
-    data: { isBilled: true }
+    data: { isBilled: true },
+    include: {
+      purchaseOrder: {
+        include: {
+          mtoOrder: true
+        }
+      }
+    }
   });
+
+  if (qc.purchaseOrder.mtoOrder.mtoQueryId) {
+    await prisma.mtoQuery.update({
+      where: { id: qc.purchaseOrder.mtoOrder.mtoQueryId },
+      data: { status: 'COMPLETED' }
+    });
+  }
+
   revalidatePath('/qc');
+  revalidatePath('/dashboard');
   return { success: true };
 }

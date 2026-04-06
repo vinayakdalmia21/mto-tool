@@ -120,7 +120,8 @@ export default function OperationsMasterDashboard({
   const handleDownloadCSV = () => {
     const headers = [
       'Query ID', 'MTO ID', 'Customer', 'Staff', 'Vendor',
-      'Vendor Est.', 'Estimate Sent', 'Price Locked', 'MTO Raised', 'CAD Upload', 'PO Raised', 'QC Passed', 'Completed'
+      'Vendor Est.', 'Estimate Sent', 'Price Locked', 'MTO Raised', 'CAD Upload', 'PO Raised', 'QC Passed', 'Completed',
+      'Pipeline Time', 'Vendor Est Amount', 'Customer Locked Price', 'QC Final Price'
     ];
     
     const rows = filteredQueries.map(q => [
@@ -136,7 +137,11 @@ export default function OperationsMasterDashboard({
       q.stages.cadUpload,
       q.stages.poRaised,
       q.stages.qcPassed,
-      q.stages.completed
+      q.stages.completed,
+      `${q.daysInPipeline} Days`,
+      q.vendorEstValue,
+      q.lockedPrice,
+      q.qcFinalPrice
     ]);
 
     const csvContent = [
@@ -265,51 +270,77 @@ export default function OperationsMasterDashboard({
             </div>
 
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1300px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1600px' }}>
                 <thead>
                   <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--surface-border)' }}>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>Query ID</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>MTO ID</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>Customer</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>Staff</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>Vendor</th>
+                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Query ID</th>
+                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>MTO ID</th>
+                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Customer</th>
+                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Staff</th>
+                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Vendor</th>
                     
-                    {/* STAGES */}
-                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Vendor Est.</th>
-                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Est. Sent</th>
-                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Locked</th>
-                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>MTO Raised</th>
-                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>CAD Upload</th>
-                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>PO Raised</th>
-                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>QC Passed</th>
-                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Completed</th>
+                    {/* STAGES (13 core) */}
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>Vendor Est.</th>
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>Est. Sent</th>
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>Locked</th>
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>MTO Raised</th>
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>CAD Upload</th>
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>PO Raised</th>
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>QC Passed</th>
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>Completed</th>
+
+                    {/* SUPPLEMENTARY FINANCIALS */}
+                    <th style={{ padding: '0.75rem', color: 'var(--primary)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Pipeline Time</th>
+                    <th style={{ padding: '0.75rem', color: 'var(--primary)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Vendor Est.</th>
+                    <th style={{ padding: '0.75rem', color: 'var(--primary)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Locked Price</th>
+                    <th style={{ padding: '0.75rem', color: 'var(--success)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>QC Final</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredQueries.length === 0 ? (
-                    <tr><td colSpan={13} style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>No queries match your current focus.</td></tr>
+                    <tr><td colSpan={17} style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>No queries match your current focus.</td></tr>
                   ) : null}
                   {filteredQueries.map(q => {
+                    const isInactive = !['COMPLETED', 'DROPPED'].includes(q.status) && 
+                                       (Date.now() - new Date(q.updatedAt).getTime()) > (inactiveDays * 24 * 60 * 60 * 1000);
                     return (
                       <tr key={q.id} className="glass-panel-interactive" style={{ borderBottom: '1px solid var(--surface-border)', opacity: q.status === 'DROPPED' ? 0.6 : 1 }}>
-                        <td style={{ padding: '1rem', fontWeight: 700, fontSize: '0.85rem' }}>
+                        <td style={{ padding: '0.75rem', fontWeight: 700, fontSize: '0.8rem' }}>
                           Q-{String(q.queryNo || 0).padStart(4, '0')}
                         </td>
-                        <td style={{ padding: '1rem', fontSize: '0.85rem', color: q.staffMtoId === '—' ? 'var(--text-muted)' : 'var(--success)', fontWeight: 600 }}>
+                        <td style={{ padding: '0.75rem', fontSize: '0.8rem', color: q.staffMtoId === '—' ? 'var(--text-muted)' : 'var(--success)', fontWeight: 600 }}>
                           {q.staffMtoId}
                         </td>
-                        <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{q.customerName}</td>
-                        <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{q.staffName}</td>
-                        <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{q.vendor}</td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.customerName}</td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.staffName}</td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.vendor}</td>
                         
-                        <td style={{ padding: '0.75rem' }}>{renderStageStatus(q.stages.vendorEst)}</td>
-                        <td style={{ padding: '0.75rem' }}>{renderStageStatus(q.stages.estSent)}</td>
-                        <td style={{ padding: '0.75rem' }}>{renderStageStatus(q.stages.priceLocked)}</td>
-                        <td style={{ padding: '0.75rem' }}>{renderStageStatus(q.stages.mtoRaised)}</td>
-                        <td style={{ padding: '0.75rem' }}>{renderStageStatus(q.stages.cadUpload)}</td>
-                        <td style={{ padding: '0.75rem' }}>{renderStageStatus(q.stages.poRaised)}</td>
-                        <td style={{ padding: '0.75rem' }}>{renderStageStatus(q.stages.qcPassed)}</td>
-                        <td style={{ padding: '0.75rem' }}>{renderStageStatus(q.stages.completed, 'Completed')}</td>
+                        {/* STAGES */}
+                        <td style={{ padding: '0.5rem' }}>{renderStageStatus(q.stages.vendorEst)}</td>
+                        <td style={{ padding: '0.5rem' }}>{renderStageStatus(q.stages.estSent)}</td>
+                        <td style={{ padding: '0.5rem' }}>{renderStageStatus(q.stages.priceLocked)}</td>
+                        <td style={{ padding: '0.5rem' }}>{renderStageStatus(q.stages.mtoRaised)}</td>
+                        <td style={{ padding: '0.5rem' }}>{renderStageStatus(q.stages.cadUpload)}</td>
+                        <td style={{ padding: '0.5rem' }}>{renderStageStatus(q.stages.poRaised)}</td>
+                        <td style={{ padding: '0.5rem' }}>{renderStageStatus(q.stages.qcPassed)}</td>
+                        <td style={{ padding: '0.5rem' }}>{renderStageStatus(q.stages.completed, 'Completed')}</td>
+
+                        {/* FINANCIALS */}
+                        <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem' }}>
+                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', fontWeight: 600, color: isInactive ? 'var(--danger)' : 'inherit' }}>
+                             <Clock size={12} />
+                             {q.daysInPipeline}d
+                           </div>
+                        </td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', fontSize: '0.8rem', fontWeight: 600 }}>
+                           {q.vendorEstValue > 0 ? `₹${q.vendorEstValue.toLocaleString()}` : '—'}
+                        </td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', fontSize: '0.8rem', fontWeight: 600 }}>
+                           {q.lockedPrice > 0 ? `₹${q.lockedPrice.toLocaleString()}` : '—'}
+                        </td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', fontSize: '0.85rem', fontWeight: 800, color: 'var(--success)' }}>
+                           {q.qcFinalPrice > 0 ? `₹${q.qcFinalPrice.toLocaleString()}` : '—'}
+                        </td>
                       </tr>
                     );
                   })}
