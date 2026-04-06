@@ -6,16 +6,16 @@
   --bg-gradient-start: #0F0D0C;
   --bg-gradient-end: #050404;
   
-  --primary: #C5A059;
-  --primary-hover: #A7864B;
+  --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
   
-  --surface: rgba(26, 22, 20, 0.6);
-  --surface-hover: rgba(35, 30, 27, 0.8);
-  --surface-border: rgba(197, 160, 89, 0.15);
-  --surface-border-active: rgba(197, 160, 89, 0.4);
+  --surface: rgba(15, 23, 42, 0.6);
+  --surface-hover: rgba(30, 41, 59, 0.8);
+  --surface-border: rgba(255, 255, 255, 0.1);
+  --surface-border-active: rgba(139, 92, 246, 0.4);
   
-  --text-main: #F4F1EE;
-  --text-muted: #9E9388;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
   
   /* Status Colors */
   --success: #10b981;
@@ -137,12 +137,13 @@ input::placeholder, textarea::placeholder {
 
 /* Luxury Enhancements */
 h1, h2, h3 {
-  font-family: 'Cinzel', 'Playfair Display', serif;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background: linear-gradient(to bottom, #F4F1EE 0%, #C5A059 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  background: none;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: initial;
+  color: var(--text-main);
 }
 
 .veda-card {

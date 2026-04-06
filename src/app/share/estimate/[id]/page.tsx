@@ -42,118 +42,227 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
   const hasDiscount = (order?.discountAmount || est?.discountAmount || 0) > 0;
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0, color: 'var(--primary)', letterSpacing: '-0.02em' }}>
+    <div style={{ maxWidth: 850, margin: '0 auto', color: '#1A1A1A' }}>
+      <div style={{ marginBottom: '4rem', textAlign: 'center' }}>
+        <h1 style={{ 
+          fontSize: '3rem', 
+          fontWeight: 700, 
+          margin: 0, 
+          color: '#631E32', 
+          fontFamily: "'Playfair Display', serif",
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase'
+        }}>
           Quotation
         </h1>
-        <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontSize: '1.1rem' }}>
-          Ref: Q-{queryNoStr} | {mto.customer.name}
-        </p>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          gap: '1rem', 
+          marginTop: '0.75rem',
+          color: '#631E32',
+          opacity: 0.7,
+          fontSize: '1rem',
+          letterSpacing: '0.1em'
+        }}>
+          <span>REF: Q-{queryNoStr}</span>
+          <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#631E32' }}></span>
+          <span>{mto.customer.name}</span>
+        </div>
       </div>
 
-      <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
-        
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem' }}>
+      <div style={{ 
+        backgroundColor: '#FFFFFF', 
+        padding: '3.5rem', 
+        borderRadius: '4px', 
+        boxShadow: '0 20px 40px rgba(99, 30, 50, 0.05)',
+        border: '1px solid rgba(99, 30, 50, 0.1)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Decorative corner accent */}
+        <div style={{ 
+          position: 'absolute', 
+          top: 0, 
+          right: 0, 
+          width: '100px', 
+          height: '100px', 
+          background: 'linear-gradient(135deg, transparent 50%, rgba(204, 166, 96, 0.1) 50%)' 
+        }} />
+
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '3rem' }}>
           <thead>
-            <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <th style={{ padding: '1.2rem 1rem', borderBottom: '2px solid var(--surface-border)', textAlign: 'left', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Item Description</th>
-              <th style={{ padding: '1.2rem 1rem', borderBottom: '2px solid var(--surface-border)', textAlign: 'center', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Weight/Qty</th>
-              <th style={{ padding: '1.2rem 1rem', borderBottom: '2px solid var(--surface-border)', textAlign: 'right', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Amount</th>
+            <tr>
+              <th style={{ 
+                padding: '1.5rem 1rem', 
+                borderBottom: '2px solid #631E32', 
+                textAlign: 'left', 
+                color: '#631E32', 
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '0.9rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em'
+              }}>Description</th>
+              <th style={{ 
+                padding: '1.5rem 1rem', 
+                borderBottom: '2px solid #631E32', 
+                textAlign: 'center', 
+                color: '#631E32', 
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '0.9rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em'
+              }}>Weight/Qty</th>
+              <th style={{ 
+                padding: '1.5rem 1rem', 
+                borderBottom: '2px solid #631E32', 
+                textAlign: 'right', 
+                color: '#631E32', 
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '0.9rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em'
+              }}>Amount</th>
             </tr>
           </thead>
           <tbody>
             {/* Gold */}
-            <tr>
-              <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)' }}>
-                <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Gold Fine</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{mto.goldKaratage || ''} {mto.metalColor || ''} @ ₹{est.goldRate.toLocaleString()}/gm</div>
+            <tr style={{ borderBottom: '1px solid rgba(99, 30, 50, 0.08)' }}>
+              <td style={{ padding: '1.5rem 1rem' }}>
+                <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Gold Fine</div>
+                <div style={{ fontSize: '0.85rem', color: '#631E32', opacity: 0.6, marginTop: '0.2rem' }}>
+                  {mto.goldKaratage || ''} {mto.metalColor || ''} @ ₹{rate.toLocaleString()}/gm
+                </div>
               </td>
-              <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'center', fontWeight: 500 }}>
-                {est.goldWeight} g
+              <td style={{ padding: '1.5rem 1rem', textAlign: 'center', color: '#444' }}>
+                {weight} g
               </td>
-              <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'right', fontWeight: 600 }}>
+              <td style={{ padding: '1.5rem 1rem', textAlign: 'right', fontWeight: 600, color: '#631E32' }}>
                 ₹{goldTotal.toLocaleString()}
               </td>
             </tr>
 
-            {/* Diamond - use ternary instead of && to avoid rendering 0 */}
+            {/* Diamond */}
             {hasDiamond ? (
-              <tr>
-                <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)' }}>
-                  <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Diamonds</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Quality Assured @ ₹{est.diamondRate?.toLocaleString()}/ct</div>
+              <tr style={{ borderBottom: '1px solid rgba(99, 30, 50, 0.08)' }}>
+                <td style={{ padding: '1.5rem 1rem' }}>
+                  <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Diamonds</div>
+                  <div style={{ fontSize: '0.85rem', color: '#631E32', opacity: 0.6, marginTop: '0.2rem' }}>
+                    Certified Gems @ ₹{dRate.toLocaleString()}/ct
+                  </div>
                 </td>
-                <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'center', fontWeight: 500 }}>
-                  {est.diamondWeight} ct
+                <td style={{ padding: '1.5rem 1rem', textAlign: 'center', color: '#444' }}>
+                  {dWeight} ct
                 </td>
-                <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'right', fontWeight: 600 }}>
+                <td style={{ padding: '1.5rem 1rem', textAlign: 'right', fontWeight: 600, color: '#631E32' }}>
                   ₹{diamondTotal.toLocaleString()}
                 </td>
               </tr>
             ) : null}
 
             {/* Making */}
-            <tr>
-              <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)' }}>
-                 <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Craftsmanship & Making</div>
-                 <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Precision handcrafted @ {est.makingPercent}%</div>
+            <tr style={{ borderBottom: '1px solid rgba(99, 30, 50, 0.08)' }}>
+              <td style={{ padding: '1.5rem 1rem' }}>
+                 <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Craftsmanship</div>
+                 <div style={{ fontSize: '0.85rem', color: '#631E32', opacity: 0.6, marginTop: '0.2rem' }}>
+                   Bespoke hand-detailing @ {mPercent}%
+                 </div>
               </td>
-              <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'center' }}>-</td>
-              <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'right', fontWeight: 600 }}>
+              <td style={{ padding: '1.5rem 1rem', textAlign: 'center', color: '#888' }}>—</td>
+              <td style={{ padding: '1.5rem 1rem', textAlign: 'right', fontWeight: 600, color: '#631E32' }}>
                 ₹{makingCharge.toLocaleString()}
               </td>
             </tr>
 
             {/* Other Stones */}
             {hasOtherStones ? (
-              <tr>
-                <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)' }}>
-                  <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Other Stones / Extras</div>
+              <tr style={{ borderBottom: '1px solid rgba(99, 30, 50, 0.08)' }}>
+                <td style={{ padding: '1.5rem 1rem' }}>
+                  <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Additional Stones</div>
                 </td>
-                <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'center' }}>-</td>
-                <td style={{ padding: '1.2rem 1rem', borderBottom: '1px solid var(--surface-border)', textAlign: 'right', fontWeight: 600 }}>
-                  ₹{(est.otherStones || 0).toLocaleString()}
+                <td style={{ padding: '1.5rem 1rem', textAlign: 'center', color: '#888' }}>—</td>
+                <td style={{ padding: '1.5rem 1rem', textAlign: 'right', fontWeight: 600, color: '#631E32' }}>
+                  ₹{oStones.toLocaleString()}
                 </td>
               </tr>
             ) : null}
           </tbody>
         </table>
 
-        {/* Footer Calculations */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'flex-end' }}>
-          <div style={{ display: 'flex', gap: '2rem', fontSize: '0.95rem' }}>
-            <span style={{ color: 'var(--text-muted)' }}>GST (3%)</span>
-            <span style={{ fontWeight: 600, width: '100px', textAlign: 'right' }}>₹{(order.gstAmount || 0).toLocaleString()}</span>
+        {/* Totals Section */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-end', padding: '0 1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', width: '250px', fontSize: '0.95rem' }}>
+            <span style={{ color: '#444' }}>Taxes (GST 3%)</span>
+            <span style={{ fontWeight: 600 }}>₹{(order.gstAmount || 0).toLocaleString()}</span>
           </div>
           
           {hasDiscount ? (
-            <div style={{ display: 'flex', gap: '2rem', fontSize: '0.95rem', color: 'var(--success)' }}>
-              <span>Discount ({est.discountPercent}%)</span>
-              <span style={{ fontWeight: 600, width: '100px', textAlign: 'right' }}>- ₹{est.discountAmount.toLocaleString()}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '250px', fontSize: '0.95rem', color: '#CCA660' }}>
+              <span>Special Appreciation</span>
+              <span style={{ fontWeight: 600 }}>- ₹{(order.discountAmount || 0).toLocaleString()}</span>
             </div>
           ) : null}
 
-          <div style={{ marginTop: '1rem', paddingTop: '1.5rem', borderTop: '2px solid var(--surface-border)', display: 'flex', gap: '2rem', fontSize: '1.5rem', fontWeight: 800 }}>
-             <span style={{ color: 'var(--text-main)' }}>Total Value</span>
-             <span style={{ color: 'var(--primary)', width: '150px', textAlign: 'right' }}>₹{(order.advanceAmount + order.remainingAmount).toLocaleString()}</span>
+          <div style={{ 
+            marginTop: '1.5rem', 
+            paddingTop: '2rem', 
+            borderTop: '1px solid #631E32', 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            width: '350px' 
+          }}>
+             <span style={{ 
+               fontSize: '1.2rem', 
+               color: '#631E32', 
+               fontFamily: "'Playfair Display', serif",
+               fontWeight: 600,
+               textTransform: 'uppercase',
+               letterSpacing: '0.1em'
+             }}>Total Estimate</span>
+             <span style={{ 
+               fontSize: '2rem', 
+               fontWeight: 800, 
+               color: '#631E32' 
+             }}>₹{(order.advanceAmount + order.remainingAmount).toLocaleString()}</span>
           </div>
         </div>
 
-        {/* Design Notes */}
+        {/* Notes Section */}
         {est.notes ? (
-          <div style={{ marginTop: '3rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--surface-border)' }}>
-             <h4 style={{ marginBottom: '0.75rem', fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Terms & Design Notes</h4>
-             <p style={{ margin: 0, lineHeight: 1.6, color: 'var(--text-main)' }}>{est.notes}</p>
+          <div style={{ 
+            marginTop: '4rem', 
+            padding: '2rem', 
+            backgroundColor: '#FDF8F0', 
+            border: '1px dashed rgba(99, 30, 50, 0.2)',
+            borderRadius: '2px'
+          }}>
+             <h4 style={{ 
+               margin: '0 0 1rem 0', 
+               fontSize: '0.8rem', 
+               color: '#631E32', 
+               textTransform: 'uppercase', 
+               letterSpacing: '0.15em',
+               fontWeight: 700
+             }}>Artisan Notes</h4>
+             <p style={{ margin: 0, lineHeight: 1.8, color: '#444', fontSize: '0.95rem', fontStyle: 'italic' }}>
+               "{est.notes}"
+             </p>
           </div>
         ) : null}
 
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+      <div style={{ textAlign: 'center', marginTop: '4rem', paddingBottom: '4rem' }}>
         <PrintButton />
-        <p style={{ marginTop: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-          Generated by VEDA MTO System. Prices valid for 24 hours due to bullion fluctuations.
+        <p style={{ 
+          marginTop: '2rem', 
+          color: '#631E32', 
+          opacity: 0.5, 
+          fontSize: '0.75rem',
+          letterSpacing: '0.05em'
+        }}>
+          This quotation is valid for 24 hours. Gold prices are subject to global bullion fluctuations.
         </p>
       </div>
     </div>

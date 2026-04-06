@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useAuth } from './auth-context';
-import { updateGlobalPricing, fetchLiveGoldRate, calculateKaratRates } from './actions/pricing';
+import { updateGlobalPricing, fetchLiveGoldRate } from './actions/pricing';
 import { TrendingUp, Gem, Save, RefreshCw, Clock } from 'lucide-react';
 import { formatIST } from '@/lib/date-utils';
+import { calculateKaratRates } from '@/lib/pricing-utils';
 
 export default function GlobalPricingPanel({ initialPricing }: { initialPricing: any }) {
   const { role } = useAuth();
