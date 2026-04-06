@@ -19,17 +19,22 @@ export default function QcItemCard({ po }: { po: any }) {
   const vendorEst = query?.vendorEstimations?.[0];
 
   // Helper to get precisely defined 'Locked Price' data: Snapshot -> Pricing -> Estimation
+  // This ensures we always have a value for comparison, even if the order snapshot is partial
   const getLocked = (field: string) => {
+    // 1. Core Inputs
     if (field === 'goldWeight') return promised?.goldWeight || queryPricing?.goldWeight || latestEst?.goldWeight || vendorEst?.goldWeight || 0;
     if (field === 'goldRate') return promised?.goldRate || queryPricing?.goldRate || latestEst?.goldRate || 0;
     if (field === 'diamondWeight') return promised?.diamondWeight || latestEst?.diamondWeight || vendorEst?.diamondWeight || 0;
     if (field === 'diamondRate') return promised?.diamondRate || latestEst?.diamondRate || vendorEst?.diamondRate || 0;
-    if (field === 'makingPercent') return promised?.makingPercent || latestEst?.makingPercent || 0;
-    if (field === 'otherStones') return promised?.otherStones || latestEst?.otherStones || 0;
-    if (field === 'discountPercent') return promised?.discountPercent || latestEst?.discountPercent || 0;
-    if (field === 'discountAmount') return promised?.discountAmount || 0;
-    if (field === 'gstAmount') return promised?.gstAmount || 0;
-    if (field === 'totalAmount') return promised?.totalAmount || 0;
+    if (field === 'makingPercent') return promised?.makingPercent ?? latestEst?.makingPercent ?? 0;
+    if (field === 'otherStones') return promised?.otherStones ?? latestEst?.otherStones ?? 0;
+    if (field === 'discountPercent') return promised?.discountPercent ?? latestEst?.discountPercent ?? 0;
+    
+    // 2. Computed Financials (Snapshot prefers explicit values, then fallbacks to latest estimation)
+    if (field === 'discountAmount') return promised?.discountAmount || latestEst?.discountAmount || 0;
+    if (field === 'gstAmount') return promised?.gstAmount || latestEst?.gstAmount || 0;
+    if (field === 'totalAmount') return promised?.totalAmount || latestEst?.totalAmount || queryPricing?.finalPrice || 0;
+    
     return 0;
   };
 
@@ -118,7 +123,29 @@ export default function QcItemCard({ po }: { po: any }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
         {/* Actuals Form - Detailed Pricing Table */}
         <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
-          <h4 style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>📥 Recording Actuals</h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h4 style={{ margin: 0, fontSize: '1rem' }}>📥 Recording Actuals</h4>
+            <button 
+              onClick={() => {
+                if (confirm('Reset form to Locked Promised values?')) {
+                  setActuals({
+                    goldWeight: getLocked('goldWeight'),
+                    goldRate: getLocked('goldRate'),
+                    diamondWeight: getLocked('diamondWeight'),
+                    diamondRate: getLocked('diamondRate'),
+                    makingPercent: getLocked('makingPercent'),
+                    otherStones: getLocked('otherStones'),
+                    discountPercent: getLocked('discountPercent'),
+                    gstPercent: 3,
+                    notes: qcData?.notes || ""
+                  });
+                }
+              }}
+              style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', background: 'rgba(139, 92, 246, 0.1)', color: 'var(--primary)', border: '1px solid var(--primary)', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              Reset to Promised
+            </button>
+          </div>
           
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
             <tbody>
