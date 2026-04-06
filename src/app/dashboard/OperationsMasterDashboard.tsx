@@ -19,11 +19,15 @@ import {
 export default function OperationsMasterDashboard({ 
   stats, 
   masterQueries,
-  actionView
+  actionView,
+  hideKpis = false,
+  title = "Operations Command Center"
 }: { 
   stats: any, 
   masterQueries: any[],
-  actionView: React.ReactNode
+  actionView?: React.ReactNode,
+  hideKpis?: boolean,
+  title?: string
 }) {
   const [inactiveDays, setInactiveDays] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
@@ -165,7 +169,7 @@ export default function OperationsMasterDashboard({
       <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <h1 style={{ fontSize: '2.25rem', fontWeight: 800, letterSpacing: '-0.025em', marginBottom: '0.5rem' }}>
-            Operations Command Center
+            {title}
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
             High-signal visibility into your MTO pipeline and operational bottlenecks.
@@ -176,45 +180,47 @@ export default function OperationsMasterDashboard({
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
           
           {/* --- KPI SECTION --- */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '1.25rem' 
-          }}>
-            {kpis.map((kpi, idx) => (
-              <div key={idx} className="glass-panel" 
-                title={kpi.tooltip}
-                style={{ 
-                  padding: '1.5rem', 
-                  borderLeft: `4px solid ${kpi.color}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.25rem',
-                  transition: 'transform 0.2s ease',
-                  cursor: 'help'
-                }}>
-                <div style={{ 
-                  background: `${kpi.color}20`, 
-                  color: kpi.color,
-                  padding: '1rem',
-                  borderRadius: '12px'
-                }}>
-                  {kpi.icon}
+          {!hideKpis && (
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '1.25rem' 
+            }}>
+              {kpis.map((kpi, idx) => (
+                <div key={idx} className="glass-panel" 
+                  title={kpi.tooltip}
+                  style={{ 
+                    padding: '1.5rem', 
+                    borderLeft: `4px solid ${kpi.color}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.25rem',
+                    transition: 'transform 0.2s ease',
+                    cursor: 'help'
+                  }}>
+                  <div style={{ 
+                    background: `${kpi.color}20`, 
+                    color: kpi.color,
+                    padding: '1rem',
+                    borderRadius: '12px'
+                  }}>
+                    {kpi.icon}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {kpi.label}
+                    </div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: 800 }}>
+                      {kpi.value}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                      {kpi.sub}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {kpi.label}
-                  </div>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800 }}>
-                    {kpi.value}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                    {kpi.sub}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* --- OPERATIONS MASTER TABLE --- */}
           <div className="glass-panel" style={{ padding: '0', overflow: 'hidden', border: '1px solid var(--surface-border)' }}>
