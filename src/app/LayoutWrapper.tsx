@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
@@ -28,9 +29,15 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <main style={{ flex: 1, padding: '2rem', marginLeft: '260px' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', transition: 'all 0.3s ease' }}>
+      <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
+      <main style={{ 
+        flex: 1, 
+        padding: '2rem', 
+        marginLeft: isCollapsed ? '80px' : '260px',
+        transition: 'margin-left 0.3s ease',
+        minWidth: 0 // Prevent flex-basis issues
+      }}>
         {children}
       </main>
     </div>

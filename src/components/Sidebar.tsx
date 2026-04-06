@@ -8,18 +8,23 @@ import {
   LayoutDashboard, 
   Briefcase, 
   Calculator, 
-  CreditCard, 
   Package, 
   Building2, 
   ClipboardCheck, 
-  FileText,
-  TrendingUp,
-  Image as ImageIcon
+  TrendingUp, 
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export default function Sidebar() {
+interface SidebarProps {
+  isCollapsed?: boolean;
+  onToggle?: () => void;
+}
+
+export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
   const { role, setRole, userName } = useAuth();
   const pathname = usePathname();
 
@@ -42,27 +47,43 @@ export default function Sidebar() {
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
 
   return (
-    <aside className={`${styles.sidebar} glass-panel`}>
-      <div className={styles.header}>
-        <Diamond size={28} className={styles.brandIcon} />
-        <span className={styles.brandName}>VEDA MTO</span>
-      </div>
+    <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} glass-panel`}>
+      <header className={styles.header}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+          <Diamond size={24} className={styles.brandIcon} />
+          {!isCollapsed && <span className={styles.brandName}>VEDA MTO</span>}
+        </div>
+        <button 
+          onClick={onToggle}
+          className={styles.collapseToggle}
+          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+        >
+          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
+      </header>
 
-      <div className={styles.roleSelector}>
-        <label>View As:</label>
-        <select value={role} onChange={handleRoleChange} className={styles.select}>
-          <option value="SALES">Store Staff</option>
-          <option value="OPERATIONS">Operations</option>
-        </select>
-      </div>
+      {!isCollapsed && (
+        <div className={styles.roleSelector}>
+          <label>View As:</label>
+          <select value={role} onChange={handleRoleChange} className={styles.select}>
+            <option value="SALES">Store Staff</option>
+            <option value="OPERATIONS">Operations</option>
+          </select>
+        </div>
+      )}
 
       <nav className={styles.nav}>
         {visibleItems.map(item => {
            const isActive = pathname === item.href;
            return (
-             <Link key={item.label} href={item.href} className={`${styles.navItem} ${isActive ? styles.active : ''}`}>
+             <Link 
+               key={item.label} 
+               href={item.href} 
+               className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+               title={isCollapsed ? item.label : ''}
+              >
                <span className={styles.icon}>{item.icon}</span>
-               {item.label}
+               {!isCollapsed && <span className={styles.label}>{item.label}</span>}
              </Link>
            );
         })}
@@ -73,10 +94,12 @@ export default function Sidebar() {
           <div className={styles.avatar}>
             {userName.charAt(0)}
           </div>
-          <div className={styles.userInfo}>
-            <p className={styles.userName}>{userName}</p>
-            <p className={styles.userRole}>{role === 'SALES' ? 'Store Staff' : 'Operations'}</p>
-          </div>
+          {!isCollapsed && (
+            <div className={styles.userInfo}>
+              <p className={styles.userName}>{userName}</p>
+              <p className={styles.userRole}>{role === 'SALES' ? 'Store Staff' : 'Operations'}</p>
+            </div>
+          )}
         </div>
       </div>
     </aside>

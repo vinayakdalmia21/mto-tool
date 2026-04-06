@@ -111,7 +111,7 @@ export async function getMasterTableQueries() {
       po: hasProd ? 'PASSED' : (q.orders[0]?.purchaseOrder ? 'PASSED' : (q.status === 'PRICE_LOCKED' || q.status === 'ORDER_PLACED' ? 'PENDING' : 'DASH')),
       production: hasQC ? 'PASSED' : (q.orders[0]?.purchaseOrder?.status === 'COMPLETED' ? 'PASSED' : (['IN_PRODUCTION', 'RAISED'].includes(q.orders[0]?.purchaseOrder?.status || '') ? 'PENDING' : 'DASH')),
       qc: hasProd && q.orders[0]?.purchaseOrder?.status === 'DISPATCHED' && !hasQC ? 'PENDING' : (hasQC ? 'PASSED' : 'DASH'),
-      completed: hasComp ? 'PASSED' : 'DASH'
+      completed: hasQC ? 'PASSED' : 'DASH'
     };
 
     return {

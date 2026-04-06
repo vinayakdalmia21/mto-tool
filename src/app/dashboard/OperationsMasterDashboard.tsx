@@ -35,56 +35,64 @@ export default function OperationsMasterDashboard({
       value: stats.totalQueries, 
       sub: 'All-time volume', 
       icon: <Layers size={20} />, 
-      color: '#6366f1' 
+      color: '#6366f1',
+      tooltip: 'Total number of inquiries received since inception.'
     },
     { 
       label: 'Active Queries', 
       value: stats.activeQueries, 
       sub: 'Live workload', 
       icon: <Clock size={20} />, 
-      color: '#10b981' 
+      color: '#10b981',
+      tooltip: 'Inquiries currently moving through the pipeline (Open to Production).'
     },
     { 
       label: 'Inactive Queries', 
       value: stats.inactiveQueries, 
       sub: `No status changes (> ${inactiveDays} days)`, 
       icon: <AlertCircle size={20} />, 
-      color: '#ef4444' 
+      color: '#ef4444',
+      tooltip: 'Queries with no activity/status updates beyond the defined threshold.'
     },
     { 
       label: 'Conversion Rate', 
       value: `${stats.conversionRate}%`, 
       sub: 'Query to Completed', 
       icon: <TrendingUp size={20} />, 
-      color: '#8b5cf6' 
+      color: '#8b5cf6',
+      tooltip: 'Percentage of total inquiries that successfully reached the Completed stage.'
     },
     { 
       label: 'Drop Rate', 
       value: `${stats.dropRate}%`, 
       sub: `${stats.dropCount} queries lost`, 
       icon: <XCircle size={20} />, 
-      color: '#f43f5e' 
+      color: '#f43f5e',
+      tooltip: 'Percentage of inquiries marked as Dropped/Closed without a sale.'
     },
     { 
       label: 'Avg Pipeline Time', 
       value: `${stats.avgPipelineTime} Days`, 
       sub: 'Lead to closure', 
       icon: <Calendar size={20} />, 
-      color: '#06b6d4' 
+      color: '#06b6d4',
+      tooltip: 'Average duration from query creation to the final completion milestone.'
     },
     { 
       label: 'Total Pipeline Value', 
       value: `₹${(stats.totalPipelineValue / 100000).toFixed(1)}L`, 
       sub: 'Potential Rev', 
       icon: <DollarSign size={20} />, 
-      color: '#f59e0b' 
+      color: '#f59e0b',
+      tooltip: 'Sum of the estimated/current value of all live queries in the pipeline.'
     },
     { 
       label: 'Locked Value', 
       value: `₹${(stats.lockedValue / 100000).toFixed(1)}L`, 
       sub: 'High certainty', 
       icon: <CheckCircle2 size={20} />, 
-      color: '#22c55e' 
+      color: '#22c55e',
+      tooltip: 'Value of orders where the price is locked or a PO has been issued.'
     },
   ];
 
@@ -102,8 +110,8 @@ export default function OperationsMasterDashboard({
   }, [masterQueries, searchQuery]);
 
   // 3. Status Display Logic
-  const renderStageStatus = (status: string) => {
-    if (status === 'PASSED') return <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)', fontWeight: 600, fontSize: '0.75rem' }}>Passed</div>;
+  const renderStageStatus = (status: string, customLabel?: string) => {
+    if (status === 'PASSED') return <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)', fontWeight: 600, fontSize: '0.75rem' }}>{customLabel || 'Passed'}</div>;
     if (status === 'PENDING') return <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--warning)', fontWeight: 600, fontSize: '0.75rem' }}>Pending</div>;
     return <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--surface-border)' }}>—</div>;
   };
@@ -174,14 +182,17 @@ export default function OperationsMasterDashboard({
             gap: '1.25rem' 
           }}>
             {kpis.map((kpi, idx) => (
-              <div key={idx} className="glass-panel" style={{ 
-                padding: '1.5rem', 
-                borderLeft: `4px solid ${kpi.color}`,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1.25rem',
-                transition: 'transform 0.2s ease'
-              }}>
+              <div key={idx} className="glass-panel" 
+                title={kpi.tooltip}
+                style={{ 
+                  padding: '1.5rem', 
+                  borderLeft: `4px solid ${kpi.color}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.25rem',
+                  transition: 'transform 0.2s ease',
+                  cursor: 'help'
+                }}>
                 <div style={{ 
                   background: `${kpi.color}20`, 
                   color: kpi.color,
@@ -265,7 +276,7 @@ export default function OperationsMasterDashboard({
                     <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>Basic Info</th>
                     <th style={{ padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>Status</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Query</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Est.</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Est..</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Negot.</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>Locked</th>
                     <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>PO</th>
@@ -306,13 +317,13 @@ export default function OperationsMasterDashboard({
                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>V: <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{q.vendor}</span></div>
                         </td>
                         <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.queryRaised)}</td>
-                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.estimation)}</td>
-                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.negotiation)}</td>
-                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.priceLocked)}</td>
-                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.po)}</td>
-                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.production)}</td>
-                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.qc)}</td>
-                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.completed)}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.estimation, 'Passed')}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.negotiation, 'Passed')}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.priceLocked, 'Passed')}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.po, 'Passed')}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.production, 'Passed')}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.qc, 'Passed')}</td>
+                        <td style={{ padding: '1rem' }}>{renderStageStatus(q.stages.completed, 'Completed')}</td>
 
                         <td style={{ padding: '1.25rem' }}>
                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, color: isInactive ? 'var(--danger)' : 'inherit' }}>

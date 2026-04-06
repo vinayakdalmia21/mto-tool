@@ -37,7 +37,7 @@ export default function QcItemCard({ po }: { po: any }) {
   const diamondValue = Number(actuals.diamondWeight) * Number(actuals.diamondRate);
   const makingCharges = goldValue * (Number(actuals.makingPercent) / 100);
   const subtotal = goldValue + diamondValue + makingCharges + Number(actuals.otherStones);
-  const discountAmount = subtotal * (Number(actuals.discountPercent) / 100);
+  const discountAmount = makingCharges * (Number(actuals.discountPercent) / 100);
   const taxableTotal = subtotal - discountAmount;
   const gstAmount = taxableTotal * (Number(actuals.gstPercent) / 100);
   const actualTotal = taxableTotal + gstAmount;
@@ -150,7 +150,7 @@ export default function QcItemCard({ po }: { po: any }) {
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                 <td style={{ padding: '0.6rem 0' }}>Discount</td>
                 <td style={{ padding: '0.6rem 0.5rem' }} colSpan={2}>
-                  <input type="number" value={actuals.discountPercent} onChange={e => handleInputChange('discountPercent', e.target.value)} style={{ width: '40px', padding: '0.3rem' }} />% off Subtotal
+                  <input type="number" value={actuals.discountPercent} onChange={e => handleInputChange('discountPercent', e.target.value)} style={{ width: '40px', padding: '0.3rem' }} />% off Making
                 </td>
                 <td style={{ padding: '0.6rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--error)' }}>
                   -₹{discountAmount.toLocaleString()}
