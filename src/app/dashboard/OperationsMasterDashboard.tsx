@@ -34,8 +34,9 @@ export default function OperationsMasterDashboard({
   const [searchQuery, setSearchQuery] = useState('');
 
   // Helper to find the current pending stage
-  const getPendingStageLabel = (stages: any) => {
-    if (stages.completed === 'PASSED') return 'No Action Required';
+  const getPendingStageLabel = (q: any) => {
+    if (q.status === 'DROPPED') return `Dropped at ${q.droppedAtStage || 'Initial'}`;
+    if (q.status === 'COMPLETED' || q.stages.completed === 'PASSED') return 'No Action Required';
     
     const stageOrder = [
       { key: 'vendorEst', label: 'Vendor Estimation' },
@@ -49,7 +50,7 @@ export default function OperationsMasterDashboard({
     ];
 
     for (const s of stageOrder) {
-      if (stages[s.key] === 'PENDING') return s.label;
+      if (q.stages[s.key] === 'PENDING') return s.label;
     }
     
     return 'No Action Required';
@@ -191,7 +192,7 @@ export default function OperationsMasterDashboard({
       q.customerName,
       q.staffName,
       q.vendor,
-      getPendingStageLabel(q.stages),
+      getPendingStageLabel(q),
       q.stages.vendorEst,
       q.stages.estSent,
       q.stages.priceLocked,
@@ -377,14 +378,14 @@ export default function OperationsMasterDashboard({
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.customerName}</td>
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.staffName}</td>
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.vendor}</td>
-                        <td style={{ 
-                          padding: '0.75rem', 
-                          fontSize: '0.75rem', 
-                          fontWeight: 600, 
-                          color: getPendingStageLabel(q.stages) === 'No Action Required' ? 'var(--success)' : 'var(--warning)' 
-                        }}>
-                           {getPendingStageLabel(q.stages)}
-                        </td>
+                          <td style={{ 
+                            padding: '0.75rem', 
+                            fontSize: '0.75rem', 
+                            fontWeight: 600, 
+                            color: getPendingStageLabel(q) === 'No Action Required' ? 'var(--success)' : 'var(--warning)' 
+                          }}>
+                             {getPendingStageLabel(q)}
+                          </td>
                         
                         {/* STAGES */}
                         <td style={{ padding: '0.5rem' }}>{renderStageStatus(q.stages.vendorEst)}</td>

@@ -139,14 +139,57 @@ export async function deleteMtoQuery(id: string) {
 }
 export async function dropMtoQuery(id: string, reason: string = "Staff action") {
   try {
+    const q = await prisma.mtoQuery.findUnique({
+      where: { id },
+      include: {
+        pricing: true,
+        vendorEstimations: true,
+        estimations: { orderBy: { version: 'desc' } },
+        orders: { 
+          include: { 
+            purchaseOrder: {
+              include: { qcRecord: true }
+            }
+          },
+          orderBy: { version: 'desc' },
+          take: 1
+        }
+      }
+    });
+
+    if (!q) return { success: false, error: "Query not found" };
+
+    // Determine Stage at drop (mirroring analytics logic)
+    let stageAtDrop = "Inquiry";
+    const order = q.orders[0];
+    const hasInvoice = q.status === 'COMPLETED' || !!(order as any)?.invoice;
+    const hasQC = hasInvoice || order?.purchaseOrder?.qcRecord?.status === 'PASS';
+    const hasPO = hasQC || !!order?.purchaseOrder;
+    const hasCAD = hasPO || (!!order?.cadDesigns && JSON.parse(order.cadDesigns).length > 0);
+    const hasOrder = hasCAD || !!order;
+    const hasLock = hasOrder || !!q.pricing || ['ORDER_PLACED', 'CAD_UPLOADED', 'MOVED_TO_OPS'].includes(q.status);
+    const hasEst = hasLock || q.estimations.length > 0;
+    const hasVendor = hasEst || q.vendorEstimations.length > 0;
+
+    if (hasQC) stageAtDrop = "QC Passed";
+    else if (order?.purchaseOrder) stageAtDrop = "PO Raised";
+    else if (order?.status === 'MOVED_TO_OPS') stageAtDrop = "Moved to Ops";
+    else if (hasCAD) stageAtDrop = "CAD Uploaded";
+    else if (order) stageAtDrop = "Order Placed";
+    else if (q.pricing) stageAtDrop = "Price Locked";
+    else if (q.estimations.length > 0) stageAtDrop = "Estimation Sent";
+    else if (q.vendorEstimations.length > 0) stageAtDrop = "Vendor Estimation";
+    else if (q.status === 'ESTIMATING') stageAtDrop = "Estimating";
+
     await prisma.mtoQuery.update({
       where: { id },
       data: { 
         status: 'DROPPED',
         dropReason: reason,
+        droppedAtStage: stageAtDrop,
         statusHistory: {
           create: {
-            status: 'DROPPED'
+            status: `DROPPED`
           }
         }
       }

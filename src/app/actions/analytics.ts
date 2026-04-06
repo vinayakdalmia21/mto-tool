@@ -106,15 +106,16 @@ export async function getMasterTableQueries() {
     const hasEst = hasLock || q.estimations.length > 0;
     const hasVendor = hasEst || q.vendorEstimations.length > 0;
 
+    const isDropped = q.status === 'DROPPED';
     const stages = {
-      vendorEst: hasEst ? 'PASSED' : (q.vendorEstimations.length > 0 ? 'PASSED' : 'DASH'),
-      estSent: hasLock ? 'PASSED' : (q.estimations.length > 0 ? 'PASSED' : (q.status === 'ESTIMATING' ? 'PENDING' : 'DASH')),
-      priceLocked: hasOrder ? 'PASSED' : (!!q.pricing ? 'PASSED' : (q.status === 'PRICE_LOCKED' ? 'PENDING' : 'DASH')),
-      mtoRaised: hasCAD ? 'PASSED' : (!!q.orders[0] ? 'PASSED' : (q.status === 'PRICE_LOCKED' ? 'PENDING' : 'DASH')),
-      cadUpload: hasPO ? 'PASSED' : (hasCAD ? 'PASSED' : (q.orders[0]?.status === 'PENDING' ? 'PENDING' : 'DASH')),
-      poRaised: hasQC ? 'PASSED' : (!!q.orders[0]?.purchaseOrder ? 'PASSED' : (q.orders[0]?.status === 'MOVED_TO_OPS' ? 'PENDING' : 'DASH')),
-      qcPassed: hasInvoice ? 'PASSED' : (q.orders[0]?.purchaseOrder?.qcRecord?.status === 'PASS' ? 'PASSED' : (!!q.orders[0]?.purchaseOrder ? 'PENDING' : 'DASH')),
-      completed: hasInvoice ? 'PASSED' : (hasQC ? 'PENDING' : 'DASH')
+      vendorEst: !isDropped && hasEst ? 'PASSED' : (!isDropped && q.vendorEstimations.length > 0 ? 'PASSED' : 'DASH'),
+      estSent: !isDropped && hasLock ? 'PASSED' : (!isDropped && q.estimations.length > 0 ? 'PASSED' : (!isDropped && q.status === 'ESTIMATING' ? 'PENDING' : 'DASH')),
+      priceLocked: !isDropped && hasOrder ? 'PASSED' : (!isDropped && !!q.pricing ? 'PASSED' : (!isDropped && q.status === 'PRICE_LOCKED' ? 'PENDING' : 'DASH')),
+      mtoRaised: !isDropped && hasCAD ? 'PASSED' : (!isDropped && !!q.orders[0] ? 'PASSED' : (!isDropped && q.status === 'PRICE_LOCKED' ? 'PENDING' : 'DASH')),
+      cadUpload: !isDropped && hasPO ? 'PASSED' : (!isDropped && hasCAD ? 'PASSED' : (!isDropped && q.orders[0]?.status === 'PENDING' ? 'PENDING' : 'DASH')),
+      poRaised: !isDropped && hasQC ? 'PASSED' : (!isDropped && !!q.orders[0]?.purchaseOrder ? 'PASSED' : (!isDropped && q.orders[0]?.status === 'MOVED_TO_OPS' ? 'PENDING' : 'DASH')),
+      qcPassed: !isDropped && hasInvoice ? 'PASSED' : (!isDropped && q.orders[0]?.purchaseOrder?.qcRecord?.status === 'PASS' ? 'PASSED' : (!isDropped && !!q.orders[0]?.purchaseOrder ? 'PENDING' : 'DASH')),
+      completed: !isDropped && hasInvoice ? 'PASSED' : (!isDropped && hasQC ? 'PENDING' : 'DASH')
     };
 
     return {
@@ -130,6 +131,7 @@ export async function getMasterTableQueries() {
       lockedPrice: q.pricing?.finalPrice || 0,
       qcFinalPrice: q.orders[0]?.purchaseOrder?.qcRecord?.actualFinalValue || 0,
       daysInPipeline,
+      droppedAtStage: q.droppedAtStage,
       updatedAt: q.updatedAt,
       stages
     };

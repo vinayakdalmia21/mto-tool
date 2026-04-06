@@ -43,7 +43,8 @@ model MtoQuery {
   status          String // OPEN, ESTIMATING, AWAITING_RESPONSE, NEGOTIATION, ACCEPTED, DROPPED
   referenceImages String? // JSON string
   catalogueSku    String? // Optional SKU for regular MTOs
-  dropReason      String? // Reason if status is DROPPED
+  dropReason       String? // Reason if status is DROPPED
+  droppedAtStage   String? // Stage when dropped
   priceSensitivity String? // FLEXIBLE, NON_FLEXIBLE
 
   customer Customer @relation(fields: [customerId], references: [id])

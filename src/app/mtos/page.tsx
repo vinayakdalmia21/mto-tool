@@ -59,11 +59,18 @@ export default async function MtosPage() {
                   </span>
                 </td>
                 <td style={{ padding: '0.75rem', fontWeight: 600 }}>
-                  {mto.orders?.[0]?.staffMtoId ? (
-                    <span style={{ color: 'var(--success)' }}>{mto.orders[0].staffMtoId}</span>
-                  ) : (
-                    <span style={{ color: 'var(--text-muted)' }}>Q-{mto.queryNo.toString().padStart(4, '0')}</span>
-                  )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                    {mto.orders?.[0]?.staffMtoId ? (
+                      <span style={{ color: 'var(--success)' }}>{mto.orders[0].staffMtoId}</span>
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)' }}>Q-{mto.queryNo.toString().padStart(4, '0')}</span>
+                    )}
+                    {mto.status === 'DROPPED' && (
+                      <span style={{ fontSize: '0.65rem', color: 'var(--warning)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Dropped @ {mto.droppedAtStage || 'Initial'}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td style={{ padding: '0.75rem' }}>{mto.mtoType}</td>
                 <td style={{ padding: '0.75rem' }}>
@@ -85,7 +92,7 @@ export default async function MtosPage() {
                 <td style={{ padding: '1rem', textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                     <ShareButton queryId={mto.id} />
-                    <DropMtoButton id={mto.id} />
+                    {mto.status !== 'DROPPED' && <DropMtoButton id={mto.id} />}
                     <DeleteMtoButton id={mto.id} />
                     <Link href={`/mtos/${mto.id}`} className="btn-icon" style={{ display: 'inline-flex', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', textDecoration: 'none', color: 'var(--text-main)' }}>
                       <ChevronRight size={16} />

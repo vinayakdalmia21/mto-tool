@@ -149,7 +149,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
                 <td style={{ padding: '1.5rem 1rem' }}>
                   <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Diamonds</div>
                   <div style={{ fontSize: '0.85rem', color: '#631E32', opacity: 0.6, marginTop: '0.2rem' }}>
-                    Certified Gems @ ₹{dRate.toLocaleString()}/ct
+                    VVS-EF Diamonds @ ₹{dRate.toLocaleString()}/ct
                   </div>
                 </td>
                 <td style={{ padding: '1.5rem 1rem', textAlign: 'center', color: '#444' }}>
@@ -164,7 +164,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
             {/* Making */}
             <tr style={{ borderBottom: '1px solid rgba(99, 30, 50, 0.08)' }}>
               <td style={{ padding: '1.5rem 1rem' }}>
-                 <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Craftsmanship</div>
+                 <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Making Charges</div>
                  <div style={{ fontSize: '0.85rem', color: '#631E32', opacity: 0.6, marginTop: '0.2rem' }}>
                    Bespoke hand-detailing @ {mPercent}%
                  </div>
