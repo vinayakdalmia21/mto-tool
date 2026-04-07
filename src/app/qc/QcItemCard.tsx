@@ -30,10 +30,13 @@ export default function QcItemCard({ po }: { po: any }) {
     if (field === 'otherStones') return promised?.otherStones ?? latestEst?.otherStones ?? 0;
     if (field === 'discountPercent') return promised?.discountPercent ?? latestEst?.discountPercent ?? 0;
     
-    // 2. Computed Financials (Snapshot prefers explicit values, then fallbacks to latest estimation)
+    // 2. Computed Financials
     if (field === 'discountAmount') return promised?.discountAmount || latestEst?.discountAmount || 0;
     if (field === 'gstAmount') return promised?.gstAmount || latestEst?.gstAmount || 0;
-    if (field === 'totalAmount') return promised?.totalAmount || latestEst?.totalAmount || queryPricing?.finalPrice || 0;
+    if (field === 'totalAmount') {
+      // Prioritize the actual final price fields which include GST
+      return queryPricing?.finalPrice || latestEst?.finalEstimatedPrice || promised?.totalAmount || 0;
+    }
     
     return 0;
   };
@@ -58,15 +61,15 @@ export default function QcItemCard({ po }: { po: any }) {
   };
 
   // Calculations (Mirroring EstimationForm logic)
-  const goldValue = Number(actuals.goldWeight) * Number(actuals.goldRate);
-  const diamondValue = Number(actuals.diamondWeight) * Number(actuals.diamondRate);
-  const makingCharges = goldValue * (Number(actuals.makingPercent) / 100);
-  const subtotal = goldValue + diamondValue + makingCharges + Number(actuals.otherStones);
-  const discountAmount = makingCharges * (Number(actuals.discountPercent) / 100);
-  const taxableTotal = subtotal - discountAmount;
-  const gstAmount = taxableTotal * (Number(actuals.gstPercent) / 100);
-  const actualTotal = taxableTotal + gstAmount;
-  const difference = actualTotal - (promised?.totalAmount || queryPricing?.finalPrice || 0);
+  const goldValue = Number((Number(actuals.goldWeight) * Number(actuals.goldRate)).toFixed(2));
+  const diamondValue = Number((Number(actuals.diamondWeight) * Number(actuals.diamondRate)).toFixed(2));
+  const makingCharges = Number((goldValue * (Number(actuals.makingPercent) / 100)).toFixed(2));
+  const subtotal = Number((goldValue + diamondValue + makingCharges + Number(actuals.otherStones)).toFixed(2));
+  const discountAmount = Number((makingCharges * (Number(actuals.discountPercent) / 100)).toFixed(2));
+  const taxableTotal = Number((subtotal - discountAmount).toFixed(2));
+  const gstAmount = Number((taxableTotal * (Number(actuals.gstPercent) / 100)).toFixed(2));
+  const actualTotal = Number((taxableTotal + gstAmount).toFixed(2));
+  const difference = Number((actualTotal - (promised?.totalAmount || queryPricing?.finalPrice || 0)).toFixed(2));
 
   async function handleSaveActuals(status: string) {
     setLoading(true);

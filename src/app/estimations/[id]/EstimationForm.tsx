@@ -57,11 +57,11 @@ export default function EstimationForm({
   const makingAmount = goldAmount * (parseFloat(makingPercent) / 100);
   const otherAmount = parseFloat(otherStones) || 0;
   
-  const discountAmount = makingAmount * (parseFloat(discountPercent) / 100);
-  const taxableSubtotal = goldAmount + diamondAmount + otherAmount + makingAmount - discountAmount;
+  const discountAmount = Number((makingAmount * (parseFloat(discountPercent) / 100)).toFixed(2));
+  const taxableSubtotal = Number((goldAmount + diamondAmount + otherAmount + makingAmount - discountAmount).toFixed(2));
   
-  const gstAmount = taxableSubtotal * 0.03;
-  const finalValue = taxableSubtotal + gstAmount;
+  const gstAmount = Number((taxableSubtotal * 0.03).toFixed(2));
+  const finalValue = Number((taxableSubtotal + gstAmount).toFixed(2));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -76,7 +76,7 @@ export default function EstimationForm({
       otherStones,
       gstAmount: gstAmount.toFixed(2),
       discountAmount: discountAmount.toFixed(2),
-      totalAmount: taxableSubtotal.toFixed(2),
+      totalAmount: finalValue.toFixed(2),
       finalEstimatedPrice: finalValue.toFixed(2),
       notes
     });

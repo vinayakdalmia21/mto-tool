@@ -59,16 +59,21 @@ export async function saveEstimation(mtoId: string, data: any) {
     }
   });
 
-  // Update MTO Status
-  await prisma.mtoQuery.update({
-    where: { id: mtoId },
-    data: { 
-      status: 'AWAITING_RESPONSE',
-      statusHistory: {
-        create: { status: 'AWAITING_RESPONSE' }
+  // Update MTO Status only if it's in an early stage
+  const mto = await prisma.mtoQuery.findUnique({ where: { id: mtoId }, select: { status: true } });
+  const earlyStages = ['OPEN', 'ESTIMATING', 'AWAITING_RESPONSE', 'NEGOTIATION'];
+  
+  if (mto && earlyStages.includes(mto.status)) {
+    await prisma.mtoQuery.update({
+      where: { id: mtoId },
+      data: { 
+        status: 'AWAITING_RESPONSE',
+        statusHistory: {
+          create: { status: 'AWAITING_RESPONSE' }
+        }
       }
-    }
-  });
+    });
+  }
 
   revalidatePath(`/estimations/${mtoId}`);
   revalidatePath('/estimations');
