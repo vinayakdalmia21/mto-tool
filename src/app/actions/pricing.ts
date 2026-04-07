@@ -6,25 +6,38 @@ import https from 'https';
 import { calculateKaratRates } from '@/lib/pricing-utils';
 
 export async function getGlobalPricing() {
-  let pricing = await prisma.globalPricing.findUnique({
-    where: { id: 1 }
-  });
-
-  if (!pricing) {
-    pricing = await prisma.globalPricing.create({
-      data: {
-        id: 1,
-        rate9k: 0,
-        rate14k: 0,
-        rate18k: 0,
-        rate22k: 0,
-        rate24k: 0,
-        diamondRate: 0
-      }
+  try {
+    let pricing = await prisma.globalPricing.findUnique({
+      where: { id: 1 }
     });
+  
+    if (!pricing) {
+      pricing = await prisma.globalPricing.create({
+        data: {
+          id: 1,
+          rate9k: 0,
+          rate14k: 0,
+          rate18k: 0,
+          rate22k: 0,
+          rate24k: 0,
+          diamondRate: 0
+        }
+      });
+    }
+    return pricing;
+  } catch (error) {
+    console.error('Error fetching global pricing:', error);
+    return {
+      id: 1,
+      rate9k: 0,
+      rate14k: 0,
+      rate18k: 0,
+      rate22k: 0,
+      rate24k: 0,
+      diamondRate: 0,
+      updatedAt: new Date()
+    };
   }
-
-  return pricing;
 }
 
 

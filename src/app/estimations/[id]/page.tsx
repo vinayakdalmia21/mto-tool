@@ -25,12 +25,17 @@ export default async function EstimationDetailPage({ params }: { params: Promise
   };
 
   // Find the latest vendor feedback for state determination
-  const vendorFeedbacks = mto.vendorEstimations || [];
+  const vendorFeedbacks = mto?.vendorEstimations || [];
   const latestFeedback = vendorFeedbacks.length > 0 ? vendorFeedbacks[0] : null;
   const acceptedVendorEst = vendorFeedbacks.find((v: any) => v.isAccepted);
 
-  // Defensive check for customer
-  const customerName = mto.customer?.name || "Unknown Customer";
+  // Defensive checks for all fields
+  const customerName = mto?.customer?.name || "Unknown Customer";
+  const leadType = mto?.leadType || 'LOW';
+  const category = mto?.category || 'N/A';
+  const weightRange = mto?.weightRange || 'N/A';
+  const goldKaratage = mto?.goldKaratage || '';
+  const metalType = mto?.metalType || '';
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -38,7 +43,7 @@ export default async function EstimationDetailPage({ params }: { params: Promise
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link href="/estimations" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Back</Link>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Sales Estimation: {customerName}</h1>
-          <span className={`badge ${mto.leadType === 'HIGH' ? 'badge-danger' : 'badge-info'}`}>{mto.leadType} PRIORITY</span>
+          <span className={`badge ${leadType === 'HIGH' ? 'badge-danger' : 'badge-info'}`}>{leadType} PRIORITY</span>
         </div>
       </header>
 
@@ -63,7 +68,7 @@ export default async function EstimationDetailPage({ params }: { params: Promise
             <div className="glass-panel" style={{ padding: '2rem', borderLeft: '4px solid var(--danger)', background: 'rgba(255, 0, 0, 0.05)' }}>
                <h3 style={{ color: 'var(--danger)', marginBottom: '0.8rem' }}>❌ Vendor Rejected</h3>
                <p style={{ fontSize: '0.95rem', marginBottom: '1rem' }}>
-                 <strong>{latestFeedback.vendorName}</strong> rejected this query.
+                 <strong>{latestFeedback.vendorName || 'Vendor'}</strong> rejected this query.
                </p>
                {latestFeedback.remarks && (
                  <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', fontStyle: 'italic', fontSize: '0.9rem' }}>
@@ -80,11 +85,11 @@ export default async function EstimationDetailPage({ params }: { params: Promise
                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.9rem' }}>
                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                    <span style={{ color: 'var(--text-muted)' }}>Vendor:</span>
-                   <span>{acceptedVendorEst.vendorName}</span>
+                   <span>{acceptedVendorEst.vendorName || 'Unknown'}</span>
                  </div>
                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                    <span style={{ color: 'var(--text-muted)' }}>Confirmed Gold:</span>
-                   <span style={{ fontWeight: 600 }}>{acceptedVendorEst.goldWeight}</span>
+                   <span style={{ fontWeight: 600 }}>{acceptedVendorEst.goldWeight || '0'}</span>
                  </div>
                  {acceptedVendorEst.diamondWeight && (
                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -100,9 +105,9 @@ export default async function EstimationDetailPage({ params }: { params: Promise
           <div className="glass-panel" style={{ padding: '1.5rem' }}>
             <h4 style={{ marginBottom: '1rem', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Customer Requirements</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
-              <div>Category: {mto.category}</div>
-              {mto.goldKaratage && <div>Metal: {mto.goldKaratage} {mto.metalType}</div>}
-              <div>Target: {mto.weightRange}</div>
+              <div>Category: {category}</div>
+              {goldKaratage && <div>Metal: {goldKaratage} {metalType}</div>}
+              <div>Target: {weightRange}</div>
             </div>
           </div>
         </div>
@@ -113,7 +118,7 @@ export default async function EstimationDetailPage({ params }: { params: Promise
             <div className="glass-panel" style={{ padding: '2rem' }}>
                <h2 style={{ marginBottom: '1.5rem' }}>Pricing Breakdown</h2>
                <EstimationForm 
-                 mtoId={mto.id} 
+                 mtoId={mto?.id} 
                  mto={mto}
                  vendorLimit={acceptedVendorEst}
                  globalPricing={safePricing}
@@ -129,18 +134,18 @@ export default async function EstimationDetailPage({ params }: { params: Promise
           )}
 
           {/* HISTORY */}
-          {mto.estimations && mto.estimations.length > 0 && (
+          {mto?.estimations && mto.estimations.length > 0 && (
             <div style={{ marginTop: '2rem' }}>
                <h4 style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>Previous Estimations</h4>
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                  {mto.estimations.map((est: any) => (
-                   <div key={est.id} className="glass-panel" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <div key={est?.id || Math.random()} className="glass-panel" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                      <div>
-                       <span className="badge badge-info" style={{ marginRight: '1rem' }}>v{est.version}</span>
-                       <span style={{ fontSize: '0.9rem' }}>₹{est.finalEstimatedPrice.toLocaleString()}</span>
+                       <span className="badge badge-info" style={{ marginRight: '1rem' }}>v{est?.version || 1}</span>
+                       <span style={{ fontSize: '0.9rem' }}>₹{(est?.finalEstimatedPrice || 0).toLocaleString()}</span>
                      </div>
                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                       {formatIST(est.createdAt)}
+                       {est?.createdAt ? formatIST(est.createdAt) : 'N/A'}
                      </span>
                    </div>
                  ))}

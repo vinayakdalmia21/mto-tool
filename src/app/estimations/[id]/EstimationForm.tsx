@@ -27,13 +27,13 @@ export default function EstimationForm({
   // Dynamic Pricing Extraction
   const karr = mto.goldKaratage || '18K';
   const pricingMap: Record<string, number> = {
-    '9K': globalPricing.rate9k,
-    '14K': globalPricing.rate14k,
-    '18K': globalPricing.rate18k,
-    '22K': globalPricing.rate22k,
-    '24K': globalPricing.rate24k,
+    '9K': globalPricing?.rate9k || 0,
+    '14K': globalPricing?.rate14k || 0,
+    '18K': globalPricing?.rate18k || 0,
+    '22K': globalPricing?.rate22k || 0,
+    '24K': globalPricing?.rate24k || 0,
   };
-  const baseGoldRate = pricingMap[karr] || globalPricing.rate18k || 0;
+  const baseGoldRate = pricingMap[karr] || globalPricing?.rate18k || 0;
   
   const extractNum = (str: string | null | undefined) => {
     if (!str) return '';
