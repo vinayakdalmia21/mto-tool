@@ -57,9 +57,13 @@ export default function ActiveOrdersClient({ orders }: { orders: any[] }) {
                 <td style={{ padding: '1rem' }}>{order.mtoQuery.customer.name}</td>
                 <td style={{ padding: '1rem' }}>{order.mtoQuery.category}</td>
                 <td style={{ padding: '1rem' }}>
-                  <span className={`badge ${order.mtoQuery?.status === 'CAD_UPLOADED' ? 'badge-success' : 'badge-warning'}`}>
-                    {order.mtoQuery?.status === 'CAD_UPLOADED' ? 'CAD Added' : 'Awaiting CAD'}
-                  </span>
+                  {order.mtoQuery?.status === 'PO_PENDING' || order.mtoQuery?.status === 'COMPLETED' ? (
+                    <span className="badge badge-success">At PO Stage</span>
+                  ) : (
+                    <span className={`badge ${order.mtoQuery?.status === 'CAD_UPLOADED' ? 'badge-success' : 'badge-warning'}`}>
+                      {order.mtoQuery?.status === 'CAD_UPLOADED' ? 'CAD Added' : 'Awaiting CAD'}
+                    </span>
+                  )}
                 </td>
                 <td style={{ padding: '1rem', textAlign: 'right' }}>
                   <button className="btn" style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
@@ -254,9 +258,9 @@ function ActiveOrderCard({ order, onRefresh }: { order: any, onRefresh: () => vo
             onClick={handleMoveToPo} 
             className="btn btn-primary" 
             style={{ flex: 1, padding: '0.8rem' }}
-            disabled={movingToPo}
+            disabled={movingToPo || mto.status === 'PO_PENDING' || mto.status === 'COMPLETED'}
           >
-            {movingToPo ? 'Moving...' : '🚀 Move to Purchase Order'}
+            {movingToPo ? 'Moving...' : (mto.status === 'PO_PENDING' || mto.status === 'COMPLETED' ? '✅ Moved to PO' : '🚀 Move to Purchase Order')}
           </button>
         </div>
 

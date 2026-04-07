@@ -68,7 +68,14 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
     <div className="glass-panel" style={{ padding: '2rem', border: isAnyMoved ? '1px solid var(--success)' : '1px solid var(--surface-border)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
         <div>
-          <h3 style={{ marginBottom: '0.3rem' }}>{query.customer?.name}</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.3rem' }}>
+            <h3 style={{ margin: 0 }}>{query.customer?.name}</h3>
+            {isAnyMoved && (
+              <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>
+                {query.status.replace(/_/g, ' ')}
+              </span>
+            )}
+          </div>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             {query.category} • {query.metalType} {query.goldKaratage || ''} • QRY-{String(query.queryNo).padStart(4, '0')}
           </div>

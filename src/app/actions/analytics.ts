@@ -138,6 +138,7 @@ export async function getMasterTableQueries() {
       status: q.status || 'OPEN',
       vendor: q.orders[0]?.purchaseOrder?.vendorName || '—',
       staffMtoId: q.orders[0]?.staffMtoId || '—',
+      poNumber: q.orders[0]?.purchaseOrder?.poNumber || '—',
       estimatedValue: Number(q.estimations[0]?.finalEstimatedPrice || 0),
       vendorEstValue: Number(q.vendorEstimations[0]?.labourCharges || 0),
       lockedPrice: Number(q.pricing?.finalPrice || 0),

@@ -5,6 +5,18 @@ import { revalidatePath } from 'next/cache';
 
 export async function getOrdersForOperations() {
   return await prisma.mtoOrder.findMany({
+    where: {
+      OR: [
+        { 
+          mtoQuery: { 
+            status: { in: ['PO_PENDING', 'PO_RAISED', 'COMPLETED'] } 
+          } 
+        },
+        { 
+          purchaseOrder: { isNot: null } 
+        }
+      ]
+    },
     include: {
       mtoQuery: {
         include: { 

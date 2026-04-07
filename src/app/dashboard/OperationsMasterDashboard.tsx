@@ -185,7 +185,7 @@ export default function OperationsMasterDashboard({
   // 4. CSV Download Logic
   const handleDownloadCSV = () => {
     const headers = [
-      'Query ID', 'MTO ID', 'Customer', 'Staff', 'Vendor', 'Pending Stage',
+      'Query ID', 'MTO ID', 'PO ID', 'Customer', 'Staff', 'Vendor', 'Pending Stage',
       'Vendor Est.', 'Estimate Sent', 'Price Locked', 'MTO Raised', 'CAD Upload', 'PO Raised', 'QC Passed', 'Final Billing',
       'Pipeline Time', 'Customer Locked Price', 'QC Final Price'
     ];
@@ -193,6 +193,7 @@ export default function OperationsMasterDashboard({
     const rows = filteredQueries.map(q => [
       `Q-${String(q.queryNo || 0).padStart(4, '0')}`,
       q.staffMtoId,
+      q.poNumber,
       q.customerName,
       q.staffName,
       q.vendor,
@@ -343,6 +344,7 @@ export default function OperationsMasterDashboard({
                   <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--surface-border)' }}>
                     <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Query ID</th>
                     <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>MTO ID</th>
+                    <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>PO ID</th>
                     <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Customer</th>
                     <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Staff</th>
                     <th style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>Vendor</th>
@@ -379,6 +381,9 @@ export default function OperationsMasterDashboard({
                         </td>
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem', color: q.staffMtoId === '—' ? 'var(--text-muted)' : 'var(--success)', fontWeight: 600 }}>
                           {q.staffMtoId}
+                        </td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.8rem', color: q.poNumber === '—' ? 'var(--text-muted)' : 'var(--info)', fontWeight: 600 }}>
+                          {q.poNumber}
                         </td>
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.customerName}</td>
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{q.staffName}</td>
