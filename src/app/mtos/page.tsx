@@ -29,6 +29,7 @@ export default async function MtosPage() {
             <tr style={{ borderBottom: '1px solid var(--surface-border)', background: 'rgba(255, 255, 255, 0.03)' }}>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Lead Priority</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Query ID</th>
+              <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>MTO ID</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>MTO Type</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Image</th>
               <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>SKU (If any)</th>
@@ -60,17 +61,20 @@ export default async function MtosPage() {
                 </td>
                 <td style={{ padding: '0.75rem', fontWeight: 600 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                    {mto.orders?.[0]?.staffMtoId ? (
-                      <span style={{ color: 'var(--success)' }}>{mto.orders[0].staffMtoId}</span>
-                    ) : (
-                      <span style={{ color: 'var(--text-muted)' }}>Q-{mto.queryNo.toString().padStart(4, '0')}</span>
-                    )}
+                    <span style={{ color: 'var(--text-muted)' }}>Q-{mto.queryNo.toString().padStart(4, '0')}</span>
                     {mto.status === 'DROPPED' && (
                       <span style={{ fontSize: '0.65rem', color: 'var(--warning)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                          {mto.dropReason?.includes('at ') ? mto.dropReason.split(': ')[0] : 'Dropped'}
                       </span>
                     )}
                   </div>
+                </td>
+                <td style={{ padding: '0.75rem', fontWeight: 600 }}>
+                  {mto.orders?.[0]?.staffMtoId ? (
+                    <span style={{ color: 'var(--success)' }}>{mto.orders[0].staffMtoId}</span>
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)' }}>—</span>
+                  )}
                 </td>
                 <td style={{ padding: '0.75rem' }}>{mto.mtoType}</td>
                 <td style={{ padding: '0.75rem' }}>

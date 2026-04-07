@@ -251,6 +251,45 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
           </div>
         ) : null}
 
+        {/* Visual Specifications */}
+        {(mto.referenceImages || (order?.cadDesigns && JSON.parse(order.cadDesigns).length > 0)) && (
+          <div style={{ marginTop: '4rem', borderTop: '1px solid rgba(99, 30, 50, 0.1)', paddingTop: '3rem' }}>
+            <h2 style={{ 
+              marginBottom: '2rem', 
+              fontSize: '1.4rem', 
+              fontFamily: "'Playfair Display', serif", 
+              color: '#631E32',
+              borderBottom: '1px solid #631E32',
+              paddingBottom: '0.75rem',
+              display: 'inline-block'
+            }}>Visual Specifications</h2>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+              {/* Reference Image */}
+              {mto.referenceImages && (
+                <div style={{ background: '#FFFFFF', padding: '1.5rem', borderRadius: '4px', border: '1px solid rgba(99, 30, 50, 0.05)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#631E32', textTransform: 'uppercase' }}>Design Reference</span>
+                    <a href={mto.referenceImages} download={`MTO_${queryNoStr}_Ref.png`} style={{ fontSize: '0.7rem', color: '#631E32', textDecoration: 'underline' }}>Download</a>
+                  </div>
+                  <img src={mto.referenceImages} alt="Reference" style={{ width: '100%', height: '200px', objectFit: 'contain', background: '#FDF8F0' }} />
+                </div>
+              )}
+
+              {/* Latest CAD (if any) */}
+              {order?.cadDesigns && JSON.parse(order.cadDesigns).length > 0 && (
+                <div style={{ background: '#FFFFFF', padding: '1.5rem', borderRadius: '4px', border: '1px solid rgba(99, 30, 50, 0.05)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#631E32', textTransform: 'uppercase' }}>Proposed CAD</span>
+                    <a href={JSON.parse(order.cadDesigns)[0]} download={`MTO_${queryNoStr}_CAD.png`} style={{ fontSize: '0.7rem', color: '#631E32', textDecoration: 'underline' }}>Download</a>
+                  </div>
+                  <img src={JSON.parse(order.cadDesigns)[0]} alt="CAD Design" style={{ width: '100%', height: '200px', objectFit: 'contain', background: '#FDF8F0' }} />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
 
       <div style={{ textAlign: 'center', marginTop: '4rem', paddingBottom: '4rem' }}>

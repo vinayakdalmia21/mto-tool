@@ -103,11 +103,41 @@ export default async function VendorEstimateSharePage(props: { params: Promise<{
             
             {estimate.images && (
                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                 <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Attached Vendor CAD/Sketch</span>
-                 <img src={estimate.images} alt="Vendor Sketch" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '4px' }} />
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                   <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Attached Vendor CAD/Sketch</span>
+                   <a 
+                     href={estimate.images} 
+                     download={`Vendor_Sketch_Q${queryNo}.png`}
+                     style={{ fontSize: '0.7rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}
+                   >
+                     DOWNLOAD
+                   </a>
+                 </div>
+                 <img src={estimate.images} alt="Vendor Sketch" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.2)' }} />
                </div>
             )}
           </div>
+
+          {/* Customer Reference */}
+          {estimate.mtoQuery.referenceImages && (
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2 style={{ fontSize: '1rem', color: 'var(--text-muted)', margin: 0 }}>Customer's Initial Reference</h2>
+                <a 
+                  href={estimate.mtoQuery.referenceImages} 
+                  download={`Customer_Ref_Q${queryNo}.png`}
+                  style={{ fontSize: '0.7rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}
+                >
+                  DOWNLOAD REF
+                </a>
+              </div>
+              <img 
+                src={estimate.mtoQuery.referenceImages} 
+                alt="Customer Reference" 
+                style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '4px', background: 'rgba(0,0,0,0.2)' }} 
+              />
+            </div>
+          )}
         </section>
 
         <footer style={{ marginTop: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>

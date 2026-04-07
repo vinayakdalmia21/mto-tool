@@ -50,7 +50,24 @@ export default async function SharedMtoPage({ params }: { params: Promise<{ id: 
 
         {mto.referenceImages && (
           <div>
-            <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>Reference Image</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.8rem' }}>
+              <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>Reference Image</label>
+              <a 
+                href={mto.referenceImages} 
+                download={`MTO_${queryNoStr}_Reference.png`}
+                style={{ 
+                  fontSize: '0.75rem', 
+                  color: 'var(--primary)', 
+                  textDecoration: 'none', 
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <span>↓</span> DOWNLOAD
+              </a>
+            </div>
             <div style={{ position: 'relative', height: '400px', width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--surface-border)' }}>
                {/* Using next/img with unoptimized because it's base64 for now */}
                <img 

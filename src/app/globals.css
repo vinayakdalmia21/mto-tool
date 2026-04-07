@@ -5,6 +5,7 @@
   /* Luxury Brand Aesthetic (VEDA) */
   --bg-gradient-start: #0F0D0C;
   --bg-gradient-end: #050404;
+  --background: #050404;
   
   --primary: #8b5cf6;
   --primary-hover: #7c3aed;
@@ -15,7 +16,7 @@
   --surface-border-active: rgba(139, 92, 246, 0.4);
   
   --text-main: #f8fafc;
-  --text-muted: #94a3b8;
+  --text-muted: #CBD5E1; /* Brightened from #94a3b8 (Slate-400) to Slate-300 for better legibility */
   
   /* Status Colors */
   --success: #10b981;
@@ -140,10 +141,6 @@ h1, h2, h3 {
   font-family: inherit;
   letter-spacing: -0.02em;
   text-transform: none;
-  background: none;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
   color: var(--text-main);
 }
 

@@ -112,6 +112,51 @@ export default async function SharedOrderPage({ params }: { params: Promise<{ id
         ) : null}
       </div>
 
+      {/* Initial Design Reference */}
+      {mto.referenceImages && (
+        <div style={{ 
+          backgroundColor: '#FFFFFF', 
+          padding: '3rem', 
+          marginBottom: '2rem', 
+          borderRadius: '4px',
+          border: '1px solid rgba(99, 30, 50, 0.1)',
+          boxShadow: '0 15px 35px rgba(99, 30, 50, 0.05)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid #631E32', paddingBottom: '0.75rem' }}>
+            <h2 style={{ 
+              margin: 0,
+              fontSize: '1.4rem', 
+              fontFamily: "'Playfair Display', serif", 
+              color: '#631E32',
+              display: 'inline-block'
+            }}>Initial Design Reference</h2>
+            <a 
+              href={mto.referenceImages} 
+              download={`MTO_${queryNoStr}_Initial_Reference.png`}
+              style={{ 
+                background: '#631E32', 
+                color: 'white', 
+                padding: '0.5rem 1rem', 
+                borderRadius: '2px', 
+                fontSize: '0.7rem', 
+                textDecoration: 'none', 
+                fontWeight: 600 
+              }}
+            >
+              DOWNLOAD REFERENCE
+            </a>
+          </div>
+          
+          <div style={{ background: '#FDF8F0', padding: '1rem', borderRadius: '2px', border: '1px solid rgba(99, 30, 50, 0.05)' }}>
+            <img 
+              src={mto.referenceImages} 
+              alt="Initial Reference" 
+              style={{ width: '100%', maxHeight: '500px', objectFit: 'contain', background: '#FDF8F0' }} 
+            />
+          </div>
+        </div>
+      )}
+
       {/* CAD Designs */}
       {cadDesigns.length > 0 ? (
         <div style={{ 

@@ -122,8 +122,9 @@ export default function CreateMtoPage() {
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Metal Color *</label>
-              <select name="metalColor" required>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Metal Color</label>
+              <select name="metalColor">
+                <option value="">Select Color...</option>
                 <option value="Yellow Gold">Yellow Gold</option>
                 <option value="White Gold">White Gold</option>
                 <option value="Rose Gold">Rose Gold</option>
