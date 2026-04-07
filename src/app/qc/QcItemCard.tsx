@@ -69,7 +69,18 @@ export default function QcItemCard({ po }: { po: any }) {
   const taxableTotal = Number((subtotal - discountAmount).toFixed(2));
   const gstAmount = Number((taxableTotal * (Number(actuals.gstPercent) / 100)).toFixed(2));
   const actualTotal = Number((taxableTotal + gstAmount).toFixed(2));
-  const difference = Number((actualTotal - (promised?.totalAmount || queryPricing?.finalPrice || 0)).toFixed(2));
+  
+  // Promised Calculations (Frozen from snapshots)
+  const pGoldValue = Number((Number(getP('goldWeight')) * Number(getP('goldRate'))).toFixed(2));
+  const pDiamondValue = Number((Number(getP('diamondWeight')) * Number(getP('diamondRate'))).toFixed(2));
+  const pMakingCharges = Number((pGoldValue * (Number(getP('makingPercent')) / 100)).toFixed(2));
+  const pSubtotal = Number((pGoldValue + pDiamondValue + pMakingCharges + Number(getP('otherStones'))).toFixed(2));
+  const pDiscountAmount = Number((pMakingCharges * (Number(getP('discountPercent')) / 100)).toFixed(2));
+  const pTaxableTotal = Number((pSubtotal - pDiscountAmount).toFixed(2));
+  const pGstAmount = Number((pTaxableTotal * 0.03).toFixed(2));
+  const promisedTotal = Number((pTaxableTotal + pGstAmount).toFixed(2));
+
+  const difference = Number((actualTotal - promisedTotal).toFixed(2));
 
   async function handleSaveActuals(status: string) {
     setLoading(true);
@@ -293,11 +304,11 @@ export default function QcItemCard({ po }: { po: any }) {
               <tr style={{ fontWeight: 700, background: 'rgba(255,255,255,0.05)', fontSize: '0.9rem' }}>
                 <td style={{ padding: '0.8rem 0.5rem' }}>TOTAL</td>
                 <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem' }}>
-                  ₹{Number(getP('totalAmount') || queryPricing?.finalPrice || 0).toLocaleString()}
+                  ₹{promisedTotal.toLocaleString()}
                 </td>
                 <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem', color: 'var(--primary)' }}>₹{actualTotal.toLocaleString()}</td>
                 <td style={{ textAlign: 'right', padding: '0.8rem 0.5rem', color: difference > 0 ? 'var(--error)' : 'var(--success)' }}>
-                  ₹{(actualTotal - Number(getP('totalAmount') || queryPricing?.finalPrice || 0)).toLocaleString()}
+                  ₹{Math.abs(difference).toLocaleString()}
                 </td>
               </tr>
             </tbody>

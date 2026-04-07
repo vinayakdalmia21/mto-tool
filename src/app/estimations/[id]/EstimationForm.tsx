@@ -41,15 +41,18 @@ export default function EstimationForm({
     return match ? match[0] : '';
   };
 
-  // Inputs
-  const [goldWeight, setGoldWeight] = useState(extractNum(vendorLimit?.goldWeight) || '0');
-  const [goldRate, setGoldRate] = useState(baseGoldRate.toString());
-  const [diamondWeight, setDiamondWeight] = useState(extractNum(vendorLimit?.diamondWeight) || '0');
-  const [diamondRate, setDiamondRate] = useState((globalPricing.diamondRate || 0).toString());
-  const [makingPercent, setMakingPercent] = useState('10');
-  const [otherStones, setOtherStones] = useState('0');
-  const [discountPercent, setDiscountPercent] = useState('25');
-  const [notes, setNotes] = useState('');
+  // Extract latest estimation values for persistence
+  const latestSaved = mto.estimations?.[0];
+  
+  // Inputs - Prioritize latest saved version, then vendor confirmed limits, then global defaults
+  const [goldWeight, setGoldWeight] = useState(latestSaved?.goldWeight || extractNum(vendorLimit?.goldWeight) || '0');
+  const [goldRate, setGoldRate] = useState(latestSaved?.goldRate?.toString() || baseGoldRate.toString());
+  const [diamondWeight, setDiamondWeight] = useState(latestSaved?.diamondWeight?.toString() || extractNum(vendorLimit?.diamondWeight) || '0');
+  const [diamondRate, setDiamondRate] = useState(latestSaved?.diamondRate?.toString() || (globalPricing.diamondRate || 0).toString());
+  const [makingPercent, setMakingPercent] = useState(latestSaved?.makingPercent?.toString() || '10');
+  const [otherStones, setOtherStones] = useState(latestSaved?.otherStones?.toString() || '0');
+  const [discountPercent, setDiscountPercent] = useState(latestSaved?.discountPercent?.toString() || '25');
+  const [notes, setNotes] = useState(latestSaved?.notes || '');
 
   // Calculations
   const goldAmount = (parseFloat(goldWeight) || 0) * (parseFloat(goldRate) || 0);
