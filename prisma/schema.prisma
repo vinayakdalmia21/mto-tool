@@ -45,6 +45,7 @@ model MtoQuery {
   catalogueSku    String? // Optional SKU for regular MTOs
   dropReason       String? // Reason if status is DROPPED
   priceSensitivity String? // FLEXIBLE, NON_FLEXIBLE
+  raisedBy         String? // The staff member who raised the query
 
   customer Customer @relation(fields: [customerId], references: [id])
   staff    User     @relation(fields: [staffId], references: [id])

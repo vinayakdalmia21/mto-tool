@@ -135,6 +135,7 @@ export async function getMasterTableQueries() {
       queryNo: Number(q.queryNo || 0),
       customerName: q.customer?.name || 'Unknown',
       staffName: q.staff?.name || 'N/A',
+      raisedBy: q.raisedBy || null,
       status: q.status || 'OPEN',
       vendor: q.orders[0]?.purchaseOrder?.vendorName || '—',
       staffMtoId: q.orders[0]?.staffMtoId || '—',

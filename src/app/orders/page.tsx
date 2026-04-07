@@ -83,6 +83,7 @@ export default async function OrdersPage() {
                         type="text" 
                         name="delivery" 
                         placeholder="Timeline" 
+                        defaultValue="14 days"
                         className="input-field" 
                         style={{ maxWidth: '100px', padding: '0.4rem' }} 
                         required 

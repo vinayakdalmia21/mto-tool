@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { createMtoQuery } from '../../actions/mto';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../auth-context';
 
 export default function CreateMtoPage() {
   const router = useRouter();
+  const { userName } = useAuth();
   const [loading, setLoading] = useState(false);
   const [mtoType, setMtoType] = useState('REGULAR');
   const [category, setCategory] = useState('RING');
@@ -31,6 +33,7 @@ export default function CreateMtoPage() {
 
       <div className="glass-panel" style={{ padding: '2rem' }}>
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
+          <input type="hidden" name="raisedBy" value={userName} />
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>

@@ -49,7 +49,7 @@ export default function EstimationForm({
   const [goldRate, setGoldRate] = useState(latestSaved?.goldRate?.toString() || baseGoldRate.toString());
   const [diamondWeight, setDiamondWeight] = useState(latestSaved?.diamondWeight?.toString() || extractNum(vendorLimit?.diamondWeight) || '0');
   const [diamondRate, setDiamondRate] = useState(latestSaved?.diamondRate?.toString() || (globalPricing.diamondRate || 0).toString());
-  const [makingPercent, setMakingPercent] = useState(latestSaved?.makingPercent?.toString() || '10');
+  const [makingPercent, setMakingPercent] = useState(latestSaved?.makingPercent?.toString() || '21');
   const [otherStones, setOtherStones] = useState(latestSaved?.otherStones?.toString() || '0');
   const [discountPercent, setDiscountPercent] = useState(latestSaved?.discountPercent?.toString() || '25');
   const [notes, setNotes] = useState(latestSaved?.notes || '');

@@ -28,7 +28,12 @@ export default function DashboardClient({
   }
 
   // If Staff (Sales), show the Master Dashboard but filtered by their name and without KPIs
-  const staffQueries = masterQueries.filter(q => q.staffName === userName);
+  // Filter rule: Assigned to them OR raised by them
+  const staffQueries = masterQueries.filter(q => {
+    const isAssigned = q.staffName.toLowerCase().startsWith(userName.toLowerCase());
+    const isCreator = q.raisedBy?.toLowerCase() === userName.toLowerCase();
+    return isAssigned || isCreator;
+  });
 
   return (
     <OperationsMasterDashboard 

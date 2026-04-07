@@ -130,7 +130,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
             {/* Gold */}
             <tr style={{ borderBottom: '1px solid rgba(99, 30, 50, 0.08)' }}>
               <td style={{ padding: '1.5rem 1rem' }}>
-                <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Gold Fine</div>
+                <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Gold Value</div>
                 <div style={{ fontSize: '0.85rem', color: '#631E32', opacity: 0.6, marginTop: '0.2rem' }}>
                   {mto.goldKaratage || ''} {mto.metalColor || ''} @ ₹{rate.toLocaleString()}/gm
                 </div>
@@ -147,7 +147,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
             {hasDiamond ? (
               <tr style={{ borderBottom: '1px solid rgba(99, 30, 50, 0.08)' }}>
                 <td style={{ padding: '1.5rem 1rem' }}>
-                  <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Diamonds</div>
+                  <div style={{ fontWeight: 600, color: '#1A1A1A', fontSize: '1.1rem' }}>Diamond Value</div>
                   <div style={{ fontSize: '0.85rem', color: '#631E32', opacity: 0.6, marginTop: '0.2rem' }}>
                     VVS-EF Diamonds @ ₹{dRate.toLocaleString()}/ct
                   </div>
@@ -196,24 +196,25 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
             <span style={{ color: '#444' }}>Taxes (GST 3%)</span>
             <span style={{ fontWeight: 600 }}>₹{(order.gstAmount || 0).toLocaleString()}</span>
           </div>
-          
           {hasDiscount ? (
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '250px', fontSize: '0.95rem', color: '#CCA660' }}>
-              <span>Special Appreciation</span>
+              <span>Discount</span>
               <span style={{ fontWeight: 600 }}>- ₹{(order.discountAmount || 0).toLocaleString()}</span>
             </div>
           ) : null}
 
           <div style={{ 
-            marginTop: '1.5rem', 
-            paddingTop: '2rem', 
-            borderTop: '1px solid #631E32', 
             display: 'flex', 
             justifyContent: 'space-between', 
-            width: '350px' 
+            alignItems: 'baseline',
+            width: '100%',
+            maxWidth: '500px',
+            borderTop: '2px solid #631E32',
+            paddingTop: '1.5rem',
+            marginTop: '1rem'
           }}>
              <span style={{ 
-               fontSize: '1.2rem', 
+               fontSize: '1.1rem', 
                color: '#631E32', 
                fontFamily: "'Playfair Display', serif",
                fontWeight: 600,
@@ -221,9 +222,10 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
                letterSpacing: '0.1em'
              }}>Total Estimate</span>
              <span style={{ 
-               fontSize: '2rem', 
+               fontSize: '2.5rem', 
                fontWeight: 800, 
-               color: '#631E32' 
+               color: '#631E32',
+               lineHeight: 1
              }}>₹{(order.advanceAmount + order.remainingAmount).toLocaleString()}</span>
           </div>
         </div>
