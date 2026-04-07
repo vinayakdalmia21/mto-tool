@@ -61,7 +61,7 @@ export async function createMtoQuery(formData: FormData) {
     data: {
       customerId: customer.id,
       staffId: staff.id,
-      raisedBy: formData.get('raisedBy') as string || null,
+      raisedBy: (formData.get('raisedBy') as string) || null,
       leadType,
       mtoType,
       catalogueSku: catalogueSku || null,
@@ -83,7 +83,7 @@ export async function createMtoQuery(formData: FormData) {
           status: 'OPEN'
         }
       }
-    }
+    } as any
   });
 
   revalidatePath('/mtos');

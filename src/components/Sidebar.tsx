@@ -47,8 +47,12 @@ export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps)
     <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} glass-panel`}>
       <header className={styles.header}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-          <Diamond size={24} className={styles.brandIcon} />
-          {!isCollapsed && <span className={styles.brandName}>VEDA MTO</span>}
+          <img src="/veda-logo.png" alt="VEDA" style={{ 
+            height: isCollapsed ? '32px' : '45px', 
+            width: 'auto',
+            transition: 'all 0.3s ease',
+            margin: isCollapsed ? '0 auto' : '0'
+          }} />
         </div>
         <button 
           onClick={onToggle}

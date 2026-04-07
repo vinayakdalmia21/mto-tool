@@ -41,8 +41,8 @@ export default function ShareLayout({
           <Image 
             src="/veda-logo.png" 
             alt="VEDA Silver | Gold | Diamonds" 
-            width={240} 
-            height={240} 
+            width={320} 
+            height={120} 
             style={{ 
               display: 'block',
               maxWidth: '100%',

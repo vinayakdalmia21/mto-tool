@@ -16,19 +16,25 @@ export async function getOpenMtosForEstimation() {
 }
 
 export async function getMtoQueryDetails(mtoId: string) {
-  return await prisma.mtoQuery.findUnique({
-    where: { id: mtoId },
-    include: {
-      customer: true,
-      orders: true,
-      vendorEstimations: {
-        orderBy: { createdAt: 'desc' }
-      },
-      estimations: {
-        orderBy: { version: 'desc' }
+  try {
+    const query = await prisma.mtoQuery.findUnique({
+      where: { id: mtoId },
+      include: {
+        customer: true,
+        orders: true,
+        vendorEstimations: {
+          orderBy: { createdAt: 'desc' }
+        },
+        estimations: {
+          orderBy: { version: 'desc' }
+        }
       }
-    }
-  });
+    });
+    return query;
+  } catch (error) {
+    console.error('Error fetching MTO Details:', error);
+    return null;
+  }
 }
 
 export async function saveEstimation(mtoId: string, data: any) {
