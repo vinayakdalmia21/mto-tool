@@ -8,7 +8,10 @@ export async function getPendingVendorQueries() {
   // Let's get queries where they do NOT have an accepted vendor estimation yet.
   return await prisma.mtoQuery.findMany({
     where: {
-      status: { in: ['OPEN', 'ESTIMATING', 'AWAITING_RESPONSE', 'NEGOTIATION'] }
+      status: 'OPEN',
+      vendorEstimations: {
+        none: {}
+      }
     },
     include: {
       customer: true,
