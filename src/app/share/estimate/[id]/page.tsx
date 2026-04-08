@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from 'next/navigation';
 import PrintButton from './PrintButton';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SharedEstimatePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
@@ -16,12 +18,13 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
     }
   }) as any;
 
-  if (!mto || !mto.orders?.length) {
+  // Only 404 if MTO doesn't exist OR (no orders AND no estimations)
+  if (!mto || (!mto.orders?.length && !mto.estimations?.length)) {
     notFound();
   }
 
-  const order = mto.orders[0];
-  const est = mto.estimations[0] || {};
+  const order = mto.orders?.[0]; // Safe navigation
+  const est = mto.estimations?.[0] || {};
   const queryNoStr = String(mto.queryNo || 0).padStart(4, '0');
 
   // Logic values for the table - Prefer Order Snapshots, Fallback to Estimation
@@ -194,12 +197,12 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-end', padding: '0 1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', width: '250px', fontSize: '0.95rem' }}>
             <span style={{ color: '#444' }}>Taxes (GST 3%)</span>
-            <span style={{ fontWeight: 600 }}>₹{(order.gstAmount || 0).toLocaleString()}</span>
+            <span style={{ fontWeight: 600 }}>₹{(order?.gstAmount || est?.gstAmount || 0).toLocaleString()}</span>
           </div>
           {hasDiscount ? (
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '250px', fontSize: '0.95rem', color: '#CCA660' }}>
               <span>Discount</span>
-              <span style={{ fontWeight: 600 }}>- ₹{(order.discountAmount || 0).toLocaleString()}</span>
+              <span style={{ fontWeight: 600 }}>- ₹{(order?.discountAmount || est?.discountAmount || 0).toLocaleString()}</span>
             </div>
           ) : null}
 
@@ -226,7 +229,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
                fontWeight: 800, 
                color: '#631E32',
                lineHeight: 1
-             }}>₹{(order.advanceAmount + order.remainingAmount).toLocaleString()}</span>
+             }}>₹{(order ? (order.advanceAmount + order.remainingAmount) : (est.totalAmount || est.finalEstimatedPrice || 0)).toLocaleString()}</span>
           </div>
         </div>
 

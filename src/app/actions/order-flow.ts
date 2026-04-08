@@ -39,6 +39,7 @@ export async function lockPrice(mtoId: string) {
   revalidatePath(`/estimations/${mtoId}`);
   revalidatePath('/estimations');
   revalidatePath('/orders-sales');
+  revalidatePath(`/share/estimate/${mtoId}`);
   return { success: true };
 }
 
@@ -65,6 +66,10 @@ export async function placeOrder(mtoId: string, advanceAmount: number, staffMtoI
     where: { mtoQueryId: mtoId }
   });
   if (!pricing) throw new Error("Price not locked yet");
+
+  if (advanceAmount > pricing.finalPrice) {
+    throw new Error(`Advance (₹${advanceAmount}) cannot be more than the locked price (₹${pricing.finalPrice})`);
+  }
 
   const remaining = pricing.finalPrice - advanceAmount;
 
@@ -117,6 +122,7 @@ export async function placeOrder(mtoId: string, advanceAmount: number, staffMtoI
 
   revalidatePath('/orders-sales');
   revalidatePath(`/mtos/${mtoId}`);
+  revalidatePath(`/share/estimate/${mtoId}`);
   return { success: true };
 }
 
@@ -154,6 +160,7 @@ export async function moveToOperations(orderId: number) {
 export async function getActiveOrders() {
   return await prisma.mtoOrder.findMany({
     where: {
+      isMovedToOps: true,
       mtoQuery: {
         status: { in: ['ORDER_PLACED', 'CAD_UPLOADED', 'PO_PENDING', 'COMPLETED'] }
       }
@@ -235,4 +242,28 @@ export async function getOrderForShare(mtoQueryId: string) {
       pricing: true,
     }
   });
+}
+// Remove a specific CAD design
+export async function removeCadDesign(mtoQueryId: string, cadUrl: string) {
+  const order = await prisma.mtoOrder.findFirst({
+    where: { 
+      mtoQueryId,
+      isMovedToOps: true
+    }
+  });
+  if (!order) throw new Error("Active order version not found");
+
+  const existing: string[] = order.cadDesigns ? JSON.parse(order.cadDesigns) : [];
+  const updated = existing.filter(url => url !== cadUrl);
+
+  await prisma.mtoOrder.update({
+    where: { id: order.id },
+    data: {
+      cadDesigns: JSON.stringify(updated)
+    }
+  });
+
+  revalidatePath('/active-orders');
+  revalidatePath(`/share/order/${mtoQueryId}`);
+  return { success: true };
 }

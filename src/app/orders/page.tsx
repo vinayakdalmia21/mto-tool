@@ -35,11 +35,12 @@ export default async function OrdersPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
-              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>MTO ID</th>
-              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Customer</th>
-              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Category</th>
-              <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>PO Status</th>
-              <th style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'right' }}>Actions</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Query ID</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>MTO ID</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Customer</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Category</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>PO Status</th>
+              <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -48,7 +49,12 @@ export default async function OrdersPage() {
             ) : null}
             {sortedOrders.map((order: any) => (
               <tr key={order.id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                <td style={{ padding: '1rem' }}>MTO-{String(order.mtoQuery?.queryNo || 0).padStart(4, '0')}</td>
+                <td style={{ padding: '1rem' }}>
+                  <span className="badge" style={{ background: 'rgba(255,255,255,0.05)', color: 'white' }}>
+                    QRY-{String(order.mtoQuery?.queryNo || 0).padStart(4, '0')}
+                  </span>
+                </td>
+                <td style={{ padding: '1rem', fontWeight: 600 }}>{order.staffMtoId || '-'}</td>
                 <td style={{ padding: '1rem' }}>{order.mtoQuery?.customer?.name || 'Unknown'}</td>
                 <td style={{ padding: '1rem' }}>{order.mtoQuery?.category}</td>
                 <td style={{ padding: '1rem' }}>
@@ -92,7 +98,6 @@ export default async function OrdersPage() {
                     </form>
                   ) : (
                     <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'flex-end', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>MTO-{order.staffMtoId}</span>
                       <Link href="/qc" className="btn" style={{ background: 'rgba(255,255,255,0.1)', padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: 'white', textDecoration: 'none' }}>
                         Go to QC →
                       </Link>

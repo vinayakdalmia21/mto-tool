@@ -34,15 +34,16 @@ export default function ShareLayout({
           display: 'flex', 
           justifyContent: 'center', 
           width: '100%', 
-          marginBottom: '1rem',
+          marginBottom: '2rem',
+          paddingTop: '3rem', // Move logo down
           mixBlendMode: 'multiply',
           filter: 'contrast(1.6) brightness(1.15) saturate(1.05)' 
         }}>
           <Image 
             src="/veda-logo.png" 
             alt="VEDA Silver | Gold | Diamonds" 
-            width={320} 
-            height={120} 
+            width={480} 
+            height={160} 
             style={{ 
               display: 'block',
               maxWidth: '100%',
@@ -53,10 +54,9 @@ export default function ShareLayout({
           />
         </div>
         
-        {/* Elegant Maroon/Gold Divider */}
+        {/* Divider Only (Tagline Removed) */}
         <div className="flex items-center gap-3 mb-10 opacity-80" style={{ color: '#631E32' }}>
           <div style={{ height: '1px', width: '30px', backgroundColor: '#631E32' }}></div>
-          <p className="text-sm tracking-[0.3em] uppercase whitespace-nowrap">Ancient Wisdom • Enduring Elegance</p>
           <div style={{ height: '1px', width: '30px', backgroundColor: '#631E32' }}></div>
         </div>
       </header>

@@ -22,7 +22,7 @@ export default function EstimationForm({
   const [locking, setLocking] = useState(false);
   const [priceLocked, setPriceLocked] = useState(false);
   
-  const isLocked = ['PRICE_LOCKED', 'ORDER_PLACED', 'CAD_UPLOADED', 'COMPLETED'].includes(mto.status);
+  const isLocked = !!mto.pricing || ['PRICE_LOCKED', 'ORDER_PLACED', 'CAD_UPLOADED', 'PO_PENDING', 'PO_RAISED', 'COMPLETED'].includes(mto.status);
 
   // Dynamic Pricing Extraction
   const karr = mto.goldKaratage || '18K';

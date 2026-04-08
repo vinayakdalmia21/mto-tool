@@ -83,5 +83,6 @@ export async function saveEstimation(mtoId: string, data: any) {
 
   revalidatePath(`/estimations/${mtoId}`);
   revalidatePath('/estimations');
+  revalidatePath(`/share/estimate/${mtoId}`);
   return { success: true, estimationId: estimation.id, version: nextVersion };
 }

@@ -30,8 +30,8 @@ export default function ActiveOrdersClient({ orders }: { orders: any[] }) {
       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
         <thead>
           <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
+            <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Query ID</th>
             <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>MTO ID</th>
-            <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Order Ref</th>
             <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Customer</th>
             <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Category</th>
             <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Status</th>
@@ -50,10 +50,12 @@ export default function ActiveOrdersClient({ orders }: { orders: any[] }) {
                 }} 
                 className="glass-panel-interactive"
               >
-                <td style={{ padding: '1rem', fontWeight: 600 }}>MTO-{String(order.mtoQuery.queryNo).padStart(4, '0')}</td>
                 <td style={{ padding: '1rem' }}>
-                  <span className="badge badge-info">{order.orderRefId}</span>
+                  <span className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}>
+                    QRY-{String(order.mtoQuery.queryNo).padStart(4, '0')}
+                  </span>
                 </td>
+                <td style={{ padding: '1rem', fontWeight: 600 }}>{order.staffMtoId || '-'}</td>
                 <td style={{ padding: '1rem' }}>{order.mtoQuery.customer.name}</td>
                 <td style={{ padding: '1rem' }}>{order.mtoQuery.category}</td>
                 <td style={{ padding: '1rem' }}>
@@ -124,14 +126,26 @@ function ActiveOrderCard({ order, onRefresh }: { order: any, onRefresh: () => vo
     setPendingCads(pendingCads.filter((_, i) => i !== index));
   };
 
+  const handleRemoveExisting = async (url: string) => {
+    if (!confirm('Are you sure you want to remove this design?')) return;
+    try {
+      const { removeCadDesign } = await import('../actions/order-flow');
+      await removeCadDesign(mto.id, url);
+      onRefresh();
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    }
+  };
+
   const handleSaveAll = async () => {
-    if (pendingCads.length === 0) return;
+    // allow saving if cadRequired changed, even if pendingCads is empty
+    if (pendingCads.length === 0 && cadRequired === order.cadRequired) return;
     setUploading(true);
     try {
-      await uploadCadDesigns(mto.id, pendingCads);
+      await uploadCadDesigns(mto.id, pendingCads, cadRequired);
       setPendingCads([]);
       onRefresh();
-      alert('CAD designs saved successfully!');
+      alert('CAD configuration updated successfully!');
     } catch (err: any) {
       alert('Error: ' + err.message);
     }
@@ -199,8 +213,25 @@ function ActiveOrderCard({ order, onRefresh }: { order: any, onRefresh: () => vo
           <h5 style={{ marginBottom: '1rem' }}>Uploaded Designs</h5>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             {serverCads.map((cad, i) => (
-              <div key={i} style={{ border: '1px solid var(--surface-border)', borderRadius: '8px', overflow: 'hidden', width: '120px' }}>
+              <div key={i} style={{ position: 'relative', border: '1px solid var(--surface-border)', borderRadius: '8px', overflow: 'hidden', width: '120px' }}>
                 <img src={cad} alt={`CAD ${i + 1}`} style={{ width: '100%', height: '100px', objectFit: 'cover' }} />
+                <button 
+                  onClick={() => handleRemoveExisting(cad)}
+                  style={{ 
+                    position: 'absolute', 
+                    top: '5px', 
+                    right: '5px', 
+                    background: 'rgba(239, 68, 68, 0.9)', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '4px', 
+                    padding: '2px 5px', 
+                    cursor: 'pointer',
+                    fontSize: '10px'
+                  }}
+                >
+                  Remove
+                </button>
               </div>
             ))}
           </div>

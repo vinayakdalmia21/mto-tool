@@ -51,8 +51,9 @@ export default function LoginScreen() {
         animation: error ? 'shake 0.4s ease' : 'none'
       }}>
         <div style={{ marginBottom: '2.5rem' }}>
-          <img src="/veda-logo.png" alt="VEDA" style={{ width: '220px', marginBottom: '1.5rem' }} />
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.1em' }}>ENTER ACCESS PIN</p>
+          <Diamond size={48} color="var(--primary)" style={{ marginBottom: '1rem' }} />
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>VEDA MTO</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>ENTER ACCESS PIN</p>
         </div>
 
         {/* PIN Indicators */}

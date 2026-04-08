@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 export async function getOrdersForOperations() {
   return await prisma.mtoOrder.findMany({
     where: {
+      isMovedToOps: true,
       OR: [
         { 
           mtoQuery: { 

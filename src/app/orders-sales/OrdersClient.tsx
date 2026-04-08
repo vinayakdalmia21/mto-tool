@@ -42,6 +42,7 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
 
   const handleSave = async () => {
     if (advanceNum <= 0) { alert('Please enter advance amount'); return; }
+    if (advanceNum > lockedPrice) { alert(`Advance amount (₹${advanceNum}) cannot be more than the locked price (₹${lockedPrice})`); return; }
     if (!mtoIdValue.trim()) { alert('Please enter the core MTO ID.'); return; }
     setSaving(true);
     try {
@@ -77,7 +78,17 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
             )}
           </div>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            {query.category} • {query.metalType} {query.goldKaratage || ''} • QRY-{String(query.queryNo).padStart(4, '0')}
+            {query.category} • {query.metalType} {query.goldKaratage || ''}
+          </div>
+          <div style={{ display: 'flex', gap: '0.8rem', marginTop: '0.4rem' }}>
+             <span title="Internal Reference" style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>
+               QRY-{String(query.queryNo).padStart(4, '0')}
+             </span>
+             {latestOrder?.staffMtoId && (
+               <span title="MTO ID" style={{ fontSize: '0.73rem', background: 'var(--info)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                 {latestOrder.staffMtoId}
+               </span>
+             )}
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
