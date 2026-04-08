@@ -71,11 +71,9 @@ function OrderCard({ query, onRefresh }: { query: any, onRefresh: () => void }) 
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.3rem' }}>
             <h3 style={{ margin: 0 }}>{query.customer?.name}</h3>
-            {isAnyMoved && (
-              <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>
-                {query.status.replace(/_/g, ' ')}
-              </span>
-            )}
+            <span className={`badge ${isAnyMoved ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.7rem' }}>
+              {query.status.replace(/_/g, ' ')}
+            </span>
           </div>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             {query.category} • {query.metalType} {query.goldKaratage || ''}
