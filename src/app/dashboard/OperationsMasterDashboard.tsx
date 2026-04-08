@@ -191,7 +191,7 @@ export default function OperationsMasterDashboard({
     ];
     
     const rows = filteredQueries.map(q => [
-      `Q-${String(q.queryNo || 0).padStart(4, '0')}`,
+      `QRY-${String(q.queryNo || 0).padStart(4, '0')}`,
       q.staffMtoId,
       q.poNumber,
       q.customerName,
@@ -377,7 +377,7 @@ export default function OperationsMasterDashboard({
                     return (
                       <tr key={q.id} className="glass-panel-interactive" style={{ borderBottom: '1px solid var(--surface-border)', opacity: q.status === 'DROPPED' ? 0.6 : 1 }}>
                         <td style={{ padding: '0.75rem', fontWeight: 700, fontSize: '0.8rem' }}>
-                          Q-{String(q.queryNo || 0).padStart(4, '0')}
+                          QRY-{String(q.queryNo || 0).padStart(4, '0')}
                         </td>
                         <td style={{ padding: '0.75rem', fontSize: '0.8rem', color: q.staffMtoId === '—' ? 'var(--text-muted)' : 'var(--success)', fontWeight: 600 }}>
                           {q.staffMtoId}

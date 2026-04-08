@@ -61,7 +61,7 @@ export default async function MtosPage() {
                 </td>
                 <td style={{ padding: '0.75rem', fontWeight: 600 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>Q-{mto.queryNo.toString().padStart(4, '0')}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>QRY-{mto.queryNo.toString().padStart(4, '0')}</span>
                     {mto.status === 'DROPPED' && (
                       <span style={{ fontSize: '0.65rem', color: 'var(--warning)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                          {mto.dropReason?.includes('at ') ? mto.dropReason.split(': ')[0] : 'Dropped'}
