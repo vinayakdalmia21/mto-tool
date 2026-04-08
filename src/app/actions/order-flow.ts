@@ -47,7 +47,7 @@ export async function lockPrice(mtoId: string) {
 export async function getLockedPriceQueries() {
   return await prisma.mtoQuery.findMany({
     where: {
-      status: { in: ['ACCEPTED', 'PRICE_LOCKED', 'ORDER_PLACED', 'CAD_UPLOADED', 'PO_PENDING', 'COMPLETED'] }
+      status: { in: ['PRICE_LOCKED', 'ORDER_PLACED', 'CAD_UPLOADED', 'PO_PENDING', 'PO_RAISED', 'COMPLETED'] }
     },
     include: {
       customer: true,
