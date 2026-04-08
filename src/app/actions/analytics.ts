@@ -119,13 +119,13 @@ export async function getMasterTableQueries() {
 
     const isDropped = q.status === 'DROPPED';
     const stages = {
-      vendorEst: !isDropped && hasEst ? 'PASSED' : (!isDropped && q.vendorEstimations.length > 0 ? 'PASSED' : 'DASH'),
+      vendorEst: !isDropped && hasEst ? 'PASSED' : (!isDropped && q.vendorEstimations.length > 0 ? 'PASSED' : (!isDropped && q.status === 'OPEN' ? 'PENDING' : 'DASH')),
       estSent: !isDropped && hasLock ? 'PASSED' : (!isDropped && q.estimations.length > 0 ? 'PASSED' : (!isDropped && q.status === 'ESTIMATING' ? 'PENDING' : 'DASH')),
-      priceLocked: !isDropped && hasOrder ? 'PASSED' : (!isDropped && !!q.pricing ? 'PASSED' : (!isDropped && q.status === 'PRICE_LOCKED' ? 'PENDING' : 'DASH')),
-      mtoRaised: !isDropped && hasCAD ? 'PASSED' : (!isDropped && !!q.orders[0] ? 'PASSED' : (!isDropped && q.status === 'PRICE_LOCKED' ? 'PENDING' : 'DASH')),
-      cadUpload: !isDropped && hasPO ? 'PASSED' : (!isDropped && hasCAD ? 'PASSED' : (!isDropped && q.orders[0]?.status === 'PENDING' ? 'PENDING' : 'DASH')),
-      poRaised: !isDropped && hasQC ? 'PASSED' : (!isDropped && !!q.orders[0]?.purchaseOrder ? 'PASSED' : (!isDropped && q.orders[0]?.status === 'MOVED_TO_OPS' ? 'PENDING' : 'DASH')),
-      qcPassed: !isDropped && hasInvoice ? 'PASSED' : (!isDropped && q.orders[0]?.purchaseOrder?.qcRecord?.status === 'PASS' ? 'PASSED' : (!isDropped && !!q.orders[0]?.purchaseOrder ? 'PENDING' : 'DASH')),
+      priceLocked: !isDropped && hasOrder ? 'PASSED' : (!isDropped && !!q.pricing ? 'PASSED' : (!isDropped && (q.status === 'AWAITING_RESPONSE' || q.status === 'NEGOTIATION') ? 'PENDING' : 'DASH')),
+      mtoRaised: !isDropped && hasCAD ? 'PASSED' : (!isDropped && !!q.orders[0] ? 'PASSED' : (!isDropped && (q.status === 'PRICE_LOCKED' || q.status === 'ACCEPTED') ? 'PENDING' : 'DASH')),
+      cadUpload: !isDropped && hasPO ? 'PASSED' : (!isDropped && hasCAD ? 'PASSED' : (!isDropped && (q.orders[0]?.status === 'PENDING' || q.status === 'ORDER_PLACED') ? 'PENDING' : 'DASH')),
+      poRaised: !isDropped && hasQC ? 'PASSED' : (!isDropped && !!q.orders[0]?.purchaseOrder ? 'PASSED' : (!isDropped && (q.orders[0]?.status === 'MOVED_TO_OPS' || q.status === 'PO_PENDING' || q.status === 'CAD_UPLOADED') ? 'PENDING' : 'DASH')),
+      qcPassed: !isDropped && hasInvoice ? 'PASSED' : (!isDropped && q.orders[0]?.purchaseOrder?.qcRecord?.status === 'PASS' ? 'PASSED' : (!isDropped && (!!q.orders[0]?.purchaseOrder || q.status === 'PO_RAISED') ? 'PENDING' : 'DASH')),
       completed: !isDropped && hasInvoice ? 'PASSED' : (!isDropped && hasQC ? 'PENDING' : 'DASH')
     };
 
