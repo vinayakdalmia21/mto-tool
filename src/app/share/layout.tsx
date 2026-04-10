@@ -1,5 +1,22 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 
+export const metadata: Metadata = {
+  title: 'VEDA Bespoke',
+  description: 'Your Custom Jewellery Estimate',
+  openGraph: {
+    title: 'VEDA Bespoke',
+    description: 'Your Custom Jewellery Estimate',
+    images: [
+      {
+        url: '/veda-logo.png',
+        width: 480,
+        height: 160,
+        alt: 'VEDA Logo',
+      },
+    ],
+  },
+};
 export default function ShareLayout({
   children,
 }: {
