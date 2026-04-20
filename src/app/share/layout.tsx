@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://bespoke.vedajewel.co'),
   title: 'VEDA Bespoke',
   description: 'Your Custom Jewellery Estimate',
   openGraph: {
@@ -9,10 +10,10 @@ export const metadata: Metadata = {
     description: 'Your Custom Jewellery Estimate',
     images: [
       {
-        url: '/veda-logo.png',
-        width: 480,
-        height: 160,
-        alt: 'VEDA Logo',
+        url: '/peacock-logo.png', // Uses the new logo for sharing previews (WhatsApp, etc.)
+        width: 500, // Approximate standard square/portrait width for the preview
+        height: 500,
+        alt: 'VEDA Bespoke Custom Jewellery',
       },
     ],
   },

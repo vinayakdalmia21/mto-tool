@@ -139,15 +139,60 @@ export default async function EstimationDetailPage({ params }: { params: Promise
                <h4 style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>Previous Estimations</h4>
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                  {mto.estimations.map((est: any) => (
-                   <div key={est?.id || Math.random()} className="glass-panel" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                     <div>
-                       <span className="badge badge-info" style={{ marginRight: '1rem' }}>v{est?.version || 1}</span>
-                       <span style={{ fontSize: '0.9rem' }}>₹{(est?.finalEstimatedPrice || 0).toLocaleString()}</span>
+                   <details key={est?.id || Math.random()} className="glass-panel" style={{ padding: 0 }}>
+                     <summary style={{ padding: '1rem', cursor: 'pointer', listStyle: 'none' }}>
+                       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center' }}>
+                         <div>
+                           <span style={{ marginRight: '0.5rem', opacity: 0.6 }}>►</span>
+                           <span className="badge badge-info" style={{ marginRight: '1rem' }}>v{est?.version || 1}</span>
+                           <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>₹{(est?.finalEstimatedPrice || 0).toLocaleString()}</span>
+                         </div>
+                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                           {est?.createdAt ? formatIST(est.createdAt) : 'N/A'}
+                         </span>
+                       </div>
+                     </summary>
+                     <div style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.1)', fontSize: '0.85rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>Gold:</span>
+                            <span>{est?.goldWeight || '0'}g @ ₹{est?.goldRate || 0}/g</span>
+                          </div>
+                          {(est?.diamondWeight || 0) > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span style={{ color: 'var(--text-muted)' }}>Diamond:</span>
+                              <span>{est?.diamondWeight}ct @ ₹{est?.diamondRate || 0}/ct</span>
+                            </div>
+                          )}
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>Making:</span>
+                            <span>{est?.makingPercent || 0}%</span>
+                          </div>
+                          {(est?.otherStones || 0) > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span style={{ color: 'var(--text-muted)' }}>Other Stones:</span>
+                              <span>₹{(est?.otherStones || 0).toLocaleString()}</span>
+                            </div>
+                          )}
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>GST:</span>
+                            <span>₹{(est?.gstAmount || 0).toLocaleString()}</span>
+                          </div>
+                          {(est?.discountAmount || 0) > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span style={{ color: 'var(--text-muted)' }}>Discount:</span>
+                              <span style={{ color: 'var(--success)' }}>-₹{(est?.discountAmount || 0).toLocaleString()} ({est?.discountPercent || 0}%)</span>
+                            </div>
+                          )}
+                        </div>
+                        {est?.notes && (
+                          <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px dashed rgba(255,255,255,0.1)' }}>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem', fontSize: '0.75rem' }}>NOTES</span>
+                            <div style={{ fontStyle: 'italic', color: '#ccc' }}>{est.notes}</div>
+                          </div>
+                        )}
                      </div>
-                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                       {est?.createdAt ? formatIST(est.createdAt) : 'N/A'}
-                     </span>
-                   </div>
+                   </details>
                  ))}
                </div>
             </div>
