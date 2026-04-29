@@ -82,7 +82,7 @@ export default async function MtosPage() {
                     <img 
                       src={mto.referenceImages} 
                       alt="Reference" 
-                      style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} 
+                      style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }} 
                     />
                   ) : (
                     <span style={{ color: 'var(--text-muted)' }}>—</span>
