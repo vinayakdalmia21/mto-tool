@@ -275,7 +275,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
                 <div style={{ background: '#FFFFFF', padding: '1.5rem', borderRadius: '4px', border: '1px solid rgba(99, 30, 50, 0.05)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#631E32', textTransform: 'uppercase' }}>Design Reference</span>
-                    <a href={mto.referenceImages} download={`MTO_${queryNoStr}_Ref.png`} style={{ fontSize: '0.7rem', color: '#631E32', textDecoration: 'underline' }}>Download</a>
+                    <a href={mto.referenceImages} download={`QRY_${queryNoStr}_Ref.png`} style={{ fontSize: '0.7rem', color: '#631E32', textDecoration: 'underline' }}>Download</a>
                   </div>
                   <img src={mto.referenceImages} alt="Reference" style={{ width: '100%', height: '200px', objectFit: 'contain', background: '#FDF8F0' }} />
                 </div>
@@ -286,7 +286,7 @@ export default async function SharedEstimatePage({ params }: { params: Promise<{
                 <div style={{ background: '#FFFFFF', padding: '1.5rem', borderRadius: '4px', border: '1px solid rgba(99, 30, 50, 0.05)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#631E32', textTransform: 'uppercase' }}>Proposed CAD</span>
-                    <a href={JSON.parse(order.cadDesigns)[0]} download={`MTO_${queryNoStr}_CAD.png`} style={{ fontSize: '0.7rem', color: '#631E32', textDecoration: 'underline' }}>Download</a>
+                    <a href={JSON.parse(order.cadDesigns)[0]} download={`QRY_${queryNoStr}_CAD.png`} style={{ fontSize: '0.7rem', color: '#631E32', textDecoration: 'underline' }}>Download</a>
                   </div>
                   <img src={JSON.parse(order.cadDesigns)[0]} alt="CAD Design" style={{ width: '100%', height: '200px', objectFit: 'contain', background: '#FDF8F0' }} />
                 </div>

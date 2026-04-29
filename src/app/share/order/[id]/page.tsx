@@ -51,7 +51,7 @@ export default async function SharedOrderPage({ params }: { params: Promise<{ id
           fontSize: '1rem',
           letterSpacing: '0.1em'
         }}>
-          <span>MTO-{queryNoStr}</span>
+          <span>QRY-{queryNoStr}</span>
           <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#631E32' }}></span>
           <span>{mto.customer.name}</span>
         </div>
@@ -132,7 +132,7 @@ export default async function SharedOrderPage({ params }: { params: Promise<{ id
             }}>Initial Design Reference</h2>
             <a 
               href={mto.referenceImages} 
-              download={`MTO_${queryNoStr}_Initial_Reference.png`}
+              download={`QRY_${queryNoStr}_Initial_Reference.png`}
               style={{ 
                 background: '#631E32', 
                 color: 'white', 

@@ -78,7 +78,15 @@ export default async function MtosPage() {
                 </td>
                 <td style={{ padding: '0.75rem' }}>{mto.mtoType}</td>
                 <td style={{ padding: '0.75rem' }}>
-                  {mto.referenceImages ? <span style={{ color: 'var(--primary)' }}>Yes</span> : <span style={{ color: 'var(--text-muted)' }}>No</span>}
+                  {mto.referenceImages ? (
+                    <img 
+                      src={mto.referenceImages} 
+                      alt="Reference" 
+                      style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} 
+                    />
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)' }}>—</span>
+                  )}
                 </td>
                 <td style={{ padding: '0.75rem' }}>{mto.catalogueSku || '-'}</td>
                 <td style={{ padding: '0.75rem' }}>{formatIST(mto.createdAt)}</td>

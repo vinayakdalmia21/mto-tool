@@ -22,7 +22,7 @@ export default async function SharedMtoPage({ params }: { params: Promise<{ id: 
           Design Specifications
         </h1>
         <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-          Reference: MTO-{queryNoStr}
+          Reference: QRY-{queryNoStr}
         </p>
       </div>
 
@@ -54,7 +54,7 @@ export default async function SharedMtoPage({ params }: { params: Promise<{ id: 
               <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>Reference Image</label>
               <a 
                 href={mto.referenceImages} 
-                download={`MTO_${queryNoStr}_Reference.png`}
+                download={`QRY_${queryNoStr}_Reference.png`}
                 style={{ 
                   fontSize: '0.75rem', 
                   color: 'var(--primary)', 
